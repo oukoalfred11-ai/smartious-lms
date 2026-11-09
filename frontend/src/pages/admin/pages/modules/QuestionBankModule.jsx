@@ -325,7 +325,7 @@ function QuestionBankModule({ toast }) {
           onClick={e=>e.target===e.currentTarget&&setImportOpen(false)}>
           <div style={{ background:'#fff', borderRadius:16, maxWidth:760, width:'100%', maxHeight:'90vh', overflow:'auto' }}>
             <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
-              <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>Bulk import questions</div>
+              <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:22 }}>Bulk import questions</div>
               <div style={{ fontSize:12.5, opacity:.8, marginTop:4 }}>Paste a JSON array. Duplicates (same text + subject + curriculum) are skipped.</div>
             </div>
             <div style={{ padding:'20px 28px' }}>
@@ -483,7 +483,7 @@ function BulkImportModal({ onClose, onDone, toast, subjects, curricula }) {
       <div style={{ background:'#fff', borderRadius:16, maxWidth:820, width:'100%', maxHeight:'92vh', overflow:'auto' }}>
         <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
           <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.55)' }}>Question Bank</div>
-          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:23, marginTop:2 }}>Bulk import questions</div>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:23, marginTop:2 }}>Bulk import questions</div>
         </div>
         <div style={{ padding:'22px 28px' }}>
 
@@ -597,7 +597,7 @@ function QuestionEditorModal({ q, onClose, onSave, subjects, curricula }) {
       onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div style={{ background:'#fff', borderRadius:16, maxWidth:720, width:'100%', maxHeight:'92vh', overflow:'auto' }}>
         <div style={{ background:`linear-gradient(135deg,${TOKENS.crimson},${TOKENS.crimsonDeep})`, padding:'20px 28px', color:'#fff' }}>
-          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22 }}>{form._id?'Edit Question':'New Question'}</div>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:22 }}>{form._id?'Edit Question':'New Question'}</div>
         </div>
         <div style={{ padding:'22px 28px', display:'grid', gap:16 }}>
 

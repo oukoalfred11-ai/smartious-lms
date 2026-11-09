@@ -9,7 +9,7 @@
 import { useState, useEffect } from 'react'
 
 const C = { cr: '#7D1025', cr2: '#8B1A2E', gold: '#C9973A', ink: '#1A0A0E', sl: '#3D3438', mut: '#6B6266', bone: '#F7F1E8', bone2: '#EFE6D6', line: '#E6DACB' }
-const serif = "'DM Serif Display',Georgia,serif"
+const serif = "'Source Serif 4',Georgia,serif"
 const wrap = { maxWidth: 1120, margin: '0 auto', padding: '0 20px' }
 const h2 = { fontFamily: serif, fontWeight: 400, fontSize: 'clamp(1.5rem, 3vw, 2.1rem)', color: C.ink, margin: '0 0 14px', lineHeight: 1.2 }
 const card = { background: '#fff', border: `1px solid ${C.line}`, borderRadius: 14, padding: '20px 22px' }

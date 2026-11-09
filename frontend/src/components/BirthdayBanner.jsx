@@ -15,7 +15,7 @@ import { api } from '../context/ctx.jsx'
 const CRIMSON = '#7D1025'
 const GOLD = '#C9A030'
 const CREAM = '#FDFAF4'
-const SERIF = 'Georgia, "Times New Roman", serif'
+const SERIF = '"Source Serif 4",Georgia,serif'
 
 const initialsOf = (f = '', l = '') => ((f[0] || '') + (l[0] || '')).toUpperCase() || 'S'
 const roleLabel = r => ({ student: 'Student', teacher: 'Teacher', parent: 'Parent', admin: 'Staff', accountant: 'Staff', sales: 'Staff', ops_manager: 'Staff', dos: 'Staff' }[r] || 'Community member')
@@ -60,10 +60,10 @@ export default function BirthdayBanner() {
   }
 
   const modalBox = { position: 'fixed', inset: 0, background: 'rgba(8,12,20,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }
-  const modalCard = { background: '#fff', borderRadius: 14, padding: '26px 28px', width: 480, maxWidth: '94vw', maxHeight: '86vh', overflowY: 'auto', fontFamily: 'Arial, sans-serif' }
+  const modalCard = { background: '#fff', borderRadius: 14, padding: '26px 28px', width: 480, maxWidth: '94vw', maxHeight: '86vh', overflowY: 'auto', fontFamily: '"DM Sans",system-ui,sans-serif' }
 
   return (
-    <div style={{ marginBottom: 18, fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ marginBottom: 18, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
       <div style={{ background: `linear-gradient(120deg, ${CRIMSON} 0%, #5A0B1B 65%, #3E0712 100%)`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 6px 24px rgba(125,16,37,.25)' }}>
         <div style={{ height: 3, background: GOLD }} />
         <div style={{ padding: '18px 24px 20px' }}>

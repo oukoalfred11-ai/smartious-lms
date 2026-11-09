@@ -218,7 +218,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', marginBottom: 20 }}>
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '.2em', color: INK }}>SMARTIOUS</div>
-            <div style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1, color: INK }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', lineHeight: 1, color: INK }}>
               CLUBS <span style={{ color: CR }}>MODULE</span>
             </div>
             <div style={{ fontSize: 14, color: MUTE, marginTop: 6 }}>Explore. Learn. Lead. Beyond Academics.</div>

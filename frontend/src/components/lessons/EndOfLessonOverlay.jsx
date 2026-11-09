@@ -94,12 +94,12 @@ export default function EndOfLessonOverlay({ classId, toast, onClose }) {
   )
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="End of lesson" style={{ position: 'fixed', inset: 0, zIndex: 2000, background: C.bg, color: C.ink, colorScheme: 'light', overflowY: 'auto', fontFamily: 'Inter,-apple-system,sans-serif' }}>
+    <div role="dialog" aria-modal="true" aria-label="End of lesson" style={{ position: 'fixed', inset: 0, zIndex: 2000, background: C.bg, color: C.ink, colorScheme: 'light', overflowY: 'auto', fontFamily: '"DM Sans",system-ui,sans-serif' }}>
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '22px 16px 60px', display: 'grid', gap: 14 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: '.12em', color: C.gold, textTransform: 'uppercase' }}>Lesson finished</div>
-            <h2 style={{ margin: '2px 0 0', fontSize: 24, color: C.ink, fontFamily: "'Instrument Serif', Georgia, serif", fontWeight: 400 }}>
+            <h2 style={{ margin: '2px 0 0', fontSize: 24, color: C.ink, fontFamily: "'Source Serif 4',Georgia,serif", fontWeight: 400 }}>
               {info ? `${info.lesson.subject}${info.lesson.label ? ' — ' + info.lesson.label : ''}` : 'Loading…'}
             </h2>
             {info && <div style={{ fontSize: 13, color: C.mut, marginTop: 3 }}>{fmt(info.lesson.scheduledAt)} · {(info.lesson.students || []).map(s => s.name).join(', ') || 'no students'}</div>}

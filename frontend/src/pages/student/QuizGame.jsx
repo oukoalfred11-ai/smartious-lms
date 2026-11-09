@@ -65,7 +65,7 @@ function Celebration({ show, big }) {
       ))}
       <div style={{
         position:'absolute', left:'50%', top:'42%', transform:'translate(-50%,-50%)',
-        fontFamily:"'Instrument Serif',Georgia,serif", fontSize: big?52:38, fontWeight:400,
+        fontFamily:"'Source Serif 4',Georgia,serif", fontSize: big?52:38, fontWeight:400,
         color:'#7D1025', textShadow:'0 2px 20px rgba(201,160,48,.5), 0 0 40px #fff',
         animation:'praisePop 1.8s ease forwards', whiteSpace:'nowrap',
       }}>{praise}</div>
@@ -355,7 +355,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.16em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
               Smartious Quiz
             </div>
-            <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:28, color:'#fff', lineHeight:1.2 }}>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:28, color:'#fff', lineHeight:1.2 }}>
               {subject||'Quiz'} Challenge
             </div>
             {(topic||curriculum) && (
@@ -429,7 +429,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
   // ── PLAYING ──────────────────────────────────────────
   if (phase === 'playing' && q) {
     return (
-      <div style={{ minHeight:'100vh', background:C.cream, display:'flex', flexDirection:'column', fontFamily:"Inter,sans-serif" }}>
+      <div style={{ minHeight:'100vh', background:C.cream, display:'flex', flexDirection:'column', fontFamily:"'DM Sans',system-ui,sans-serif" }}>
         <Celebration show={confetti} big={streak>=3}/>
         <XPPop xp={xpPop} show={!!xpPop}/>
 
@@ -582,7 +582,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
   // ── RESULT SCREEN ─────────────────────────────────────
   if (phase === 'result') {
     return (
-      <div style={{ minHeight:'100vh', background:C.cream, padding:'24px 20px', fontFamily:"Inter,sans-serif" }}>
+      <div style={{ minHeight:'100vh', background:C.cream, padding:'24px 20px', fontFamily:"'DM Sans',system-ui,sans-serif" }}>
         <Celebration show={pct >= 70} big={pct>=90}/>
 
         <div style={{ maxWidth:600, margin:'0 auto' }}>
@@ -594,7 +594,7 @@ export default function QuizGame({ subject, topic, subtopic, curriculum, grade, 
             <div style={{ fontSize:60 }}>
               {pct>=90?'♛':pct>=70?'✧':pct>=50?'✓':'·'}
             </div>
-            <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:32, marginTop:8 }}>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:32, marginTop:8 }}>
               {pct>=90?'Outstanding!':pct>=70?'Great Job!':pct>=50?'Well Done!':'Keep Practising!'}
             </div>
             <div style={{ fontSize:64, fontWeight:900, color:C.gold, margin:'8px 0', letterSpacing:'.02em' }}>{pct}%</div>

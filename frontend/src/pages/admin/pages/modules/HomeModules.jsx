@@ -46,7 +46,7 @@ export function DashboardModule({ setPage, userStats, pendingAllocations, refres
           {now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </div>
         <h1 style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
+          fontFamily: "'Source Serif 4',Georgia,serif",
           fontSize: 44, fontWeight: 400, color: TOKENS.s900,
           margin: 0, lineHeight: 1.1, letterSpacing: '-.02em',
         }}>
@@ -68,7 +68,7 @@ export function DashboardModule({ setPage, userStats, pendingAllocations, refres
       {/* MODULE TILE GRID */}
       <div style={{ marginBottom: 24 }}>
         <h2 style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
+          fontFamily: "'Source Serif 4',Georgia,serif",
           fontSize: 22, fontWeight: 500, color: TOKENS.s900,
           margin: '0 0 16px', letterSpacing: '-.005em',
         }}>Modules</h2>
@@ -81,7 +81,7 @@ export function DashboardModule({ setPage, userStats, pendingAllocations, refres
 
       {/* QUICK ACTIONS */}
       <PCard accent={TOKENS.gold}>
-        <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 14px', fontWeight: 600 }}>Quick Actions</h3>
+        <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 14px', fontWeight: 600 }}>Quick Actions</h3>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <button onClick={() => openAddUser('student')} className="btn btn-p btn-sm">+ Add Student</button>
           <button onClick={() => openAddUser('teacher')} className="btn btn-s btn-sm">+ Add Teacher</button>
@@ -132,7 +132,7 @@ export function AnalyticsModule({ setPage, refreshKey, toast }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
         <PCard accent={TOKENS.accentNavy}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 16px', fontWeight: 600 }}>Student Growth</h3>
+          <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 16px', fontWeight: 600 }}>Student Growth</h3>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 140 }}>
             {[{k:'Sep',v:1180},{k:'Oct',v:1320},{k:'Nov',v:1410},{k:'Dec',v:1530},{k:'Jan',v:1840},{k:'Feb',v:stats.students || 2010, hi:true}].map((d, i) => {
               const max = 2010
@@ -147,7 +147,7 @@ export function AnalyticsModule({ setPage, refreshKey, toast }) {
         </PCard>
 
         <PCard accent={TOKENS.crimson}>
-          <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 16px', fontWeight: 600 }}>By Curriculum</h3>
+          <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18, color: TOKENS.s900, margin: '0 0 16px', fontWeight: 600 }}>By Curriculum</h3>
           {(() => {
             const c = {}
             students.forEach(s => { const k = s.curriculum || 'Unspecified'; c[k] = (c[k] || 0) + 1 })

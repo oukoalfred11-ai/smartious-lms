@@ -97,7 +97,7 @@ function TeachersModule({ refreshKey, toast, openAddUser }) {
                       <Av init={initials(t.firstName, t.lastName)} col={avColor(name)} size={52}/>
                     )}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 17, color: TOKENS.s900, marginBottom: 2 }}>
+                      <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontWeight: 600, fontSize: 17, color: TOKENS.s900, marginBottom: 2 }}>
                         {name || 'Unnamed'}
                       </div>
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginBottom: 2 }}>
@@ -198,7 +198,7 @@ function TeacherDetailModal({ teacher, onClose, onChanged, toast }) {
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
               {tch.jobTitle || 'Teacher'}
             </div>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, marginTop: 2 }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, marginTop: 2 }}>
               {name || 'Unnamed Teacher'}
             </div>
             <div style={{ fontSize: 12, opacity: .85 }}>{tch.email}</div>
@@ -715,7 +715,7 @@ function TeacherStudentsTab({ teacher, toast }) {
   if (allocations.length === 0) {
     return (
       <div style={{ padding: 24, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 18, color: '#1A1A1A', marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18, color: '#1A1A1A', marginBottom: 4 }}>
           No students yet
         </div>
         <div style={{ fontSize: 12.5, color: '#6B6B6B' }}>

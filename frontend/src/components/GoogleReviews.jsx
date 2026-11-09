@@ -54,7 +54,7 @@ export default function GoogleReviews({ V, seed = '', heading, intro, showHeader
       {showHeader && (
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div className="eyebrow" style={{ justifyContent: 'center' }}>What parents say</div>
-          <h3 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: '1.6rem', fontWeight: 400, color: V.ink, marginTop: 8, marginBottom: 14, lineHeight: 1.2 }}>
+          <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: '1.6rem', fontWeight: 400, color: V.ink, marginTop: 8, marginBottom: 14, lineHeight: 1.2 }}>
             {heading || `Rated ${GOOGLE_RATING.stars} on Google by ${GOOGLE_RATING.count}+ families`}
           </h3>
           {intro && <p style={{ fontSize: 14, color: V.sl, lineHeight: 1.7, maxWidth: 680, margin: '0 auto 14px' }}>{intro}</p>}
@@ -75,7 +75,7 @@ export default function GoogleReviews({ V, seed = '', heading, intro, showHeader
               opacity: k === i ? 1 : 0, visibility: k === i ? 'visible' : 'hidden', transition: 'opacity .5s ease, visibility .5s',
             }}>
               <Stars n={r.rating} color={V.gold3} />
-              <blockquote style={{ margin: 0, fontFamily: "'DM Serif Display',Georgia,serif", fontStyle: 'italic', fontSize: '1.05rem', color: V.ink, lineHeight: 1.7 }}>
+              <blockquote style={{ margin: 0, fontFamily: "'Source Serif 4',Georgia,serif", fontStyle: 'italic', fontSize: '1.05rem', color: V.ink, lineHeight: 1.7 }}>
                 &ldquo;{r.text}&rdquo;
               </blockquote>
               <figcaption style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 'auto' }}>

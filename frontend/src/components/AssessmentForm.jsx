@@ -257,7 +257,7 @@ export default function AssessmentForm({ nav }) {
 
   const sectionStyle  = { background:V.white, border:`1px solid ${V.bone3}`, borderRadius:12, padding:'28px 28px 22px', marginBottom:22 }
   const sectionLabel  = { fontSize:11, color:V.gold3, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', marginBottom:8 }
-  const sectionTitle  = { fontFamily:"'DM Serif Display',Georgia,serif", fontSize:24, color:V.ink, margin:'0 0 6px', lineHeight:1.2 }
+  const sectionTitle  = { fontFamily:"'Source Serif 4',Georgia,serif", fontSize:24, color:V.ink, margin:'0 0 6px', lineHeight:1.2 }
   const sectionSub    = { fontSize:13.5, color:V.sl, lineHeight:1.6, marginBottom:20 }
   const fieldRow      = { display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:14, marginBottom:14 }
   const labelStyle    = { display:'block', fontSize:12, color:V.ink, fontWeight:600, marginBottom:6, letterSpacing:'.01em' }
@@ -286,7 +286,7 @@ export default function AssessmentForm({ nav }) {
   }
 
   return (
-    <div style={{background:V.bone,minHeight:'100vh',paddingBottom:80,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",color:V.ink}}>
+    <div style={{background:V.bone,minHeight:'100vh',paddingBottom:80,fontFamily:"'DM Sans',system-ui,sans-serif",color:V.ink}}>
       <header style={{background:V.ink,color:'#fff',padding:'30px 24px 36px'}}>
         <div style={{maxWidth:820,margin:'0 auto'}}>
           <button onClick={() => nav('/')} style={{background:'transparent',color:'rgba(255,255,255,.7)',border:'none',cursor:'pointer',fontSize:12,padding:0,marginBottom:18,display:'flex',alignItems:'center',gap:6}}>
@@ -294,7 +294,7 @@ export default function AssessmentForm({ nav }) {
             Back to Smartious
           </button>
           <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:8}}>Assessment request</div>
-          <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.6vw,2.4rem)',margin:'0 0 12px',lineHeight:1.2,color:'#fff'}}>
+          <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.6vw,2.4rem)',margin:'0 0 12px',lineHeight:1.2,color:'#fff'}}>
             Request an academic assessment for your child
           </h1>
           <p style={{fontSize:14.5,color:'rgba(255,255,255,.78)',lineHeight:1.65,maxWidth:680,margin:0}}>
@@ -551,13 +551,13 @@ export default function AssessmentForm({ nav }) {
 
 function SuccessState({ form, requestRef, nav }) {
   return (
-    <div style={{background:V.bone,minHeight:'100vh',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",color:V.ink}}>
+    <div style={{background:V.bone,minHeight:'100vh',fontFamily:"'DM Sans',system-ui,sans-serif",color:V.ink}}>
       <div style={{maxWidth:680,margin:'0 auto',padding:'80px 24px',textAlign:'center'}}>
         <div style={{width:64,height:64,borderRadius:'50%',background:V.gold3,color:V.ink,display:'inline-flex',alignItems:'center',justifyContent:'center',marginBottom:24,fontSize:28}}>
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
         <div style={{fontSize:11,color:V.gold3,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:12}}>Request received</div>
-        <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.6vw,2.4rem)',margin:'0 0 16px',color:V.ink,lineHeight:1.2}}>
+        <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.6vw,2.4rem)',margin:'0 0 16px',color:V.ink,lineHeight:1.2}}>
           Thank you, {form.parent1FirstName}.
         </h1>
         <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:28}}>

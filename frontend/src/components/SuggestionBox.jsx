@@ -32,13 +32,13 @@ export default function SuggestionBox() {
           both produced a doubled edge. */}
       <button onClick={() => { setOpen(true); setState('') }} title="Suggestion Box"
         className="sm-glow sm-glow-fab"
-        style={{ position:'fixed', bottom:22, right:22, zIndex:250, background:'#7D1025', color:'#F0CC5A', border:'none', borderRadius:999, padding:'12px 20px', fontSize:12.5, fontWeight:800, cursor:'pointer', boxShadow:'0 6px 22px rgba(125,16,37,.42)', fontFamily:'Arial, sans-serif', letterSpacing:'.02em', textShadow:'0 0 12px rgba(240,204,90,.55)' }}>
+        style={{ position:'fixed', bottom:22, right:22, zIndex:250, background:'#7D1025', color:'#F0CC5A', border:'none', borderRadius:999, padding:'12px 20px', fontSize:12.5, fontWeight:800, cursor:'pointer', boxShadow:'0 6px 22px rgba(125,16,37,.42)', fontFamily:'"DM Sans",system-ui,sans-serif', letterSpacing:'.02em', textShadow:'0 0 12px rgba(240,204,90,.55)' }}>
         Suggestion Box
       </button>
       {open && (
         <div style={{ position:'fixed', inset:0, background:'rgba(8,12,20,.55)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:300, padding:16 }} onClick={() => setOpen(false)}>
-          <div style={{ background:'#fff', borderRadius:14, padding:'26px 28px', width:460, maxWidth:'94vw', fontFamily:'Arial, sans-serif' }} onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:19, fontWeight:700, color:'#7D1025' }}>Suggestion Box</div>
+          <div style={{ background:'#fff', borderRadius:14, padding:'26px 28px', width:460, maxWidth:'94vw', fontFamily:'"DM Sans",system-ui,sans-serif' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontFamily:'"Source Serif 4",Georgia,serif', fontSize:19, fontWeight:700, color:'#7D1025' }}>Suggestion Box</div>
             <div style={{ fontSize:12.5, color:'#6B7280', margin:'6px 0 14px' }}>
               Share an idea or concern with the school administration. Every suggestion is read by the Director.
             </div>

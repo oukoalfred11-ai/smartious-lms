@@ -298,7 +298,7 @@ export default function LibraryShelf({ user, toast, mySubjects: mySubjectNames, 
               <div style={{ display:'flex', flexDirection:'column', gap: 14 }}>
                 {Object.keys(paperTree[sec]).sort().map(subj => (
                   <div key={subj} style={{ background:'#fff', border:'1px solid #E8E2D6', borderRadius: 12, padding: '14px 16px' }}>
-                    <div style={{ fontFamily:'Georgia, serif', fontSize: 15, fontWeight: 700, color:'#1A1A1A', marginBottom: 10 }}>
+                    <div style={{ fontFamily:'"Source Serif 4",Georgia,serif', fontSize: 15, fontWeight: 700, color:'#1A1A1A', marginBottom: 10 }}>
                       {subj}
                     </div>
                     <div style={{ display:'flex', flexDirection:'column', gap: 8 }}>
@@ -408,7 +408,7 @@ function StudentBookCard({ book, onOpen, actions }) {
           }}>PDF</div>
           <div style={{
             color: '#F0CC5A', fontSize: 11, fontWeight: 700, textAlign: 'center',
-            padding: '0 14px', fontFamily: 'Georgia, serif', fontStyle: 'italic',
+            padding: '0 14px', fontFamily: '"Source Serif 4",Georgia,serif', fontStyle: 'italic',
             display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden',
           }}>{book.subjectName || 'Coursebook'}</div>
         </div>

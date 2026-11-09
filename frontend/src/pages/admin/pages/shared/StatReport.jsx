@@ -93,7 +93,7 @@ function StatReportModal({ spec, toast, onClose }) {
     const w = window.open('', '_blank')
     if (!w) return toast?.error?.('Allow pop-ups to print the report.')
     w.document.write(`<!doctype html><html><head><title>${esc(rep.title)}</title><style>
-      body{font-family:Georgia,serif;color:#1a1a1a;margin:32px;line-height:1.45}h1{font-size:21px;margin:0;color:#7D1025}
+      body{font-family:'Source Serif 4',Georgia,serif;color:#1a1a1a;margin:32px;line-height:1.45}h1{font-size:21px;margin:0;color:#7D1025}
       .sub{color:#666;font-size:11.5px;margin:2px 0 12px}.k{display:flex;gap:22px;flex-wrap:wrap;margin:10px 0}.k b{display:block;font-size:17px}
       table{width:100%;border-collapse:collapse;font-size:10.5px}th{text-align:left;background:#F7F2EA;padding:5px 7px;border:1px solid #ddd}
       td{padding:4px 7px;border:1px solid #ddd}.m{font-size:9.5px;color:#666;margin-top:12px;border-top:1px solid #ddd;padding-top:6px}

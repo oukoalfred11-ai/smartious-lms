@@ -5,8 +5,8 @@
    Aesthetic: Cinematic editorial dark-ink with warm gold accents
    
    Fonts (loaded via index.html):
-     Display:   DM Serif Display  → heroic editorial authority
-     Body:      Plus Jakarta Sans → refined, modern, legible
+     Headings:  Source Serif 4    → every heading, website and portals
+     Body:      DM Sans           → all body text
      Mono:      Fira Code         → precise, technical data
      
    Philosophy:
@@ -18,7 +18,7 @@
 ═══════════════════════════════════════════════════════════ */
 
 /* ── GOOGLE FONTS ─────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;0,8..60,800;1,8..60,400;1,8..60,600;1,8..60,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fira+Code:wght@400;500;600&display=swap');
 
 /* ── TOKENS ───────────────────────────────────────────────── */
 :root {
@@ -69,8 +69,8 @@
   --accent2:  var(--gold2);
 
   /* Fonts */
-  --f-display: 'DM Serif Display', Georgia, serif;
-  --f-body:    'Plus Jakarta Sans', system-ui, sans-serif;
+  --f-display: 'Source Serif 4',Georgia,serif;
+  --f-body:    'DM Sans',system-ui,sans-serif;
   --f-mono:    'Fira Code', 'Courier New', monospace;
 
   /* Spacing scale (8px base) */
@@ -245,6 +245,17 @@ a { color: inherit; text-decoration: none }
 button { font-family: var(--f-body); cursor: pointer; border: none; background: none; outline: none }
 input, textarea, select { font-family: var(--f-body); outline: none }
 img { display: block; max-width: 100% }
+
+/* House type: Source Serif 4 for headings, DM Sans for body text, across the
+   website and every portal. */
+h1, h2, h3, h4, h5, h6 { font-family: var(--f-display) !important }
+
+/* One colour per sentence: words picked out inside a heading or a sentence
+   take the colour of the sentence. Links keep their colour so they can be
+   found; pills and badges (elements with their own background) keep theirs. */
+:is(h1, h2, h3, h4, h5, h6) :is(em, i, strong, b, span:not([style*="background"]):not([class*="badge"]):not([class*="pill"]):not([class*="chip"])),
+p :is(em, i, strong, b),
+li :is(em, i, strong, b) { color: inherit !important }
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px }

@@ -430,7 +430,7 @@ function AdvisoryDashboard({ programme, deliveryMode, firstName }) {
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#F0CC5A' }}>
           {c.tag}{deliveryMode ? ` · ${deliveryMode}` : ''}
         </div>
-        <h1 style={{ fontFamily: "'Instrument Serif',serif", fontSize: 30, fontWeight: 400, margin: '8px 0 0', lineHeight: 1.15 }}>
+        <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, fontWeight: 400, margin: '8px 0 0', lineHeight: 1.15 }}>
           Welcome, {firstName}
         </h1>
         <p style={{ fontSize: 14, opacity: .9, marginTop: 8, lineHeight: 1.6 }}>
@@ -746,7 +746,7 @@ export default function StudentPortal() {
       height:'auto',
       overflow:'visible',
       background:TOKENS.cream,
-      fontFamily:'Inter,-apple-system,BlinkMacSystemFont,sans-serif',
+      fontFamily:'"DM Sans",system-ui,sans-serif',
       color:TOKENS.ink,
     }}>
 
@@ -817,7 +817,7 @@ export default function StudentPortal() {
           {!collapsed && (
             <div style={{minWidth:0}}>
               <div style={{
-                fontFamily:'Instrument Serif,Georgia,serif',
+                fontFamily:'"Source Serif 4",Georgia,serif',
                 fontSize:22, fontWeight:400,
                 color:TOKENS.ink, lineHeight:1,
               }}>
@@ -827,7 +827,7 @@ export default function StudentPortal() {
                 fontSize:9.5, color:TOKENS.crimson,
                 letterSpacing:'.14em', textTransform:'uppercase',
                 marginTop:4, fontWeight:700,
-                fontFamily:'Inter,-apple-system,sans-serif',
+                fontFamily:'"DM Sans",system-ui,sans-serif',
               }}>
                 Student Portal
               </div>
@@ -1106,7 +1106,7 @@ export default function StudentPortal() {
               </div>
             )}
             <div style={{
-              fontFamily:"'Instrument Serif',Georgia,serif",
+              fontFamily:"'Source Serif 4',Georgia,serif",
               fontSize: isMobile ? 20 : 22, fontWeight:400,
               color:TOKENS.ink, lineHeight:1.2,
               whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
@@ -1299,7 +1299,7 @@ export default function StudentPortal() {
                 border: `2px solid ${TOKENS.gold}`,
                 cursor: 'pointer',
                 fontSize: 13, fontWeight: 800,
-                fontFamily: 'Instrument Serif,Georgia,serif',
+                fontFamily: '"Source Serif 4",Georgia,serif',
                 overflow: 'hidden', flexShrink: 0,
                 padding: 0,
                 boxShadow: `0 2px 6px ${TOKENS.crimson}30`,
@@ -1468,7 +1468,7 @@ export default function StudentPortal() {
                         Your Programme
                       </div>
                       <h2 style={{
-                        fontFamily: "'Instrument Serif','Playfair Display',serif",
+                        fontFamily: "'Source Serif 4',Georgia,serif",
                         fontSize: 34, fontWeight: 400, margin: 0, lineHeight: 1.1,
                       }}>
                         {curriculumDisplay || 'No curriculum on file'}
@@ -1526,7 +1526,7 @@ export default function StudentPortal() {
                   }}>
                     <div style={{ fontSize: 48, marginBottom: 12, opacity:.5 }}>▤</div>
                     <div style={{
-                      fontFamily:"'Instrument Serif',serif", fontSize: 22,
+                      fontFamily:"'Source Serif 4',Georgia,serif", fontSize: 22,
                       color:'#1A1A1A', marginBottom: 8,
                     }}>
                       No subjects enrolled yet
@@ -1615,7 +1615,7 @@ export default function StudentPortal() {
                             }}>
                               <div style={{ flex:1 }}>
                                 <div style={{
-                                  fontFamily:"'Instrument Serif',serif",
+                                  fontFamily:"'Source Serif 4',Georgia,serif",
                                   fontSize:22, lineHeight:1.1, margin:0,
                                   textShadow:'0 1px 4px rgba(0,0,0,.3)',
                                 }}>
@@ -2036,7 +2036,7 @@ function PracticeTab({ user, toast, goTo }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
               Practice &amp; Master
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               Sharpen your skills, one topic at a time
             </h2>
             <p style={{ fontSize: 13.5, opacity: .85, marginTop: 8, marginBottom: 0, maxWidth: 540, lineHeight: 1.55 }}>
@@ -4316,7 +4316,7 @@ function MshauriTab({ user }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 4 }}>
               Personalised AI Tutor
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               Mshauri
             </h2>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -4357,7 +4357,7 @@ function MshauriTab({ user }) {
                 background: m.role === 'assistant' ? '#8B1A2E' : 'var(--s200)',
                 color: m.role === 'assistant' ? '#F0CC5A' : 'var(--s700)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: m.role === 'assistant' ? 'Instrument Serif, serif' : 'JetBrains Mono, monospace',
+                fontFamily: m.role === 'assistant' ? '"Source Serif 4",Georgia,serif' : 'JetBrains Mono, monospace',
                 fontSize: m.role === 'assistant' ? 16 : 12,
                 fontWeight: 700,
                 flexShrink: 0,
@@ -4386,7 +4386,7 @@ function MshauriTab({ user }) {
                 width: 32, height: 32, borderRadius: '50%',
                 background: '#8B1A2E', color: '#F0CC5A',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'Instrument Serif, serif', fontSize: 16, fontWeight: 700,
+                fontFamily: '"Source Serif 4",Georgia,serif', fontSize: 16, fontWeight: 700,
                 flexShrink: 0,
               }}>M</div>
               <div style={{
@@ -4810,7 +4810,7 @@ function StudyPlanTab({ user, store, setPage, toast }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
               Personalised &amp; Adaptive
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               Your Study Plan
             </h2>
             <p style={{ fontSize: 13.5, opacity: .85, marginTop: 6, marginBottom: 0, maxWidth: 520, lineHeight: 1.55 }}>
@@ -6493,7 +6493,7 @@ function MyResultsTab({ user, toast, setPage }) {
               alignItems:'center', justifyContent:'center', paddingLeft:8, paddingBottom:4,
             }}>
               <div style={{ fontSize:66, fontWeight:700, color:'#D81324', lineHeight:1,
-                            fontFamily:"'Instrument Serif', Georgia, serif" }}>
+                            fontFamily:"'Source Serif 4',Georgia,serif" }}>
                 {graded.length ? `${overallStats.avgPct}%` : '\u2014'}
               </div>
               <div style={{ fontSize:11.5, fontWeight:800, letterSpacing:'.16em', color:'#D81324', opacity:.8, marginTop:2 }}>
@@ -7138,7 +7138,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
               position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center',
               paddingLeft:8, paddingBottom:6,
               fontSize:96, fontWeight:700, color:'#D81324', lineHeight:1,
-              fontFamily:"'Instrument Serif', Georgia, serif",
+              fontFamily:"'Source Serif 4',Georgia,serif",
             }}>
               {sub.grade || (pct >= 50 ? 'P' : '\u2014')}
             </div>
@@ -7296,7 +7296,7 @@ function MyResultDetail({ subId, detail, loading, onBack, user, toast }) {
           <div style={{
             position:'absolute', top:14, left:18,
             fontSize:64, color:'#C9A030', opacity:.25,
-            fontFamily:"'Instrument Serif',serif", lineHeight:1,
+            fontFamily:"'Source Serif 4',Georgia,serif", lineHeight:1,
           }}>&ldquo;</div>
           <div style={{ paddingLeft:32 }}>
             <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#7D1025', marginBottom:6 }}>
@@ -9144,7 +9144,7 @@ function ProfileTab({ user, toast }) {
             border: '3px solid #F0CC5A',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontSize: 30, fontWeight: 700,
-            fontFamily: "'Instrument Serif', serif",
+            fontFamily: "'Source Serif 4',Georgia,serif",
             flexShrink: 0,
             overflow: 'hidden',
             boxShadow: '0 4px 16px rgba(0,0,0,.25)',
@@ -9157,7 +9157,7 @@ function ProfileTab({ user, toast }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .75, marginBottom: 6 }}>
               Account Settings
             </div>
-            <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               {displayName || 'My Profile'}
             </h2>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
@@ -9217,7 +9217,7 @@ function ProfileTab({ user, toast }) {
                 width: 72, height: 72, borderRadius: '50%',
                 background: avatar ? 'transparent' : avatarBg,
                 color: '#fff', fontSize: 26, fontWeight: 700,
-                fontFamily: "'Instrument Serif', serif",
+                fontFamily: "'Source Serif 4',Georgia,serif",
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 overflow: 'hidden',
                 flexShrink: 0,
@@ -10018,7 +10018,7 @@ function DashboardTab({ user, store, setPage, toast }) {
             <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.2em', textTransform:'uppercase', color:'#C9A030', marginBottom:10 }}>
               {dayLabel}
             </div>
-            <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:38, fontWeight:400, color:'#fff', margin:'0 0 10px', letterSpacing:'-.5px', lineHeight:1.08 }}>
+            <h2 style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:38, fontWeight:400, color:'#fff', margin:'0 0 10px', letterSpacing:'-.5px', lineHeight:1.08 }}>
               {greeting}, <em style={{ fontStyle:'italic', color:'#F0CC5A' }}>{firstName}</em>
             </h2>
             <div style={{ display:'flex', gap:14, flexWrap:'wrap', marginBottom:12 }}>
@@ -10292,7 +10292,7 @@ function DashboardTab({ user, store, setPage, toast }) {
             return (
               <div style={{ background:'linear-gradient(135deg,#7D1025,#5A0B1B)', borderRadius:12, padding:'20px 20px' }}>
                 <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'#C9A030', marginBottom:10 }}>Daily affirmation</div>
-                <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:15, fontWeight:400, color:'#fff', lineHeight:1.55, marginBottom:10, fontStyle:'italic' }}>"{q.text}"</div>
+                <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:15, fontWeight:400, color:'#fff', lineHeight:1.55, marginBottom:10, fontStyle:'italic' }}>"{q.text}"</div>
                 <div style={{ fontSize:11, color:'rgba(255,255,255,.55)' }}>— {q.author}</div>
               </div>
             )
@@ -10499,7 +10499,7 @@ function LessonPracticeTab({ subject, curriculum, topic, user, toast }) {
         textAlign: 'center',
       }}>
         <div style={{
-          fontFamily: "'Instrument Serif', serif",
+          fontFamily: "'Source Serif 4',Georgia,serif",
           fontSize: 20, color: '#1A1A1A', marginBottom: 8,
         }}>
           No practice questions for this topic yet
@@ -10541,7 +10541,7 @@ function LessonPracticeTab({ subject, curriculum, topic, user, toast }) {
             Practice complete
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 38, fontWeight: 400, lineHeight: 1 }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 38, fontWeight: 400, lineHeight: 1 }}>
               {result.score}%
             </div>
             <div style={{ fontSize: 14, opacity: .9 }}>
@@ -11239,7 +11239,7 @@ function RealTimetableTab({ user, setPage, toast }) {
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'#C9A030', marginBottom:8 }}>
               Weekly Timetable
             </div>
-            <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:28, fontWeight:400, color:'#fff', margin:'0 0 6px', letterSpacing:'-.3px' }}>
+            <h2 style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:28, fontWeight:400, color:'#fff', margin:'0 0 6px', letterSpacing:'-.3px' }}>
               {user?.firstName} {user?.lastName}
             </h2>
             <div style={{ display:'flex', gap:16, flexWrap:'wrap', marginBottom:10 }}>
@@ -11330,7 +11330,7 @@ function RealTimetableTab({ user, setPage, toast }) {
 
       {entries.length===0 ? (
         <div style={{ padding:28, background:'#FBFAF5', border:'1px solid #E8E2D6', borderRadius:10, textAlign:'center' }}>
-          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#1A0F0E', marginBottom:6 }}>No timetable entries yet</div>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:20, color:'#1A0F0E', marginBottom:6 }}>No timetable entries yet</div>
           <div style={{ fontSize:13, color:'#857973', lineHeight:1.6, maxWidth:460, margin:'0 auto' }}>
             Your teachers haven't added you to any class slots yet. Once they do, your weekly schedule will appear here.
           </div>
@@ -11891,7 +11891,7 @@ function SubjectFullAnalysis({ subjectName, curriculum, grade, api, onBack }) {
 
       <div>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: GOLD }}>LESSON PLAN ANALYSIS</div>
-        <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, color: INK, margin: '2px 0 0' }}>{subjectName}</h2>
+        <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, fontWeight: 400, color: INK, margin: '2px 0 0' }}>{subjectName}</h2>
         <div style={{ fontSize: 12.5, color: MUT, marginTop: 2 }}>{curriculum}{grade ? ' \u00b7 ' + grade : ''}</div>
       </div>
 

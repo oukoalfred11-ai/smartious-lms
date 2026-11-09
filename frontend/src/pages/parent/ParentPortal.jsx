@@ -26,7 +26,7 @@ function PSection({ tag, title, em, sub }) {
   return (
     <div style={{ marginBottom:20 }}>
       {tag&&<div style={{ fontSize:10, fontWeight:700, color:C.crimson, textTransform:'uppercase', letterSpacing:'.14em', marginBottom:4 }}>{tag}</div>}
-      <h2 style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:26, fontWeight:400, color:C.ink, margin:'4px 0 6px', lineHeight:1.15 }}>
+      <h2 style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:26, fontWeight:400, color:C.ink, margin:'4px 0 6px', lineHeight:1.15 }}>
         {title}{em&&<em style={{ fontStyle:'italic', color:C.crimson }}> {em}</em>}
       </h2>
       {sub&&<div style={{ fontSize:13, color:C.s500, lineHeight:1.55 }}>{sub}</div>}
@@ -146,7 +146,7 @@ export default function ParentPortal() {
   const initials   = user ? ((user.firstName?.[0]||'')+(user.lastName?.[0]||'')).toUpperCase() : 'P'
 
   return (
-    <div style={{ display:'flex', height:isMobile?'100dvh':'100vh', overflow:'hidden', background:C.cream, fontFamily:"Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif", color:C.ink }}>
+    <div style={{ display:'flex', height:isMobile?'100dvh':'100vh', overflow:'hidden', background:C.cream, fontFamily:"'DM Sans',system-ui,sans-serif", color:C.ink }}>
 
       {/* ══ SIDEBAR ══ */}
       <aside style={{ width:collapsed?76:252, flexShrink:0, background:C.cream, borderRight:`1px solid ${C.s100}`, display:'flex', flexDirection:'column', height:'100vh', overflowY:'auto', overflowX:'hidden', transition:'width .25s cubic-bezier(.22,.61,.36,1)', position:'relative', zIndex:50, scrollbarWidth:'none' ,
@@ -165,7 +165,7 @@ export default function ParentPortal() {
           </svg>
           {!collapsed&&(
             <div>
-              <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22, fontWeight:400, color:C.ink, lineHeight:1 }}>
+              <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:22, fontWeight:400, color:C.ink, lineHeight:1 }}>
                 Smart<em style={{ fontStyle:'italic', color:C.crimson }}>ious</em>
               </div>
               <div style={{ fontSize:9.5, color:C.crimson, letterSpacing:'.14em', textTransform:'uppercase', marginTop:4, fontWeight:700 }}>Parent Portal</div>
@@ -282,7 +282,7 @@ export default function ParentPortal() {
           )}
           <div style={{ flex:1, minWidth:0 }}>
             <div style={{ fontSize:10, fontWeight:700, color:C.crimson, letterSpacing:'.14em', textTransform:'uppercase', marginBottom:3 }}>Parent Portal</div>
-            <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:22, fontWeight:400, color:C.ink, lineHeight:1.2 }}>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:22, fontWeight:400, color:C.ink, lineHeight:1.2 }}>
               {PAGE_TITLES[page]||'Dashboard'}
               {selectedChild&&<span style={{ fontSize:14, fontWeight:400, color:C.s500, marginLeft:12, display:isMobile?'none':'inline' }}>— {selectedChild.firstName} {selectedChild.lastName}</span>}
             </div>
@@ -404,7 +404,7 @@ function NoChildLinked({ onLink }) {
       <div style={{ width:72, height:72, borderRadius:'50%', background:'#FBF6E3', border:`2px solid ${C.gold}40`, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:20 }}>
         <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke={C.gold} strokeWidth="1.5" strokeLinecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:24, color:C.ink, marginBottom:8 }}>No student linked yet</div>
+      <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:24, color:C.ink, marginBottom:8 }}>No student linked yet</div>
       <div style={{ fontSize:13.5, color:C.s500, maxWidth:400, lineHeight:1.65, marginBottom:24 }}>
         Link your child's account using their admission number to view their progress, timetable, and fees.
       </div>
@@ -473,7 +473,7 @@ function ParentDashboard({ child, showToast, setPage }) {
             <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'rgba(255,255,255,.5)', marginBottom:8 }}>
               {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
             </div>
-            <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:26, color:'#fff', marginBottom:4 }}>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:26, color:'#fff', marginBottom:4 }}>
               {child.firstName} {child.lastName}
             </div>
             <div style={{ fontSize:13, color:'rgba(255,255,255,.65)' }}>{child.curriculum} · {child.gradeLevel} · {child.programme||'Homeschool'}</div>

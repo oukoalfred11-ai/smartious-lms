@@ -74,7 +74,7 @@ export default function CommandModule({ toast, role = 'dos' }) {
       const table = (title, heads, rows) => `<h2>${title}</h2><table><thead><tr>${heads.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
       const money = (n) => fmtMoney(n)
       const html = `<!doctype html><html><head><title>Smartious Board Pack</title><style>
-        body{font-family:Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
+        body{font-family:'Source Serif 4',Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
         h1{font-size:24px;margin:0;color:#7D1025}.sub{color:#666;font-size:12px;margin-bottom:20px}
         h2{font-size:15px;margin:24px 0 8px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px}
         table{width:100%;border-collapse:collapse;font-size:11.5px}

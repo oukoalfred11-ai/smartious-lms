@@ -181,7 +181,7 @@ export default function LessonPlayerTab({ user, toast, setPage, mode = 'student'
                 {selectedSubject.curriculum}
               </div>
               <h1 style={{
-                fontFamily: "'Instrument Serif',serif", fontSize: 28, fontWeight: 400,
+                fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400,
                 margin: 0, lineHeight: 1.15, color: BRAND.ink,
               }}>
                 {selectedSubject.subjectName}
@@ -214,7 +214,7 @@ export default function LessonPlayerTab({ user, toast, setPage, mode = 'student'
           </div>
         ) : lessons.length === 0 ? (
           <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
               No lessons yet
             </div>
             <div style={{ fontSize: 13, color: BRAND.inkMute }}>
@@ -275,7 +275,7 @@ export default function LessonPlayerTab({ user, toast, setPage, mode = 'student'
             Your Learning Library
           </div>
           <h1 style={{
-            fontFamily: "'Instrument Serif',serif", fontSize: 32, fontWeight: 400,
+            fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 32, fontWeight: 400,
             margin: 0, lineHeight: 1.1,
           }}>
             {subjects.length > 0
@@ -307,7 +307,7 @@ export default function LessonPlayerTab({ user, toast, setPage, mode = 'student'
               <polygon points="5 3 19 12 5 21 5 3"/>
             </svg>
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, color: BRAND.ink, marginBottom: 6 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, color: BRAND.ink, marginBottom: 6 }}>
             No subjects yet
           </div>
           <div style={{ fontSize: 13.5, color: BRAND.inkMute, maxWidth: 420, margin: '0 auto', lineHeight: 1.55 }}>
@@ -388,7 +388,7 @@ function StudentSubjectCard({ subject, onOpen }) {
 
       <div style={{ padding: '14px 18px 16px' }}>
         <div style={{
-          fontFamily: "'Instrument Serif',serif", fontSize: 20, fontWeight: 400,
+          fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, fontWeight: 400,
           color: BRAND.ink, lineHeight: 1.15, marginBottom: 4,
         }}>
           {subject.subjectName}
@@ -701,7 +701,7 @@ function LessonDetailView({ lesson, subject, teacher, mastered, onBack, lessons 
             </span>
           )}
         </div>
-        <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 400, color: BRAND.ink, lineHeight: 1.2, margin: 0 }}>
+        <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 400, color: BRAND.ink, lineHeight: 1.2, margin: 0 }}>
           {lesson.title}
         </h1>
       </div>

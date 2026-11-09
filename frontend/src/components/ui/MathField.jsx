@@ -102,7 +102,7 @@ export function renderMath(text) {
       } catch { /* fall through to plain */ }
     }
     return (
-      <span key={i} style={{ fontFamily: 'Cambria, Georgia, serif', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+      <span key={i} style={{ fontFamily: '"Source Serif 4",Georgia,serif', fontStyle: 'italic', whiteSpace: 'nowrap' }}>
         {plainMath(part.text)}
       </span>
     )
@@ -217,4 +217,4 @@ const tabBtn = { fontSize:11, fontWeight:700, padding:'4px 10px', borderRadius:9
                  border:'1px solid #E8E0D0', cursor:'pointer' }
 const symBtn = { minWidth:34, padding:'6px 9px', borderRadius:6, border:'1px solid #E8E0D0',
                  background:'#fff', fontSize:13.5, cursor:'pointer', color:'#0D1220',
-                 fontFamily:'Cambria, Georgia, serif' }
+                 fontFamily:'"Source Serif 4",Georgia,serif' }

@@ -253,7 +253,7 @@ function MathAnswer({ value, onChange, readOnly }) {
       )}
       {value && (
         <div style={{ marginTop: 8, fontSize: 13, color: C.mute }}>
-          Reads as: <span style={{ fontSize: 16, color: C.ink, fontFamily: "'Cambria Math','STIX Two Math',Georgia,serif" }}>{prettyMath(value)}</span>
+          Reads as: <span style={{ fontSize: 16, color: C.ink, fontFamily: "'Cambria Math','STIX Two Math','Source Serif 4',Georgia,serif" }}>{prettyMath(value)}</span>
         </div>
       )}
     </div>

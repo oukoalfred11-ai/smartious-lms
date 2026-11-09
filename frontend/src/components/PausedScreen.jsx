@@ -37,14 +37,14 @@ export default function PausedScreen() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#FDFAF4', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: 'Georgia, serif' }}>
+    <div style={{ minHeight: '100vh', background: '#FDFAF4', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, fontFamily: '"Source Serif 4",Georgia,serif' }}>
       <div style={{ maxWidth: 520, width: '100%', background: '#fff', borderRadius: 16, boxShadow: '0 10px 40px rgba(8,12,20,.12)', overflow: 'hidden' }}>
         <div style={{ height: 8, background: '#7D1025' }} />
         <div style={{ height: 3, background: '#C9A030' }} />
         <div style={{ padding: '36px 40px' }}>
-          <div style={{ fontSize: 12, letterSpacing: 3, color: '#C9A030', fontWeight: 700, fontFamily: 'Arial, sans-serif' }}>SMARTIOUS HOMESCHOOL GLOBAL</div>
+          <div style={{ fontSize: 12, letterSpacing: 3, color: '#C9A030', fontWeight: 700, fontFamily: '"DM Sans",system-ui,sans-serif' }}>SMARTIOUS HOMESCHOOL GLOBAL</div>
           <h1 style={{ margin: '14px 0 6px', fontSize: 26, color: '#080C14' }}>Account temporarily paused</h1>
-          <div style={{ display: 'inline-block', background: isFee ? '#FEF2F2' : '#F8F1E4', color: isFee ? '#991B1B' : '#7D1025', fontWeight: 700, fontSize: 13, padding: '5px 14px', borderRadius: 999, fontFamily: 'Arial, sans-serif', marginBottom: 16 }}>{label}</div>
+          <div style={{ display: 'inline-block', background: isFee ? '#FEF2F2' : '#F8F1E4', color: isFee ? '#991B1B' : '#7D1025', fontWeight: 700, fontSize: 13, padding: '5px 14px', borderRadius: 999, fontFamily: '"DM Sans",system-ui,sans-serif', marginBottom: 16 }}>{label}</div>
 
           {pause?.role === 'parent' && students.length > 0 && (
             <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.6, margin: '0 0 10px' }}>
@@ -65,14 +65,14 @@ export default function PausedScreen() {
           )}
 
           {pause?.note && (
-            <div style={{ background: '#F9FAFB', borderLeft: '3px solid #C9A030', padding: '10px 14px', fontSize: 13.5, color: '#4B5563', margin: '14px 0', fontFamily: 'Arial, sans-serif' }}>{pause.note}</div>
+            <div style={{ background: '#F9FAFB', borderLeft: '3px solid #C9A030', padding: '10px 14px', fontSize: 13.5, color: '#4B5563', margin: '14px 0', fontFamily: '"DM Sans",system-ui,sans-serif' }}>{pause.note}</div>
           )}
 
-          <p style={{ fontSize: 13.5, color: '#6B7280', lineHeight: 1.7, margin: '16px 0 24px', fontFamily: 'Arial, sans-serif' }}>
+          <p style={{ fontSize: 13.5, color: '#6B7280', lineHeight: 1.7, margin: '16px 0 24px', fontFamily: '"DM Sans",system-ui,sans-serif' }}>
             Questions or ready to resume? Contact us at <strong>hello@smartioushomeschool.com</strong> or <strong>+254 745 021 212</strong>{isFee ? ' (M-Pesa Paybill 745021)' : ''}.
           </p>
 
-          <button onClick={signOut} style={{ background: '#7D1025', color: '#fff', border: 'none', padding: '11px 26px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Arial, sans-serif' }}>
+          <button onClick={signOut} style={{ background: '#7D1025', color: '#fff', border: 'none', padding: '11px 26px', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans",system-ui,sans-serif' }}>
             Sign out
           </button>
         </div>

@@ -27,7 +27,7 @@ export default function AssessmentPaymentResult({ nav }) {
   const isFailed  = status === 'failed'
 
   return (
-    <div style={{ background: V.bone, minHeight: '100vh', fontFamily: "'Plus Jakarta Sans',system-ui,sans-serif", color: V.ink }}>
+    <div style={{ background: V.bone, minHeight: '100vh', fontFamily: "'DM Sans',system-ui,sans-serif", color: V.ink }}>
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '80px 24px', textAlign: 'center' }}>
 
         {/* Icon */}
@@ -49,7 +49,7 @@ export default function AssessmentPaymentResult({ nav }) {
 
         {isSuccess && (<>
           <div style={{ fontSize: 11, color: V.gold3, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 10 }}>Payment confirmed</div>
-          <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink, lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink, lineHeight: 1.2 }}>
             Thank you — assessment fee received
           </h1>
           <p style={{ fontSize: 15, color: V.sl, lineHeight: 1.7, marginBottom: 28 }}>
@@ -75,7 +75,7 @@ export default function AssessmentPaymentResult({ nav }) {
 
         {isFailed && (<>
           <div style={{ fontSize: 11, color: '#B91C1C', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 10 }}>Payment unsuccessful</div>
-          <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink, lineHeight: 1.2 }}>
+          <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink, lineHeight: 1.2 }}>
             Your payment was not completed
           </h1>
           <p style={{ fontSize: 15, color: V.sl, lineHeight: 1.7, marginBottom: 28 }}>
@@ -99,7 +99,7 @@ export default function AssessmentPaymentResult({ nav }) {
 
         {!isSuccess && !isFailed && (<>
           <div style={{ fontSize: 11, color: '#6B6B6B', fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', marginBottom: 10 }}>Something went wrong</div>
-          <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink }}>
+          <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.6rem,3.4vw,2.2rem)', margin: '0 0 16px', color: V.ink }}>
             We couldn't confirm your payment
           </h1>
           <p style={{ fontSize: 15, color: V.sl, lineHeight: 1.7, marginBottom: 28 }}>

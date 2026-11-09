@@ -1082,7 +1082,7 @@ function CurriculumModule({ refreshKey, toast }) {
           const subjList = Array.isArray(c.subjects) ? c.subjects : []
           return (
           <PCard key={i} accent={TOKENS.gold}>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TOKENS.s900, marginBottom: 8, fontWeight: 600 }}>{c.name}</h3>
+            <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 19, color: TOKENS.s900, marginBottom: 8, fontWeight: 600 }}>{c.name}</h3>
             <div style={{ fontSize: 12, color: TOKENS.s500, marginBottom: 12 }}>{subjList.length} subjects offered</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {subjList.slice(0, 6).map((s, si) => (

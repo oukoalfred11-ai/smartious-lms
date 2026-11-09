@@ -129,7 +129,7 @@ export function ProgrammesModule({ refreshKey, toast, showFees = false }) {
         {show.map(p => (
           <PCard key={p.programme || 'unset'} accent={p.programme ? TOKENS.accentPurple : TOKENS.accentAmber}>
             <div style={{ fontSize: 11, fontWeight: 700, color: TOKENS.gold, letterSpacing: '.08em', marginBottom: 6, textTransform: 'uppercase' }}>Programme</div>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: 19, color: TOKENS.s900, marginBottom: 6, fontWeight: 600 }}>{p.programme || 'Not set'}</h3>
+            <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 19, color: TOKENS.s900, marginBottom: 6, fontWeight: 600 }}>{p.programme || 'Not set'}</h3>
             <div style={{ fontSize: 13, color: TOKENS.s500, lineHeight: 1.6, marginBottom: 14 }}>{PROGRAMME_INFO[p.programme]}</div>
             <div style={{ display: 'flex', gap: 18, paddingTop: 12, borderTop: '1px solid ' + TOKENS.s100 }}>
               {[['Active', p.active], ['Inactive', p.inactive], ['Joined ' + year, p.newThisYear]].map(([k, v]) => (
@@ -256,7 +256,7 @@ export function GroupRoomsModule({ refreshKey, toast }) {
               <PCard key={room._id} accent={isLive ? TOKENS.accentRose : TOKENS.accentOcean}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 17, color: TOKENS.s900, margin: 0 }}>{room.name}</h3>
+                    <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontWeight: 600, fontSize: 17, color: TOKENS.s900, margin: 0 }}>{room.name}</h3>
                     <div style={{ fontSize: 12, color: TOKENS.s500, marginTop: 2 }}>{room.subject} · {room.curriculum || '—'} {room.grade ? '· ' + room.grade : ''}</div>
                   </div>
                   {isLive && <span style={{ background: TOKENS.accentRose, color: TOKENS.white, fontSize: 9, fontWeight: 800, padding: '3px 9px', borderRadius: 99, letterSpacing: '.08em' }}>● LIVE</span>}

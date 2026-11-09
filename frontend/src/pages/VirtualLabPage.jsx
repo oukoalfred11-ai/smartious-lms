@@ -46,7 +46,7 @@ export default function VirtualLabPage({ go }) {
   const startDemo = () => { setDemo(true); setTimeout(() => document.getElementById('try')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }
 
   const sec = (bg) => ({ background: bg, padding: '72px 0' })
-  const h2 = { fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.9rem,3.2vw,2.8rem)', fontWeight: 400, lineHeight: 1.12, color: C.ink, margin: '0 0 14px' }
+  const h2 = { fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.9rem,3.2vw,2.8rem)', fontWeight: 400, lineHeight: 1.12, color: C.ink, margin: '0 0 14px' }
   const lead = { fontSize: 16.5, color: C.sl, lineHeight: 1.75, maxWidth: 820, margin: '0 0 28px' }
   const grid = (min) => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}px, 100%), 1fr))`, gap: 18 })
   const card = { background: '#fff', border: `1px solid ${C.line}`, borderRadius: 14, padding: 20 }
@@ -58,7 +58,7 @@ export default function VirtualLabPage({ go }) {
         <div className="wrap" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(460px, 100%), 1fr))', gap: 40, alignItems: 'center' }}>
           <div>
             <div className="eyebrow" style={{ color: C.gold }}>{VL_HERO.eyebrow}</div>
-            <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(2.2rem,4.4vw,3.5rem)', fontWeight: 400, lineHeight: 1.06, margin: '0 0 20px', color: '#fff' }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(2.2rem,4.4vw,3.5rem)', fontWeight: 400, lineHeight: 1.06, margin: '0 0 20px', color: '#fff' }}>
               Smartious <em style={{ color: C.gold }}>Virtual Lab</em>: 3D science practicals you do with your own hands
             </h1>
             <p style={{ fontSize: 17, lineHeight: 1.75, color: 'rgba(255,255,255,.9)', margin: '0 0 28px', maxWidth: 640 }}>{VL_HERO.lead}</p>
@@ -68,7 +68,7 @@ export default function VirtualLabPage({ go }) {
             </div>
             <div style={{ display: 'flex', gap: 26, flexWrap: 'wrap' }}>
               {VL_HERO.stats.map(([n, l]) => (
-                <div key={l}><div style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 30, color: C.gold, lineHeight: 1 }}>{n}</div><div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.75)', marginTop: 4 }}>{l}</div></div>
+                <div key={l}><div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, color: C.gold, lineHeight: 1 }}>{n}</div><div style={{ fontSize: 12.5, color: 'rgba(255,255,255,.75)', marginTop: 4 }}>{l}</div></div>
               ))}
             </div>
           </div>

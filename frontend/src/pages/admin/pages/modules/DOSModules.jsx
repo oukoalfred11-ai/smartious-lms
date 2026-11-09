@@ -616,7 +616,7 @@ export function DOSAttendanceModule({ toast, refreshKey }) {
       ? table(['Date', 'Class', 'Student', 'Grade', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.student, r.studentGrade, r.joined, r.present])))
       : table(['Date', 'Class', 'Subject', 'Teacher', 'Joined', 'Register'], lessons.map(r => row([fmtD(r.date), r.class, r.subject, r.teacher, r.joined, r.present])))
     const html = `<!doctype html><html><head><title>Attendance Record - ${name}</title><style>
-      body{font-family:Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
+      body{font-family:'Source Serif 4',Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
       h1{font-size:20px;margin:0;color:#7D1025}.sub{color:#666;font-size:11.5px;margin-bottom:14px}
       h2{font-size:13px;margin:16px 0 6px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px}
       table{width:100%;border-collapse:collapse;font-size:10.5px}
@@ -753,7 +753,7 @@ export function DOSTimetableModule({ toast, refreshKey }) {
   const DAY_ORDER = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const printDoc = (title, bodyHtml) => {
     const html = `<!doctype html><html><head><title>${title}</title><style>
-      body{font-family:Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
+      body{font-family:'Source Serif 4',Georgia,serif;color:#1a1a1a;margin:36px;line-height:1.45}
       h1{font-size:21px;margin:0;color:#7D1025}.sub{color:#666;font-size:11.5px;margin-bottom:16px}
       h2{font-size:13.5px;margin:18px 0 6px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px;page-break-after:avoid}
       table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:6px}

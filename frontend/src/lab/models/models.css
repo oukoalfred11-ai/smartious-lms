@@ -1,7 +1,7 @@
 /* Labelled 3D models (ModelsPage, modelStage.js) */
 .m3d-stage { position: relative; width: 100%; height: min(72vh, 680px); min-height: 420px; border-radius: 14px; overflow: hidden; background: #141C26; }
 .m3d-stage canvas { width: 100% !important; height: 100% !important; }
-.m3d-overlay { position: absolute; inset: 0; pointer-events: none; font: 500 13px/1.2 "Inter", "Helvetica Neue", Arial, sans-serif; }
+.m3d-overlay { position: absolute; inset: 0; pointer-events: none; font: 500 13px/1.2 "DM Sans",system-ui,sans-serif; }
 .m3d-lines { position: absolute; inset: 0; overflow: visible; }
 .m3d-line { fill: none; stroke: rgba(226, 236, 246, 0.75); stroke-width: 1.2; }
 .m3d-line.sel { stroke: #FFB020; stroke-width: 2; }

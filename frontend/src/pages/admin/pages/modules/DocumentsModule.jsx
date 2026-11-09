@@ -481,7 +481,7 @@ function buildReceiptHTML(f) {
 <style>
   :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;--green:#15803D;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:#e9e6df;color:var(--ink)}
   .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
   .page-body{padding:0 22mm;flex:1}
   .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
@@ -637,7 +637,7 @@ export function buildInvoiceHTML(f, t) {
 <style>
   :root{--cr:#7D1025;--crD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#ddd;color:var(--ink)}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:#ddd;color:var(--ink)}
   .page{width:210mm;min-height:297mm;background:#fff;margin:60px auto 20px;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.15);page-break-after:always}
   .page-body{padding:0 20mm;flex:1}
   .topbar{height:6mm;background:linear-gradient(90deg,var(--crD),var(--cr))}

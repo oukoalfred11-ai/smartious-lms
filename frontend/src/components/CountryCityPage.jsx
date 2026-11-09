@@ -111,7 +111,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             Homeschooling {countryName}
           </a>
           <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Online school &middot; Virtual school &middot; Homeschool &middot; {city.county}</div>
-          <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+          <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
             Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{city.name}</em>
           </h1>
           <p style={{fontSize:14,color:V.gold3,fontStyle:'italic',marginBottom:18,maxWidth:720,lineHeight:1.5}}>{city.heroTagline}</p>
@@ -141,7 +141,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
         <div style={{maxWidth:880,margin:'0 auto'}}>
           <div className="eyebrow">Education in {city.name}</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
             Challenges {city.name} families face
           </h2>
           <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
@@ -159,13 +159,13 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
         <div style={{maxWidth:1000,margin:'0 auto'}}>
           <div className="eyebrow">Why Smartious for {city.name}</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
             Six reasons {city.name} families choose Smartious
           </h2>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:14}}>
             {(city.whyChoose || []).map(([h, p], i) => (
               <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                 <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
               </div>
             ))}
@@ -177,7 +177,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
         <div style={{maxWidth:880,margin:'0 auto'}}>
           <div className="eyebrow">Who we serve in {city.name}</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
             Family situations we work with
           </h2>
           <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:10}}>
@@ -194,7 +194,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
         <div style={{maxWidth:880,margin:'0 auto'}}>
           <div className="eyebrow">Areas served</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
             {city.name} communities and nearby areas
           </h2>
           <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
@@ -209,7 +209,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
         <div style={{maxWidth:840,margin:'0 auto'}}>
           <div className="eyebrow">FAQs</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.25}}>
             Common questions from {city.name} families
           </h2>
           <div style={{display:'flex',flexDirection:'column',gap:14}}>
@@ -227,7 +227,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
           (the static HTML from scripts/seo-static.mjs links the same pages) */}
       <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:16}}><div className="wrap">
         <nav aria-label={'More in ' + countryName} style={{maxWidth:880,margin:'0 auto'}}>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>
             More in {countryName}
           </h2>
           <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
@@ -241,7 +241,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
             ))}
           </p>
           {guides.length > 0 && (<>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'26px 0 14px',lineHeight:1.25}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'26px 0 14px',lineHeight:1.25}}>
               Guides for families in {countryName}
             </h2>
             <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
@@ -264,7 +264,7 @@ export default function CountryCityPage({ country, cities, currentCitySlug, P, V
       {/* FINAL CTA */}
       <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:64}}>
         <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.4rem)',margin:'0 0 14px',color:'#fff'}}>Ready to start your child's Cambridge journey from {city.name}?</h2>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.4rem)',margin:'0 0 14px',color:'#fff'}}>Ready to start your child's Cambridge journey from {city.name}?</h2>
           <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>Free 15-minute consultation. No commitment.</p>
           <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
             <a href={'/assessment'} onClick={(e) => { if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; e.preventDefault(); nav('/assessment') }}

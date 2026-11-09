@@ -14,7 +14,7 @@ const SmartiousLogo = ({ size = 40, withText = false }) => (
     <SmartiousCrest size={size} />
     {withText && (
       <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
-        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:'#FFFFFF'}}>
+        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:'#FFFFFF'}}>
           Smart<em style={{fontStyle:'italic',color:'#C9973A',fontWeight:500}}>ious</em>
         </div>
         <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.5)', textTransform:'uppercase', marginTop:2}}>
@@ -82,7 +82,7 @@ export default function LoginPage() {
     fontSize:15,
     color:'#fff',
     outline:'none',
-    fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+    fontFamily:"'DM Sans',system-ui,sans-serif",
     transition:'border-color .2s',
     boxSizing:'border-box',
   })
@@ -92,7 +92,7 @@ export default function LoginPage() {
       minHeight:'100vh',
       display:'flex',
       background:'#080C14',
-      fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+      fontFamily:"'DM Sans',system-ui,sans-serif",
       overflow:'hidden',
     }}>
       {/* LEFT PANEL — Form */}
@@ -117,7 +117,7 @@ export default function LoginPage() {
         {/* Welcome heading */}
         <div style={{marginBottom:36}}>
           <h1 style={{
-            fontFamily:"'DM Serif Display',Georgia,serif",
+            fontFamily:"'Source Serif 4',Georgia,serif",
             fontSize:'2.8rem',
             fontWeight:700,
             color:'#fff',
@@ -242,7 +242,7 @@ export default function LoginPage() {
             textTransform:'uppercase',
             cursor:loading ? 'not-allowed' : 'pointer',
             transition:'transform .15s, box-shadow .15s, opacity .15s',
-            fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+            fontFamily:"'DM Sans',system-ui,sans-serif",
             boxShadow:'0 10px 30px rgba(255,255,255,.18)',
             opacity:loading ? .65 : 1,
             marginBottom:18,
@@ -339,7 +339,7 @@ export default function LoginPage() {
           color:'rgba(255,255,255,.85)',
         }}>
           <div style={{
-            fontFamily:"'DM Serif Display',Georgia,serif",
+            fontFamily:"'Source Serif 4',Georgia,serif",
             fontSize:'1.4rem',
             fontWeight:700,
             lineHeight:1.25,

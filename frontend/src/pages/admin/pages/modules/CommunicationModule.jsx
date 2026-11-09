@@ -127,7 +127,7 @@ export default function CommunicationModule({ toast }) {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <div style={{ marginRight: 'auto' }}>
-          <div style={{ fontFamily: 'Georgia, serif', fontSize: 24, fontWeight: 700, color: '#080C14' }}>Communication</div>
+          <div style={{ fontFamily: '"Source Serif 4",Georgia,serif', fontSize: 24, fontWeight: 700, color: '#080C14' }}>Communication</div>
           <div style={{ fontSize: 13, color: '#6B7280', marginTop: 2 }}>Email the community: pick the audience, write once, every send is on record.</div>
         </div>
         <button onClick={() => setTab('compose')} style={chip(tab === 'compose')}>Compose</button>
