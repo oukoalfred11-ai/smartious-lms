@@ -34,6 +34,7 @@ const router = express.Router();
 const { auth } = require('../middleware/auth');
 const mongoose = require('mongoose');
 const PaystackRequest = require('../models/PaystackRequest');
+const { getTransporter } = require('../lib/issueInvoice');
 const Invoice = require('../models/Invoice');
 const { markInvoicePaid } = require('../lib/markInvoicePaid');
 const { sendPaystackReceipt, receiptFor } = require('../lib/paystackReceipt');
@@ -111,6 +112,79 @@ async function settleLinkedInvoice(doc, d) {
   return 'partial';
 }
 
+// ── The payment-request email ─────────────────────────────
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function requestEmailHTML(doc) {
+  return `
+<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;border:1px solid #E7E1D4;border-radius:12px;overflow:hidden">
+  <div style="background:#8B1A2E;padding:22px 28px">
+    <div style="color:#fff;font-size:20px;font-weight:700">Smart<span style="color:#C9973A;font-style:italic">ious</span></div>
+    <div style="color:#F3D9A4;font-size:10px;letter-spacing:3px">HOMESCHOOL</div>
+  </div>
+  <div style="padding:28px;background:#FDFAF4">
+    <p style="font-size:15px;color:#080C14;margin:0 0 14px">Dear ${esc(doc.payerName) || 'Parent'},</p>
+    <p style="font-size:14px;color:#2E3D55;line-height:1.7;margin:0 0 18px">
+      This is a secure payment request from Smartious Homeschool for
+      <strong>${esc(doc.description)}</strong>.
+    </p>
+    <div style="background:#fff;border:1px solid #E7E1D4;border-radius:10px;padding:18px 22px;margin-bottom:22px">
+      <div style="font-size:12px;color:#5A5A62;margin-bottom:4px">Amount due</div>
+      <div style="font-size:26px;color:#8B1A2E;font-weight:700">${fmtAmount(doc.amount, doc.currency)}</div>
+      <div style="font-size:11.5px;color:#5A5A62;margin-top:6px">Reference: ${doc.reference}</div>
+    </div>
+    <a href="${doc.authorizationUrl}"
+       style="display:block;text-align:center;background:#8B1A2E;color:#fff;text-decoration:none;padding:14px 20px;border-radius:9px;font-size:15px;font-weight:700">
+      Pay Now by Card
+    </a>
+    <p style="font-size:12px;color:#5A5A62;line-height:1.6;margin:18px 0 0">
+      Payment is processed securely by Paystack. Visa, Mastercard and other methods enabled on our account are accepted. If you have any question, simply reply to this email and our accounts team will assist you.
+    </p>
+  </div>
+  <div style="background:#F1EADA;padding:14px 28px;font-size:11px;color:#5A5A62">
+    Smartious Homeschool \u00b7 smartioushomeschool.com \u00b7 accounts@smartioushomeschool.com \u00b7 WhatsApp +254 745 021 212
+  </div>
+</div>`;
+}
+
+/**
+ * Send (or resend) the Pay Now email for a request and record the
+ * outcome on it: requestEmailSentAt/To on success, requestEmailError on
+ * failure. Never throws; resolves { ok, error, to }.
+ */
+async function sendRequestEmail(doc, { to } = {}) {
+  const email = String(to || doc.email || '').trim().toLowerCase();
+  const fail = async (error) => {
+    console.error('[paystack] request email failed:', doc.reference, error);
+    await PaystackRequest.updateOne({ _id: doc._id }, { $set: { requestEmailError: String(error).slice(0, 300) } }).catch(() => {});
+    return { ok: false, error: String(error), to: email };
+  };
+  if (!/.+@.+\..+/.test(email)) return fail('No valid email address for this request.');
+  const t = getTransporter();
+  if (!t) return fail('Email is not configured on the server (EMAIL_USER and EMAIL_PASSWORD, or SMTP_USER and SMTP_PASS).');
+  try {
+    const info = await Promise.race([
+      t.sendMail({
+        from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
+        to: email,
+        replyTo: 'accounts@smartioushomeschool.com',
+        subject: 'Payment request from Smartious Homeschool \u2014 ' + fmtAmount(doc.amount, doc.currency),
+        html: requestEmailHTML(doc),
+      }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('The mail server did not answer within 45 seconds.')), 45000)),
+    ]);
+    // mailPolicy skips archived, paused, deactivated and bounced addresses.
+    if (info && (info.gateSkipped || info.suppressedSkip))
+      return fail(info.gateSkipped
+        ? 'Not sent: ' + email + ' belongs to an archived, paused or deactivated account.'
+        : 'Not sent: ' + email + ' bounced or refused mail before.');
+    await PaystackRequest.updateOne({ _id: doc._id }, { $set: { requestEmailSentAt: new Date(), requestEmailSentTo: email, requestEmailError: '' } });
+    return { ok: true, to: email };
+  } catch (e) {
+    return fail(e.message || 'The email could not be sent.');
+  }
+}
+
 // ── Create a payment request ──────────────────────────────
 router.post('/request', auth, ALLOWED, async (req, res) => {
   try {
@@ -179,57 +253,11 @@ router.post('/request', auth, ALLOWED, async (req, res) => {
       studentId: inv ? (inv.studentId || null) : null,
     });
 
-    // Email the parent their Pay Now button. Fire and forget; the
-    // admin still gets the link either way. mailPolicy adds the
-    // outbox copy automatically.
-    ;(async () => {
-      try {
-        const nodemailer = require('nodemailer');
-        const t = nodemailer.createTransport({
-          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-          port: parseInt(process.env.EMAIL_PORT || '587', 10),
-          secure: parseInt(process.env.EMAIL_PORT || '587', 10) === 465,
-          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
-        });
-        await t.sendMail({
-          from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
-          to: reqDoc.email,
-          replyTo: 'accounts@smartioushomeschool.com',
-          subject: 'Payment request from Smartious Homeschool \u2014 ' + fmtAmount(amt, currency),
-          html: `
-<div style="font-family:Georgia,'Times New Roman',serif;max-width:560px;margin:0 auto;border:1px solid #E7E1D4;border-radius:12px;overflow:hidden">
-  <div style="background:#8B1A2E;padding:22px 28px">
-    <div style="color:#fff;font-size:20px;font-weight:700">Smart<span style="color:#C9973A;font-style:italic">ious</span></div>
-    <div style="color:#F3D9A4;font-size:10px;letter-spacing:3px">HOMESCHOOL</div>
-  </div>
-  <div style="padding:28px;background:#FDFAF4">
-    <p style="font-size:15px;color:#080C14;margin:0 0 14px">Dear ${payerName || 'Parent'},</p>
-    <p style="font-size:14px;color:#2E3D55;line-height:1.7;margin:0 0 18px">
-      This is a secure payment request from Smartious Homeschool for
-      <strong>${description}</strong>.
-    </p>
-    <div style="background:#fff;border:1px solid #E7E1D4;border-radius:10px;padding:18px 22px;margin-bottom:22px">
-      <div style="font-size:12px;color:#5A5A62;margin-bottom:4px">Amount due</div>
-      <div style="font-size:26px;color:#8B1A2E;font-weight:700">${fmtAmount(amt, currency)}</div>
-      <div style="font-size:11.5px;color:#5A5A62;margin-top:6px">Reference: ${reference}</div>
-    </div>
-    <a href="${init.data.authorization_url}"
-       style="display:block;text-align:center;background:#8B1A2E;color:#fff;text-decoration:none;padding:14px 20px;border-radius:9px;font-size:15px;font-weight:700">
-      Pay Now by Card
-    </a>
-    <p style="font-size:12px;color:#5A5A62;line-height:1.6;margin:18px 0 0">
-      Payment is processed securely by Paystack. Visa, Mastercard and other methods enabled on our account are accepted. If you have any question, simply reply to this email and our accounts team will assist you.
-    </p>
-  </div>
-  <div style="background:#F1EADA;padding:14px 28px;font-size:11px;color:#5A5A62">
-    Smartious Homeschool \u00b7 smartioushomeschool.com \u00b7 accounts@smartioushomeschool.com \u00b7 WhatsApp +254 745 021 212
-  </div>
-</div>`,
-        });
-      } catch (e) { console.error('[paystack] request email failed:', e.message); }
-    })();
-
-    return res.json({ success: true, data: { request: reqDoc } });
+    // Email the parent their Pay Now button and record the result on the
+    // request, so the accounts team sees at once if it did not go out.
+    const mail = await sendRequestEmail(reqDoc);
+    const saved = await PaystackRequest.findById(reqDoc._id).lean();
+    return res.json({ success: true, data: { request: saved || reqDoc, emailed: mail.ok, emailError: mail.error || '' } });
   } catch (e) {
     console.error('[paystack/request]', e);
     return res.status(500).json({ success: false, message: e.message });
@@ -251,13 +279,8 @@ router.get('/requests', auth, ALLOWED, async (req, res) => {
 function paidNotice(paidDoc) {
   ;(async () => {
     try {
-      const nodemailer = require('nodemailer');
-      const t = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.EMAIL_PORT || '587', 10),
-        secure: false,
-        auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASSWORD },
-      });
+      const t = getTransporter();
+      if (!t) throw new Error('email is not configured on the server');
       await t.sendMail({
         from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
         to: 'accounts@smartioushomeschool.com',
@@ -388,6 +411,20 @@ router.post('/requests/:reference/mark-paid', auth, async (req, res) => {
   } catch (e) { return res.status(500).json({ success: false, message: e.message }); }
 });
 
+// ── POST /requests/:reference/email { email? } — (re)send the Pay Now email ──
+router.post('/requests/:reference/email', auth, ALLOWED, async (req, res) => {
+  try {
+    const doc = await PaystackRequest.findOne({ reference: req.params.reference });
+    if (!doc) return res.status(404).json({ success: false, message: 'Request not found.' });
+    if (doc.status === 'paid') return res.status(400).json({ success: false, message: 'This request is already paid; send the receipt instead.' });
+    const out = await sendRequestEmail(doc, { to: req.body?.email });
+    if (!out.ok) return res.status(502).json({ success: false, message: out.error });
+    return res.json({ success: true, message: 'Payment link emailed to ' + out.to + '.' });
+  } catch (e) {
+    return res.status(500).json({ success: false, message: e.message });
+  }
+});
+
 // ── Receipts ──────────────────────────────────────────────
 router.get('/requests/:reference/receipt.pdf', auth, ALLOWED, async (req, res) => {
   try {
@@ -435,3 +472,4 @@ router.post('/webhook', async (req, res) => {
 });
 
 module.exports = router;
+module.exports._test = { sendRequestEmail, requestEmailHTML };

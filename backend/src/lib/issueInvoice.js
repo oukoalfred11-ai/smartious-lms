@@ -31,14 +31,27 @@ function signatoryOf(inv) {
   }
 }
 
+// SMTP settings under either naming convention (EMAIL_* or SMTP_*, and
+// EMAIL_PASS), like services/emailService.js, so a name mismatch on the
+// server cannot quietly disable invoice, payment-link and receipt email.
+function smtpSettings() {
+  const port = parseInt(process.env.EMAIL_PORT || process.env.SMTP_PORT || '587', 10)
+  return {
+    host: process.env.EMAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com',
+    port,
+    user: process.env.EMAIL_USER || process.env.SMTP_USER || '',
+    pass: process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS || process.env.SMTP_PASS || '',
+  }
+}
+
 function getTransporter() {
-  const user = process.env.EMAIL_USER, pass = process.env.EMAIL_PASSWORD
+  const { host, port, user, pass } = smtpSettings()
   if (!user || !pass) return null
   return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.EMAIL_PORT || '587', 10),
-    secure: parseInt(process.env.EMAIL_PORT || '587', 10) === 465,
+    host, port, secure: port === 465,
     auth: { user, pass },
+    // Fail in seconds, not minutes, so a caller waiting on the send can report it.
+    connectionTimeout: 15000, greetingTimeout: 15000, socketTimeout: 30000,
   })
 }
 

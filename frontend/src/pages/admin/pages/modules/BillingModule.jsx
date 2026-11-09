@@ -1106,7 +1106,10 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
       const r = await api.post('/paystack/request', body)
       const doc = r.data?.data?.request
       setLastLink(doc?.authorizationUrl || '')
-      toast?.ok?.('Payment request emailed to ' + f.email + (doc?.invoiceNo ? ' for invoice ' + doc.invoiceNo : ''))
+      if (r.data?.data?.emailed === false)
+        toast?.error?.('Payment link created, but the email did not go out: ' + (r.data?.data?.emailError || 'unknown error') + ' Copy the link below or use Resend link.')
+      else
+        toast?.ok?.('Payment request emailed to ' + f.email + (doc?.invoiceNo ? ' for invoice ' + doc.invoiceNo : ''))
       setF(p => ({ ...p, payerName: '', email: '', amount: '' }))
       if (invoiceId) { setInvoiceId(''); setF(BLANK_CARD_FORM) }
       load()
@@ -1149,6 +1152,15 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
       const url = URL.createObjectURL(new Blob([r.data], { type: 'application/pdf' }))
       if (w) w.location.href = url; else window.location.href = url
     } catch { w?.close(); toast?.error?.('Could not open the receipt.') }
+  }
+  const emailLink = async (row) => {
+    const email = window.prompt('Email the payment link to:', row.requestEmailSentTo || row.email)
+    if (!email) return
+    setBusyRef(row.reference)
+    try { const r = await api.post('/paystack/requests/' + row.reference + '/email', { email }); toast?.ok?.(r.data?.message || 'Payment link emailed.') }
+    catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not email the payment link.') }
+    load()
+    setBusyRef('')
   }
   const sendReceipt = async (row) => {
     const email = window.prompt('Send the receipt to:', row.receiptSentTo || row.email)
@@ -1261,6 +1273,9 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
                       <span style={{ color: STATUS[r.status] || TOKENS.s500, fontWeight: 800, fontSize: 11.5, textTransform: 'uppercase' }}>{r.status}</span>
                       {r.channel ? <span style={{ fontSize: 10.5, color: TOKENS.s500 }}>{' \u00b7 '}{r.channel}</span> : null}
                       {r.manual && <div style={{ fontSize: 10.5, color: TOKENS.s500 }}>Marked by {r.markedPaidByName || 'staff'}{r.manualNote ? ': ' + r.manualNote : ''}</div>}
+                      {r.status !== 'paid' && (r.requestEmailSentAt || r.requestEmailError) && <div style={{ fontSize: 10.5, color: r.requestEmailError ? '#B42318' : '#166534' }}>
+                        {r.requestEmailError ? 'Email not sent: ' + r.requestEmailError : 'Link emailed ' + new Date(r.requestEmailSentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + (r.requestEmailSentTo ? ' to ' + r.requestEmailSentTo : '')}
+                      </div>}
                       {r.status === 'paid' && <div style={{ fontSize: 10.5, color: r.receiptSentAt ? '#166534' : '#B45309' }}>
                         {r.receiptSentAt ? 'Receipt sent ' + new Date(r.receiptSentAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + (r.receiptSentTo ? ' to ' + r.receiptSentTo : '') : 'No receipt sent yet'}
                       </div>}
@@ -1270,6 +1285,11 @@ function CardPayments({ toast, onBack, prefillInvoice = null }) {
                       {r.status !== 'paid' && (
                         <button onClick={() => verify(r.reference)} disabled={checking === r.reference} style={small}>
                           {checking === r.reference ? 'Checking...' : 'Check status'}
+                        </button>
+                      )}
+                      {r.status !== 'paid' && (
+                        <button onClick={() => emailLink(r)} disabled={busyRef === r.reference} style={small} title="Email the parent their Pay Now link">
+                          {busyRef === r.reference ? 'Sending...' : r.requestEmailSentAt ? 'Resend link' : 'Email link'}
                         </button>
                       )}
                       {r.status !== 'paid' && canMark && (
