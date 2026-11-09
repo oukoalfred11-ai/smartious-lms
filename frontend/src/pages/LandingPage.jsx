@@ -52,6 +52,7 @@ import {
 import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
+import CountryArtHero from '../components/CountryArtHero.jsx'
 import CountryHub from '../components/CountryHub.jsx'
 import { imageExists } from '../data/generated/publicImages.js'
 import CountriesSection from '../components/CountriesSection.jsx'
@@ -15396,42 +15397,15 @@ export default function LandingPage() {
               })),
             })}}/>
 
-            {/* ─── HERO BANNER (public/images/countries/uae-hero-*.webp) ─── */}
-            {imageExists('/images/countries/uae-hero-1920.webp') && (
-              <div style={{background:V.ink,lineHeight:0}}>
-                <img src="/images/countries/uae-hero-1920.webp" srcSet="/images/countries/uae-hero-1920.webp 1920w, /images/countries/uae-hero-3840.webp 3840w" sizes="100vw"
-                  width="1920" height="800" alt="Online school in the UAE: live classes with expert teachers"
-                  loading="eager" fetchPriority="high" decoding="async"
-                  style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
-              </div>
-            )}
-            {/* ─── HERO ─── */}
-            <section className="sec" style={{
-              position:'relative',
-              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-            }}>
-              {!imageExists('/images/countries/uae-hero-1920.webp') && <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>}
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={imageExists('/images/countries/uae-hero-1920.webp') ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Online School &amp; Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
-                </h1>
-                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
-                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
-                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
-                    View Pricing ({country.currency})
-                  </a>
-                </div>
-              </div>
-            </section>
+            {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/uae-art-*.webp) ─── */}
+            <CountryArtHero nav={nav} slug="uae"
+              eyebrow={country.heroEyebrow} lead="Online school & homeschooling in" name={"Dubai and the UAE"}
+              subhead={country.heroSubhead} valueProp={country.heroValueProp}
+              cities={cities.slice(0, 6).map(c => c.name)}
+              primary={{ label: 'Book assessment', href: '/assessment' }}
+              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              note="Admissions reviews every request · assessment fee billed only on acceptance"
+              alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 
             {/* ─── TRUST BAR (immediately under hero) ─── */}
             <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
@@ -17193,42 +17167,15 @@ export default function LandingPage() {
               })),
             })}}/>
 
-            {/* ─── HERO BANNER (public/images/countries/saudi-arabia-hero-*.webp) ─── */}
-            {imageExists('/images/countries/saudi-arabia-hero-1920.webp') && (
-              <div style={{background:V.ink,lineHeight:0}}>
-                <img src="/images/countries/saudi-arabia-hero-1920.webp" srcSet="/images/countries/saudi-arabia-hero-1920.webp 1920w, /images/countries/saudi-arabia-hero-3840.webp 3840w" sizes="100vw"
-                  width="1920" height="800" alt="Online school in Saudi Arabia: live classes with expert teachers"
-                  loading="eager" fetchPriority="high" decoding="async"
-                  style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
-              </div>
-            )}
-            {/* ─── HERO ─── */}
-            <section className="sec" style={{
-              position:'relative',
-              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-            }}>
-              {!imageExists('/images/countries/saudi-arabia-hero-1920.webp') && <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>}
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={imageExists('/images/countries/saudi-arabia-hero-1920.webp') ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
-                </h1>
-                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
-                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
-                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
-                    View Pricing ({country.currency})
-                  </a>
-                </div>
-              </div>
-            </section>
+            {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/saudi-arabia-art-*.webp) ─── */}
+            <CountryArtHero nav={nav} slug="saudi-arabia"
+              eyebrow={country.heroEyebrow} lead="Online school & homeschool in" name={country.heroH1Suffix}
+              subhead={country.heroSubhead} valueProp={country.heroValueProp}
+              cities={cities.slice(0, 6).map(c => c.name)}
+              primary={{ label: 'Book assessment', href: '/assessment' }}
+              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              note="Admissions reviews every request · assessment fee billed only on acceptance"
+              alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 
             {/* ─── TRUST BAR (immediately under hero) ─── */}
             <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
@@ -18626,42 +18573,15 @@ export default function LandingPage() {
               })),
             })}}/>
 
-            {/* ─── HERO BANNER (public/images/countries/kenya-hero-*.webp) ─── */}
-            {imageExists('/images/countries/kenya-hero-1920.webp') && (
-              <div style={{background:V.ink,lineHeight:0}}>
-                <img src="/images/countries/kenya-hero-1920.webp" srcSet="/images/countries/kenya-hero-1920.webp 1920w, /images/countries/kenya-hero-3840.webp 3840w" sizes="100vw"
-                  width="1920" height="800" alt="Online school in Kenya: live classes with expert teachers"
-                  loading="eager" fetchPriority="high" decoding="async"
-                  style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
-              </div>
-            )}
-            {/* ─── HERO ─── */}
-            <section className="sec" style={{
-              position:'relative',
-              background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
-              color:'#fff', padding:'72px 0 56px', overflow:'hidden',
-            }}>
-              {!imageExists('/images/countries/kenya-hero-1920.webp') && <img src={country.heroImage} alt="" aria-hidden="true"
-                onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>}
-              <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
-              <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
-                <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={imageExists('/images/countries/kenya-hero-1920.webp') ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
-                  Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
-                </h1>
-                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
-                <p style={{fontSize:15,color:'rgba(255,255,255,.86)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{country.heroValueProp}</p>
-                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'14px 28px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
-<a className="lp-btnlink" href={pageToPath('pricing')} onClick={linkClick(() => P('pricing'))}
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.4)',padding:'12px 26px',borderRadius:8,fontSize:13.5,fontWeight:600,cursor:'pointer'}}>
-                    View Pricing ({country.currency})
-                  </a>
-                </div>
-              </div>
-            </section>
+            {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/kenya-art-*.webp) ─── */}
+            <CountryArtHero nav={nav} slug="kenya"
+              eyebrow={country.heroEyebrow} lead="Online school & homeschool in" name={country.heroH1Suffix}
+              subhead={country.heroSubhead} valueProp={country.heroValueProp}
+              cities={cities.slice(0, 6).map(c => c.name)}
+              primary={{ label: 'Book assessment', href: '/assessment' }}
+              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              note="Admissions reviews every request · assessment fee billed only on acceptance"
+              alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 
             {/* ─── TRUST BAR (immediately under hero) ─── */}
             <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>
