@@ -15399,11 +15399,11 @@ export default function LandingPage() {
 
             {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/uae-art-*.webp) ─── */}
             <CountryArtHero nav={nav} slug="uae"
-              eyebrow={country.heroEyebrow} lead="Online school & homeschooling in" name={"Dubai and the UAE"}
+              eyebrow={country.heroEyebrow + ' · Virtual school'} lead="Online School & Homeschooling in" name={"Dubai and the UAE"}
               subhead={country.heroSubhead} valueProp={country.heroValueProp}
               cities={cities.slice(0, 6).map(c => c.name)}
               primary={{ label: 'Book assessment', href: '/assessment' }}
-              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              secondary={{ label: `View Pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
               note="Admissions reviews every request · assessment fee billed only on acceptance"
               alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 
@@ -17169,11 +17169,11 @@ export default function LandingPage() {
 
             {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/saudi-arabia-art-*.webp) ─── */}
             <CountryArtHero nav={nav} slug="saudi-arabia"
-              eyebrow={country.heroEyebrow} lead="Online school & homeschool in" name={country.heroH1Suffix}
+              eyebrow={country.heroEyebrow + ' · Virtual school'} lead="Online School & Homeschool in" name={country.heroH1Suffix}
               subhead={country.heroSubhead} valueProp={country.heroValueProp}
               cities={cities.slice(0, 6).map(c => c.name)}
               primary={{ label: 'Book assessment', href: '/assessment' }}
-              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              secondary={{ label: `View Pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
               note="Admissions reviews every request · assessment fee billed only on acceptance"
               alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 
@@ -18575,11 +18575,11 @@ export default function LandingPage() {
 
             {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/kenya-art-*.webp) ─── */}
             <CountryArtHero nav={nav} slug="kenya"
-              eyebrow={country.heroEyebrow} lead="Online school & homeschool in" name={country.heroH1Suffix}
+              eyebrow={country.heroEyebrow + ' · Virtual school'} lead="Online School & Homeschool in" name={country.heroH1Suffix}
               subhead={country.heroSubhead} valueProp={country.heroValueProp}
               cities={cities.slice(0, 6).map(c => c.name)}
               primary={{ label: 'Book assessment', href: '/assessment' }}
-              secondary={{ label: `View pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
+              secondary={{ label: `View Pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
               note="Admissions reviews every request · assessment fee billed only on acceptance"
               alt={`Online school in ${country.name}: live classes with expert teachers`}/>
 

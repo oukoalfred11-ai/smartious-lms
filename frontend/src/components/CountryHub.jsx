@@ -124,11 +124,11 @@ function CountryHub({
           CountryArtHero; the rest keep the crimson hero below. */}
       {hasArt && (
         <CountryArtHero nav={nav} slug={country.slug}
-          eyebrow={country.heroEyebrow} lead="Online school & homeschool in" name={country.heroH1Suffix}
+          eyebrow={country.heroEyebrow + ' · Virtual school'} lead="Online School & Homeschool in" name={country.heroH1Suffix}
           subhead={country.heroSubhead} valueProp={country.heroValueProp}
           cities={cities.slice(0, 6).map(c => c.name)} seeAlso={country.seeAlso || []}
           primary={{ label: 'Book assessment', href: '/assessment?from=' + country.slug }}
-          secondary={{ label: 'See fees', href: '/pricing', onClick: () => P('pricing') }}
+          secondary={{ label: 'Book assessment', href: '/assessment' }}
           note="Admissions reviews every request · assessment fee billed only on acceptance"
           alt={`Online school in ${country.name}: live classes with expert teachers`}/>
       )}
