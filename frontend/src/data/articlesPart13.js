@@ -961,11 +961,11 @@ export const ARTICLES_PART_13 = {
     "country": "kenya",
     "img": "linear-gradient(135deg,#06121A,#8B1A2E)",
     "splash": "https://images.unsplash.com/photo-1535397459466-3a01a3ba6b21?w=1600&q=80&auto=format&fit=crop",
-    "t": "Online School in Kenya: Mombasa to Eldoret, the International Track Beyond Nairobi",
+    "t": "Online School Outside Nairobi: Mombasa to Eldoret, the International Track Beyond the Capital",
     "date": "October 2026 · 9 min read",
     "author": "Alfred Ouko",
     "role": "Founder",
-    "metaTitle": "Online School Kenya 2026: Mombasa, Kisumu & Eldoret — Smartious",
+    "metaTitle": "Online School Outside Nairobi 2026: Mombasa, Kisumu, Eldoret",
     "metaDesc": "Kenya’s Cambridge and IB schools cluster in Nairobi. For families in Mombasa, Kisumu, Nakuru, Eldoret and Thika: a live international track without boarding.",
     "intro": "Kenya has one of the strongest international school sectors in Africa, and most of it sits within a few kilometres of Karen, Runda and Westlands. We know that map well, because Smartious was founded in Nairobi and our learning centre is in Parklands. But a great deal of Kenya’s working economy is somewhere else: at the port in Mombasa, around the lake in Kisumu, among the flower farms and geothermal plants of the Rift Valley, and in the university and athletics towns of the North Rift. This guide is for the families in those places who want a Cambridge, Pearson Edexcel, IB or American route without sending a child to board.",
     "sections": [

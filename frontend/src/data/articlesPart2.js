@@ -500,7 +500,8 @@ export const ARTICLES_PART_2 = {
   'virtual-school-kenya-2026': {
     cat:'online-school', country:'kenya',
     img:'linear-gradient(135deg,#000000,#BB0000,#006B3F)', splash:'https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?w=1000&q=70',
-    t:'Virtual School in Kenya 2026: Smartious vs Every Other Option',
+    t:'Online Schools in Kenya Compared (2026): Smartious vs Every Other Option',
+    metaTitle:'Online Schools in Kenya Compared 2026: Fees, Class Size, CBC',
     metaDesc:'Virtual school in Kenya compared: Smartious vs CHS Online, King\'s InterHigh, Wolsey Hall and Crimson on fees, class size, time zone and CBC.',
     date:'February 2026 · 10 min read',
     author:'Jane Wanjiku', role:'Smartious Admissions Director',
