@@ -11659,55 +11659,42 @@ export default function LandingPage() {
       ══════════════════════════════════════════ */}
       {page === 'ca-families' && (
         <>
-          {/* HERO — direct US positioning */}
-          <section className="sec" style={{
-            position:'relative',
-            background:`linear-gradient(135deg, ${V.ink} 0%, ${V.ink2} 50%, ${V.cr} 100%)`,
-            color:'#fff',
-            padding:'80px 0 60px',
-            overflow:'hidden',
-          }}>
-            <div className="wrap">
-              <div style={{maxWidth:920,margin:'0 auto'}}>
-                {/* The page heading says what families search for; the slogan below keeps its look. */}
-                <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
-                  <span aria-hidden="true">🇨🇦</span> Online OSSD School &amp; Homeschool in Canada
-                </h1>
-                <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
-                  Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
-                  Real college pathways.
-                </p>
-                <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:760,marginBottom:30}}>
-                  Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious offers the <strong>Ontario Secondary School Diploma (OSSD)</strong> to families anywhere in Canada, through our Ontario partner school, with every class taught live by qualified teachers, and Cambridge IGCSE, A-Level and IB as options. From USD 423 per month.
-                </p>
-                <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
-                  <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}
-                    style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',letterSpacing:'.01em'}}>
-                    Book a free 30-min consultation
-                  </a>
-                  <a href="#compare"
-                    style={{background:'transparent',color:'#fff',border:'1.5px solid rgba(255,255,255,.3)',padding:'15px 30px',borderRadius:8,fontSize:14,fontWeight:700,textDecoration:'none'}}>
-                    Compare us with Acellus & Canadian options →
-                  </a>
-                </div>
-
-                {/* Trust signals */}
-                <div style={{display:'flex',gap:32,flexWrap:'wrap',marginTop:40,paddingTop:30,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-                  {[
-                    ['78+','Qualified teachers'],
-                    ['40+','Countries served'],
-                    ['8 yrs','Of teaching'],
-                    ['From $423/mo','Starting price'],
-                  ].map(([n,l]) => (
-                    <div key={l}>
-                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
-                      <div style={{fontSize:11.5,color:'rgba(255,255,255,.65)',marginTop:6,letterSpacing:'.04em'}}>{l}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* HERO — direct Canada positioning (components/CountryArtHero.jsx; art: public/images/countries/canada-art-*.webp).
+              The page heading says what families search for; the slogan below keeps its look. */}
+          <CountryArtHero nav={nav} slug="canada" name="Canada"
+            alt="Online school in Canada: live classes with expert teachers"
+            strip={
+              <p>
+                Tired of recorded-video curricula where your child is essentially alone all day? Worried about how Acellus, Time4Learning, or local board homeschool packages lessons compare to what students in top-tier private schools are doing? Smartious offers the <strong>Ontario Secondary School Diploma (OSSD)</strong> to families anywhere in Canada, through our Ontario partner school, with every class taught live by qualified teachers, and Cambridge IGCSE, A-Level and IB as options. From USD 423 per month.
+              </p>
+            }>
+            <h1 className="cah-pill">
+              <span aria-hidden="true">🇨🇦</span> Online OSSD School &amp; Homeschool in Canada
+            </h1>
+            <p className="cah-slogan">
+              Real teachers. <em>Real rigour.</em><br/>
+              Real college pathways.
+            </p>
+            <div className="cah-btns">
+              <a className="cah-b1" href={'/assessment'} onClick={linkClick(() => { trackConversion('consult_booked'); nav('/assessment') })}>
+                Book a free 30-min consultation
+              </a>
+              <a className="cah-b2" href="#compare">
+                Compare us with Acellus &amp; Canadian options →
+              </a>
             </div>
-          </section>
+            {/* Trust signals */}
+            <div className="cah-stats">
+              {[
+                ['78+','Qualified teachers'],
+                ['40+','Countries served'],
+                ['8 yrs','Of teaching'],
+                ['From $423/mo','Starting price'],
+              ].map(([n,l]) => (
+                <div key={l}><b>{n}</b><span>{l}</span></div>
+              ))}
+            </div>
+          </CountryArtHero>
 
           {/* THE PROBLEM — name what families know is wrong */}
           <section className="sec" style={{background:V.bone,paddingTop:64,paddingBottom:64}}>
