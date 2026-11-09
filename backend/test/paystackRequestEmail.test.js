@@ -26,6 +26,8 @@ test('the Pay Now email is sent and recorded on the request', async () => {
   const out = await sendRequestEmail(doc)
   assert.deepStrictEqual(out, { ok: true, to: 'parent@example.com' })
   assert.strictEqual(sent.to, 'parent@example.com')
+  // Billing must reach a family paused for unpaid fees: it skips the recipient gate.
+  assert.strictEqual(sent.smartiousBypassGate, true)
   assert.match(sent.html, /checkout\.paystack\.com\/xyz/)
   assert.ok(updates.at(-1).requestEmailSentAt instanceof Date)
   assert.strictEqual(updates.at(-1).requestEmailError, '')

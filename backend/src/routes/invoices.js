@@ -398,7 +398,7 @@ router.post('/', auth, ALLOWED, async (req, res) => {
             const pdf = await buildInvoicePdfBuffer(inv)
             attachments = [{ filename: `${invNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
           } catch (e) { console.error('[invoice pdf]', e.message) }
-          await t.sendMail({ from, to:billedToEmail,
+          await t.sendMail({ smartiousBypassGate: true, from, to:billedToEmail,
             subject:`Invoice ${invNo} — Smartious Homeschool Global`,
             html:buildInvoiceEmailHTML(inv),
             attachments,
@@ -542,7 +542,7 @@ router.post('/:id/resend', auth, ALLOWED, async (req, res) => {
         attachments.push({ filename: `${receiptNo}.pdf`, content: rpdf, contentType: 'application/pdf' })
       }
     } catch (e) { console.error('[resend pdf]', e.message) }
-    await t.sendMail({ from:process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>',
+    await t.sendMail({ smartiousBypassGate: true, from:process.env.EMAIL_FROM||'Smartious Billing <hello@smartioushomeschool.com>',
       to:email, subject:`Invoice ${inv.invoiceNo} — Smartious Homeschool Global`,
       html:buildInvoiceEmailHTML(inv),
       attachments,

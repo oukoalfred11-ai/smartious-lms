@@ -69,7 +69,7 @@ function sendReceipt(inv) {
         attachments = [{ filename: `${receiptNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
       }
     } catch (e) { console.error('[receipt pdf]', e.message) }
-    await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Billing <hello@smartioushomeschool.com>',
+    await t.sendMail({ smartiousBypassGate: true, from: process.env.EMAIL_FROM || 'Smartious Billing <hello@smartioushomeschool.com>',
       to: inv.billedToEmail,
       subject: `Payment receipt ${receiptNo} — Smartious Homeschool Global`,
       html: buildReceiptEmailHTML(inv, receiptNo),

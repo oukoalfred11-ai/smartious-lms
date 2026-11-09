@@ -66,7 +66,8 @@ async function sendPaystackReceipt(r, { to } = {}) {
     try { attachments.push({ filename: receiptNo + '.pdf', content: await buildReceiptPdfBuffer(inv, receiptNo), contentType: 'application/pdf' }) }
     catch (e) { console.error('[paystack receipt pdf]', e.message) }
   }
-  await t.sendMail({
+  await t.sendMail({ smartiousBypassGate: true, // billing reaches paused or deactivated families (mailPolicy)
+
     from: process.env.EMAIL_FROM || 'Smartious Billing <hello@smartioushomeschool.com>',
     to: email, replyTo: 'accounts@smartioushomeschool.com',
     subject: `Payment receipt ${receiptNo} — Smartious Homeschool Global`,
