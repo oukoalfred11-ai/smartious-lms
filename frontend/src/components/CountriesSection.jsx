@@ -1,11 +1,21 @@
 /**
  * CountriesSection.jsx — home page "Online school in your country".
- * Eight photo plates for the priority markets, then a searchable list of
- * every country hub. Data: src/data/countriesListing.js. Design from the
+ * Photo plates (countries with artwork first, then the crimson plates),
+ * then a searchable list of every country hub. A plate shows its photo as
+ * soon as its plate images are in public/images/countries/. Data: src/data/countriesListing.js. Design from the
  * Smartious countries listing (DM Sans + Source Serif 4, crimson/gold).
  */
 import { useState } from 'react'
 import { COUNTRY_PLATES, ALL_COUNTRIES } from '../data/countriesListing.js'
+import { imageExists } from '../data/generated/publicImages.js'
+
+// Plates with photos first; list order kept within each group.
+const hasPhoto = c => imageExists(`/images/countries/${c.slug}-plate-600.webp`)
+const PLATES = [...COUNTRY_PLATES.filter(hasPhoto), ...COUNTRY_PLATES.filter(c => !hasPhoto(c))]
+// Columns that keep the rows full: desktop 4 or 5 (else 4), tablet 3 or 2 (else 3).
+const fit = (n, opts, dflt) => opts.find(k => n % k === 0) || dflt
+const COLS = fit(PLATES.length, [4, 5], 4)
+const COLS_MD = fit(PLATES.length, [3, 2], 3)
 
 const CSS = `
 .sm-countries{--crimson:#7D1025;--deep:#4A0816;--gold:#D4A64A;--ink:#2A050D;--cream:#F8F3EA;--muted:#6B5A5E;
@@ -17,7 +27,7 @@ const CSS = `
 .sm-title{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:clamp(34px,4.4vw,56px);line-height:1.05;letter-spacing:-.01em;color:var(--crimson);margin:0}
 .sm-sub{font-size:18px;line-height:1.6;color:var(--muted);max-width:520px;margin:14px 0 0}
 .sm-link{font-weight:700;font-size:15px;color:var(--crimson);text-decoration:none;border-bottom:2px solid var(--gold);padding-bottom:4px;white-space:nowrap}
-.sm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+.sm-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:22px}
 .sm-plate{position:relative;display:block;aspect-ratio:4/5;border-radius:22px;overflow:hidden;text-decoration:none;
   background:var(--deep);box-shadow:0 18px 40px rgba(74,8,22,.16);transform:translateZ(0);
   transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
@@ -52,7 +62,7 @@ const CSS = `
 .sm-list a:hover:after{opacity:1;transform:none}
 .sm-cityline{margin-top:36px;font-size:14px;line-height:2;color:var(--muted)}
 .sm-cityline a{color:var(--crimson);font-weight:600;text-decoration:none}
-@media (max-width:1024px){.sm-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1024px){.sm-grid{grid-template-columns:repeat(var(--cols-md,3),1fr)}}
 @media (max-width:760px){
   .sm-countries{padding:64px 18px}
   .sm-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;
@@ -88,15 +98,16 @@ export default function CountriesSection({ nav, cityLinks = [] }) {
           <a className="sm-link" href="#sm-all">See all countries</a>
         </div>
 
-        <div className="sm-grid">
-          {COUNTRY_PLATES.map(c => {
+        <div className="sm-grid" style={{'--cols': COLS, '--cols-md': COLS_MD}}>
+          {PLATES.map(c => {
+            const img = hasPhoto(c)
             const href = '/online-school/' + c.slug
             return (
-              <a key={c.slug} className={'sm-plate' + (c.img ? '' : ' noimg')} data-code={c.code} href={href} onClick={go(href)}>
-                {c.img && (
+              <a key={c.slug} className={'sm-plate' + (img ? '' : ' noimg')} data-code={c.code} href={href} onClick={go(href)}>
+                {img && (
                   <img src={`/images/countries/${c.slug}-plate-600.webp`}
                     srcSet={`/images/countries/${c.slug}-plate-600.webp 600w, /images/countries/${c.slug}-plate-1200.webp 1200w`}
-                    sizes="(max-width:760px) 72vw, (max-width:1024px) 33vw, 300px" width="600" height="750"
+                    sizes="(max-width:760px) 72vw, (max-width:1024px) 50vw, 300px" width="600" height="750"
                     alt={`Children learning online in ${c.name}`} loading="lazy" decoding="async"/>
                 )}
                 <span className="sm-region">{c.region}</span>
