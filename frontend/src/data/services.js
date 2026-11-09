@@ -11,7 +11,7 @@ export const SERVICES = [
     svg: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
     desc: 'A qualified tutor visits your home (Nairobi) or connects via video. Structured, accredited curriculum in your own environment. Weekly lesson planning, monthly reports, parent portal. All curricula available.',
     tags: ['1-on-1 Tutor', 'Flexible Schedule', 'All Curricula', 'Written Reports'],
-    seoTitle: 'Homeschooling in Nairobi, Kenya | Qualified Home Tutors — Smartious',
+    seoTitle: 'In-Home Tutors in Nairobi: Homeschool at Home | Smartious',
     seoDesc: 'Structured homeschooling in Nairobi and online with qualified tutors: Cambridge IGCSE, A-Level, IB and CBC, weekly reports and a full parent portal.',
     detail: {
       tagline: 'Accredited home education, delivered by a dedicated tutor',
