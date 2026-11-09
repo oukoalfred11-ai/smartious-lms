@@ -23,6 +23,7 @@ export const COUNTRY_PLATES = [
   { slug: 'australia', name: 'Australia', region: 'Oceania', cities: 'Sydney, Melbourne, Brisbane', code: 'AU' },
   { slug: 'india', name: 'India', region: 'South Asia', cities: 'Mumbai, Delhi NCR, Bangalore', code: 'IN' },
   { slug: 'pakistan', name: 'Pakistan', region: 'South Asia', cities: 'Karachi, Lahore, Islamabad', code: 'PK' },
+  { slug: 'morocco', name: 'Morocco', region: 'North Africa', cities: 'Casablanca, Rabat, Marrakech', code: 'MA' },
   { slug: 'oman', name: 'Oman', region: 'Gulf', cities: 'Muscat', code: 'OM' },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
