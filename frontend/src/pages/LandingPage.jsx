@@ -53,6 +53,7 @@ import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
+import { imageExists } from '../data/generated/publicImages.js'
 import CountriesSection from '../components/CountriesSection.jsx'
 import GoogleReviews, { GoogleRatingBadge } from '../components/GoogleReviews.jsx'
 import CountryVideo from '../components/CountryVideo.jsx'
@@ -15395,19 +15396,28 @@ export default function LandingPage() {
               })),
             })}}/>
 
+            {/* ─── HERO BANNER (public/images/countries/uae-hero-*.webp) ─── */}
+            {imageExists('/images/countries/uae-hero-1920.webp') && (
+              <div style={{background:V.ink,lineHeight:0}}>
+                <img src="/images/countries/uae-hero-1920.webp" srcSet="/images/countries/uae-hero-1920.webp 1920w, /images/countries/uae-hero-3840.webp 3840w" sizes="100vw"
+                  width="1920" height="800" alt="Online school in the UAE: live classes with expert teachers"
+                  loading="eager" fetchPriority="high" decoding="async"
+                  style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
+              </div>
+            )}
             {/* ─── HERO ─── */}
             <section className="sec" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
+              {!imageExists('/images/countries/uae-hero-1920.webp') && <img src={country.heroImage} alt="" aria-hidden="true"
                 onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>}
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={imageExists('/images/countries/uae-hero-1920.webp') ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -18607,19 +18617,28 @@ export default function LandingPage() {
               })),
             })}}/>
 
+            {/* ─── HERO BANNER (public/images/countries/kenya-hero-*.webp) ─── */}
+            {imageExists('/images/countries/kenya-hero-1920.webp') && (
+              <div style={{background:V.ink,lineHeight:0}}>
+                <img src="/images/countries/kenya-hero-1920.webp" srcSet="/images/countries/kenya-hero-1920.webp 1920w, /images/countries/kenya-hero-3840.webp 3840w" sizes="100vw"
+                  width="1920" height="800" alt="Online school in Kenya: live classes with expert teachers"
+                  loading="eager" fetchPriority="high" decoding="async"
+                  style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
+              </div>
+            )}
             {/* ─── HERO ─── */}
             <section className="sec" style={{
               position:'relative',
               background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
               color:'#fff', padding:'72px 0 56px', overflow:'hidden',
             }}>
-              <img src={country.heroImage} alt="" aria-hidden="true"
+              {!imageExists('/images/countries/kenya-hero-1920.webp') && <img src={country.heroImage} alt="" aria-hidden="true"
                 onError={e => { e.currentTarget.style.display='none' }}
-                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>
+                style={{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',opacity:0.55,zIndex:0}}/>}
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={imageExists('/images/countries/kenya-hero-1920.webp') ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>

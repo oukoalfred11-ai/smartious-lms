@@ -110,7 +110,7 @@ writeFileSync(join(OUT, 'routeIndex.js'),
   `for (const [mods, slugs] of Object.entries(HOMESCHOOL)) for (const s of slugs.split(' ')) HOMESCHOOL_SLUG_MODULES.set(s, mods.split(','))\n\n` +
   `export const COUNTRY_SLUGS = new Set(${JSON.stringify(countrySlugs)})\n`)
 
-// ── Local images that exist (public/ top level, heroes/, banners/) ─────
+// ── Local images that exist (public/ top level, heroes/, banners/, images/) ─────
 const PUBLIC = join(__dirname, '..', 'public')
 const IMG = /\.(jpe?g|png|webp|avif|gif|svg)$/i
 const images = []
@@ -118,14 +118,14 @@ const walk = (dir, rel) => {
   if (!existsSync(dir)) return
   for (const f of readdirSync(dir)) {
     const p = join(dir, f), r = rel + '/' + f
-    if (statSync(p).isDirectory()) { if (rel === '' ? ['heroes', 'banners'].includes(f) : true) walk(p, r) }
+    if (statSync(p).isDirectory()) { if (rel === '' ? ['heroes', 'banners', 'images'].includes(f) : true) walk(p, r) }
     else if (IMG.test(f)) images.push(r)
   }
 }
 walk(PUBLIC, '')
 writeFileSync(join(OUT, 'publicImages.js'),
   HEADER +
-  `// Local images under public/ (top level, heroes/, banners/). Remote URLs are not listed.\n` +
+  `// Local images under public/ (top level, heroes/, banners/, images/). Remote URLs are not listed.\n` +
   `export const PUBLIC_IMAGES = new Set(${JSON.stringify(images.sort())})\n\n` +
   `// True for a remote URL or a local image that exists; false for a missing local file or no src.\n` +
   `export const imageExists = (src) => !!src && (/^(https?:)?\\/\\//.test(src) || /^data:/.test(src) || PUBLIC_IMAGES.has(src.split(/[?#]/)[0]))\n`)

@@ -81,6 +81,8 @@ function CountryHub({
   SMARTIOUS_RATING, SMARTIOUS_REVIEWS,
   GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL,
 }) {
+  const banner = `/images/countries/${country.slug}-hero-1920.webp`
+  const hasBanner = imageExists(banner)
   return (
     <>
       {/* Schema: the service this hub offers, tied to the Organization in
@@ -117,13 +119,25 @@ function CountryHub({
         })),
       })}}/>
 
+      {/* ─── HERO BANNER ───
+          Countries with designed artwork (public/images/countries/<slug>-hero-*.webp)
+          show it full width; the page's H1 stays in the hero below for search and
+          screen readers, visually hidden because the banner already says it. */}
+      {hasBanner && (
+        <div style={{background:V.ink,lineHeight:0}}>
+          <img src={banner} srcSet={`${banner} 1920w, ${banner.replace('-1920.', '-3840.')} 3840w`} sizes="100vw"
+            width="1920" height="800" alt={`Online school in ${country.name}: live classes with expert teachers`}
+            loading="eager" fetchPriority="high" decoding="async"
+            style={{display:'block',width:'100%',height:'auto',maxHeight:'80vh',objectFit:'cover'}}/>
+        </div>
+      )}
       {/* ─── HERO ─── */}
       <section className="sec" style={{
         position:'relative',
         background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
         color:'#fff', padding:'72px 0 56px', overflow:'hidden',
       }}>
-        {imageExists(country.heroImage) && (
+        {!hasBanner && imageExists(country.heroImage) && (
           <img src={country.heroImage} alt="" aria-hidden="true"
             loading="eager"
             fetchPriority="high"
@@ -134,7 +148,7 @@ function CountryHub({
         <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
         <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
           <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-          <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+          <h1 style={hasBanner ? {position:'absolute',width:1,height:1,overflow:'hidden',clip:'rect(0 0 0 0)',whiteSpace:'nowrap'} : {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
             Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
           </h1>
           <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
