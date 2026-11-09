@@ -5112,10 +5112,10 @@ export default function LandingPage() {
   usePageMeta(metaTitle, metaDesc, canonicalOverride)
   useHeroPreload(page === 'home')
 
-  // Load public teacher profiles when the Teachers page is opened.
+  // Load public teacher profiles when the Teachers page or the home page (Meet our team) is opened.
   // Fetched once, from the public (no-auth) endpoint.
   useEffect(() => {
-    if (page !== 'teachers' || teachersLoaded) return
+    if ((page !== 'teachers' && page !== 'home') || teachersLoaded) return
     setTeachersLoading(true)
     const base = (import.meta.env?.VITE_API_URL || 'https://smartious-backend.onrender.com').replace(/\/$/, '')
     fetch(base + '/api/users/public-teachers')
@@ -6481,41 +6481,62 @@ export default function LandingPage() {
             </div>
           </div></section>
 
-          {/* HIGHLIGHTS */}
-          <section className="sec" style={{background:V.bone}}>
-            <div className="wrap">
-              <div className="sec-hd reveal">
-                <div className="eyebrow">Everything You Need</div>
-                <h2 className="display">Explore <em>Smartious</em></h2>
-                <p className="lead" style={{marginTop:14}}>A world-class education platform for ambitious families across 40+ countries. Tap any card to explore in full.</p>
-              </div>
-              <div className="hl-grid">
-                {[
-                  {n:'8 yrs',h:'About Us',p:'Founded 2018 · Nairobi-based · Our story & team',pg:'about',svg:'<circle cx="12" cy="8" r="4"/><path d="M6 21v-1a6 6 0 0 1 12 0v1"/>'},
-                  {n:'5',h:'Curricula',p:'Cambridge · IB · Edexcel · CBC · American',pg:'curricula',svg:'<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>'},
-                  {n:'6',h:'Services',p:'Homeschool · Tuition · Online · Mshauri AI',pg:'services',svg:'<rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/>'},
-                  {n:'40+',h:'Countries',p:'Kenya · UAE · UK · USA · Canada · Australia · and many more',pg:'home',svg:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'},
-                  {n:'$15/hr',h:'Pricing',p:'Transparent USD pricing · One-to-one tuition $15/hour · Fees from $423/month (Primary)',pg:'pricing',svg:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'},
-                  {n:'78+',h:'Tutors',p:'Qualified specialists · BEd, MEd, PhD profiles',pg:'teachers',svg:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>'},
-                  {n:'10',h:'FAQ',p:'Enrolment, exams, pricing & Mshauri AI answered',pg:'faq',svg:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>'},
-                  {n:'9',h:'Blog',p:'IGCSE guides · IB tips · Study abroad · AI learning',pg:'blog',svg:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'},
-                ].map(({n,h,p,pg,svg}) => (
-                  <a key={h}
-                    href={'/' + pg}
-                    onClick={e => { e.preventDefault(); P(pg) }}
-                    className="hl reveal"
-                    style={{textDecoration:'none', color:'inherit', display:'block'}}>
-                    <div className="hl-ico">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={`${V.cr}`} strokeWidth="1.8" strokeLinecap="round" dangerouslySetInnerHTML={{__html:svg}}/>
-                    </div>
-                    <div className="hl-n">{n}</div>
-                    <div className="hl-h">{h}</div>
-                    <div className="hl-p">{p}</div>
+          {/* MEET OUR TEAM — the Dean, the Principal, the Head of Admissions and the
+              most experienced teacher, from the public team list (/api/users/public-teachers).
+              Hidden until the list loads, so the home page never shows an empty block. */}
+          {(() => {
+            const tierOf = t => t.tier || (t.principal ? 'principal' : 'teachers')
+            const picked = []
+            const take = t => { if (t && !picked.includes(t)) picked.push(t) }
+            const titles = t => (t.title || '') + ' ' + (t.role || '')
+            // Order on the page: Principal, Dean, Head of Admissions, most experienced teacher.
+            take(publicTeachers.find(t => tierOf(t) === 'principal' || /principal/i.test(t.title || '')))
+            take(publicTeachers.find(t => !picked.includes(t) && /\bdean\b/i.test(titles(t))))
+            take(publicTeachers.find(t => !picked.includes(t) && /admission/i.test(titles(t))))
+            const teachers = publicTeachers.filter(t => tierOf(t) === 'teachers' && !picked.includes(t))
+            const qualified = teachers.filter(t => (t.role || 'Teacher') === 'Teacher')
+            take((qualified.length ? qualified : teachers).sort((x, y) => (y.yearsOfExperience || 0) - (x.yearsOfExperience || 0))[0])
+            if (!picked.length) return null
+            return (
+              <section className="tm-stage" style={{padding:'84px 0 76px'}}><div className="wrap">
+                <div className="tm-head" style={{marginBottom:44}}>
+                  <div className="tm-eyebrow">Our People</div>
+                  <h2 className="tm-title" style={{fontSize:'clamp(2rem,4.4vw,3.2rem)'}}>Meet our <em>Team</em></h2>
+                  <p className="tm-intro">The people who lead Smartious and teach your child: qualified, experienced and focused on every learner.</p>
+                </div>
+                <div className="tm-row">
+                  {picked.map(t => {
+                    const initials = t.name.split(/\s+/).map(w => w[0]).filter(Boolean).slice(0,2).join('').toUpperCase()
+                    return (
+                      <a key={t.id} className="tm-person" href={pageToPath('teachers')} onClick={linkClick(() => P('teachers'))}
+                        style={{textDecoration:'none'}} aria-label={'Meet ' + t.name + ', ' + (t.title || '')}>
+                        <div className="tm-frame">
+                          <div className="tm-accent"/>
+                          <div className="tm-shape">
+                            {t.avatar
+                              ? <img src={t.avatar} alt={t.name} className="tm-img" loading="lazy"/>
+                              : <div className="tm-initials">{initials || 'S'}</div>}
+                          </div>
+                          {t.yearsOfExperience > 0 && <div className="tm-years"><strong>{t.yearsOfExperience}</strong> {t.yearsOfExperience === 1 ? 'yr' : 'yrs'}</div>}
+                        </div>
+                        <div className="tm-plate">
+                          <div className="tm-name">{t.name}</div>
+                          <div className="tm-role">{t.title}</div>
+                        </div>
+                      </a>
+                    )
+                  })}
+                </div>
+                <div style={{textAlign:'center',marginTop:44}}>
+                  <a className="lp-btnlink" href={pageToPath('teachers')} onClick={linkClick(() => P('teachers'))}
+                    style={{display:'inline-flex',alignItems:'center',gap:10,background:V.cr,color:'#fff',padding:'15px 30px',borderRadius:10,fontSize:15,fontWeight:800,textDecoration:'none',boxShadow:'0 10px 26px rgba(125,16,37,.35)'}}>
+                    Meet the whole team
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                   </a>
-                ))}
-              </div>
-            </div>
-          </section>
+                </div>
+              </div></section>
+            )
+          })()}
 
           {/* ═══════════════════════════════════════════
               FAMILY SITUATIONS — anonymised scenarios
