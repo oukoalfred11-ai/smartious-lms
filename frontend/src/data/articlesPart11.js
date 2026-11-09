@@ -408,11 +408,11 @@ export const ARTICLES_PART_11 = {
   'online-school-oman-guide': {
     cat: 'online-school', country: 'oman',
     img: 'linear-gradient(135deg,#1A0F0A,#8B1A2E)', splash: IMG_GULF, splashAlt: 'A student in Muscat learning online at home',
-    t: 'Online School in Oman: A Guide for Parents (2026/27)',
+    t: 'Homeschooling Rules in Oman: Ministry, IGCSE Exams and Fees (2026/27)',
     date: 'October 2026 · 9 min read',
     ...AUTHOR,
-    metaTitle: 'Online School in Oman: Parent Guide 2026/27',
-    metaDesc: 'Online school in Oman: IGCSE and A Level as a private candidate, Ministry of Education rules, fees in OMR and Muscat timetables.',
+    metaTitle: 'Oman Homeschooling Rules 2026/27: Ministry, IGCSE, Fees',
+    metaDesc: 'Homeschooling rules in Oman: Ministry of Education guidance, IGCSE and A Level as a private candidate, equivalency, fees in OMR and Muscat timetables.',
     intro: "Families in Muscat, Seeb, Sohar, Salalah, Nizwa and Sur look at online school when they move to Oman mid-year, live far from an international school, or want a particular curriculum. Oman is one hour ahead of Nairobi, so lessons sit comfortably in the Omani school day. This guide explains how online school works in Oman, exams, recognition questions, fees in rials and what to check.",
     sections: [
       { h: 'Who regulates schools in Oman', p: "Schools in Oman, including private schools, are overseen by the Ministry of Education, moe.gov.om. Higher education and university admission involve the Ministry of Higher Education, Research and Innovation. An online school based outside Oman is not a licensed Omani school. Smartious does not claim approval or licensing from any Omani ministry." },
