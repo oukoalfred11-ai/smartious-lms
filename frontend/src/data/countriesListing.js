@@ -19,6 +19,7 @@ export const COUNTRY_PLATES = [
   { slug: 'saudi-arabia', name: 'Saudi Arabia', region: 'Gulf', cities: 'Riyadh, Jeddah', code: 'SA' },
   { slug: 'united-kingdom', name: 'United Kingdom', region: 'Europe', cities: 'London, Manchester, Birmingham', code: 'GB' },
   { slug: 'usa', name: 'United States', region: 'North America', cities: 'Houston, Los Angeles, Miami', code: 'US' },
+  { slug: 'canada', name: 'Canada', region: 'North America', cities: 'Toronto, Vancouver, Calgary', code: 'CA' },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
   { slug: 'bahrain', name: 'Bahrain', region: 'Gulf', cities: 'Manama, Saar', code: 'BH' },

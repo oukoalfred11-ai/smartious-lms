@@ -11,11 +11,24 @@ import { imageExists } from '../data/generated/publicImages.js'
 
 // Plates with photos first; list order kept within each group.
 const hasPhoto = c => imageExists(`/images/countries/${c.slug}-plate-600.webp`)
-const PLATES = [...COUNTRY_PLATES.filter(hasPhoto), ...COUNTRY_PLATES.filter(c => !hasPhoto(c))]
-// Columns that keep the rows full: desktop 4 or 5 (else 4), tablet 3 or 2 (else 3).
-const fit = (n, opts, dflt) => opts.find(k => n % k === 0) || dflt
-const COLS = fit(PLATES.length, [4, 5], 4)
-const COLS_MD = fit(PLATES.length, [3, 2], 3)
+const WITH_PHOTO = COUNTRY_PLATES.filter(hasPhoto)
+const CRIMSON = COUNTRY_PLATES.filter(c => !hasPhoto(c))
+// Full rows on desktop: 5 or 4 columns, whichever leaves out the fewest crimson
+// plates (photo plates are never left out; a left-out country is still in the
+// searchable list below). Tablet: 3 or 2 columns that divide the count, else 3.
+const pick = (() => {
+  let best = { cols: 4, n: COUNTRY_PLATES.length, drop: Infinity }
+  for (const cols of [5, 4]) {
+    const total = WITH_PHOTO.length + CRIMSON.length
+    const n = Math.max(Math.floor(total / cols) * cols, WITH_PHOTO.length)
+    const drop = total - n
+    if (drop < best.drop) best = { cols, n, drop }
+  }
+  return best
+})()
+const PLATES = [...WITH_PHOTO, ...CRIMSON].slice(0, pick.n)
+const COLS = pick.cols
+const COLS_MD = [3, 2].find(k => PLATES.length % k === 0) || 3
 
 const CSS = `
 .sm-countries{--crimson:#7D1025;--deep:#4A0816;--gold:#D4A64A;--ink:#2A050D;--cream:#F8F3EA;--muted:#6B5A5E;
