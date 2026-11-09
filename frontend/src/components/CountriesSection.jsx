@@ -21,7 +21,8 @@ const pick = (() => {
   for (const cols of [5, 4]) {
     const total = WITH_PHOTO.length + CRIMSON.length
     const n = Math.max(Math.floor(total / cols) * cols, WITH_PHOTO.length)
-    const drop = total - n
+    // Fewest plates left out first; on a tie, prefer the column count that fills every row.
+    const drop = total - n + (n % cols ? 0.5 : 0)
     if (drop < best.drop) best = { cols, n, drop }
   }
   return best
