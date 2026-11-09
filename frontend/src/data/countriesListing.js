@@ -1,21 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════════
    countriesListing.js — the home page countries section
    ───────────────────────────────────────────────────────────────────
-   COUNTRY_PLATES: the eight photo plates (priority markets for the
-   January 2027 intake). A plate shows its photo when
-   /images/countries/<slug>-plate-600.webp and -1200.webp exist and
-   `img: true` is set; otherwise it shows the crimson plate with the
-   country code.
+   COUNTRY_PLATES: the home page photo plates. A plate shows its photo
+   as soon as /images/countries/<slug>-plate-600.webp (and -1200.webp)
+   exist; otherwise it shows the crimson plate with the country code.
+   Plates with photos are listed first, so each country we design
+   artwork for moves up automatically. To add a country, add a row here
+   and drop its plate images in public/images/countries/.
    ALL_COUNTRIES: every /online-school/<slug> hub, for the searchable
    list. Every slug must be a hub that seo-static.mjs writes.
    Used by components/CountriesSection.jsx and scripts/seo-static.mjs.
 ═══════════════════════════════════════════════════════════════════ */
 
 export const COUNTRY_PLATES = [
-  { slug: 'nigeria', name: 'Nigeria', region: 'West Africa', cities: 'Lagos, Abuja, Port Harcourt', code: 'NG', img: true },
-  { slug: 'kenya', name: 'Kenya', region: 'East Africa', cities: 'Nairobi, Mombasa', code: 'KE', img: true },
-  { slug: 'uae', name: 'UAE', region: 'Gulf', cities: 'Dubai, Abu Dhabi, Sharjah', code: 'AE', img: true },
-  { slug: 'saudi-arabia', name: 'Saudi Arabia', region: 'Gulf', cities: 'Riyadh, Jeddah', code: 'SA', img: true },
+  { slug: 'nigeria', name: 'Nigeria', region: 'West Africa', cities: 'Lagos, Abuja, Port Harcourt', code: 'NG' },
+  { slug: 'kenya', name: 'Kenya', region: 'East Africa', cities: 'Nairobi, Mombasa', code: 'KE' },
+  { slug: 'uae', name: 'UAE', region: 'Gulf', cities: 'Dubai, Abu Dhabi, Sharjah', code: 'AE' },
+  { slug: 'saudi-arabia', name: 'Saudi Arabia', region: 'Gulf', cities: 'Riyadh, Jeddah', code: 'SA' },
+  { slug: 'united-kingdom', name: 'United Kingdom', region: 'Europe', cities: 'London, Manchester, Birmingham', code: 'GB' },
+  { slug: 'usa', name: 'United States', region: 'North America', cities: 'Houston, Los Angeles, Miami', code: 'US' },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
   { slug: 'bahrain', name: 'Bahrain', region: 'Gulf', cities: 'Manama, Saar', code: 'BH' },
