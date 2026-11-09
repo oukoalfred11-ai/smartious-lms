@@ -252,7 +252,8 @@ async function issueInvoice(opts = {}) {
           const pdf = await buildInvoicePdfBuffer(inv)
           attachments = [{ filename: `${invNo}.pdf`, content: pdf, contentType: 'application/pdf' }]
         } catch (e) { console.error('[issueInvoice pdf]', e.message) }
-        await t.sendMail({
+        await t.sendMail({ smartiousBypassGate: true, // billing reaches paused or deactivated families (mailPolicy)
+
           from, to: inv.billedToEmail,
           subject: `Invoice ${invNo} — Smartious Homeschool Global`,
           html: buildInvoiceEmailHTML(inv),

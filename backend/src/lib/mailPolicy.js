@@ -39,7 +39,10 @@
  *                     smartiousBypassGate: true to pass anyway;
  *                     the exit and reinstatement notices use it,
  *                     since those are addressed to just-archived
- *                     people by design. If the database cannot be
+ *                     people by design, and so does every billing
+ *                     email (invoices, payment links, receipts, fee
+ *                     reminders): a family paused for unpaid fees
+ *                     must still receive the means to pay. If the database cannot be
  *                     consulted, mail passes: a gate fault must
  *                     never stop operational email.
  *

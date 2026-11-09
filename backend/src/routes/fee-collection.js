@@ -337,7 +337,7 @@ async function sendReminder(student) {
   const failures = []
   for (const email of recipients) {
     try {
-      await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Finance <hello@smartioushomeschool.com>', to: email, subject, html })
+      await t.sendMail({ smartiousBypassGate: true, from: process.env.EMAIL_FROM || 'Smartious Finance <hello@smartioushomeschool.com>', to: email, subject, html })
       sent++
     } catch(e) {
       failures.push(email)

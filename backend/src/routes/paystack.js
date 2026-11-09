@@ -164,7 +164,8 @@ async function sendRequestEmail(doc, { to } = {}) {
   if (!t) return fail('Email is not configured on the server (EMAIL_USER and EMAIL_PASSWORD, or SMTP_USER and SMTP_PASS).');
   try {
     const info = await Promise.race([
-      t.sendMail({
+      t.sendMail({ smartiousBypassGate: true, // billing reaches paused or deactivated families (mailPolicy)
+
         from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>',
         to: email,
         replyTo: 'accounts@smartioushomeschool.com',

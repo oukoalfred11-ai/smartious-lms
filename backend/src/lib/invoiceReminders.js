@@ -273,7 +273,8 @@ async function sendReminder(invoice, { kind = 'manual', sentBy = null, automatic
 
   // One message addressed to everyone, so parent and student see the
   // same thread and either can reply to the school.
-  await t.sendMail({
+  await t.sendMail({ smartiousBypassGate: true, // billing reaches paused or deactivated families (mailPolicy)
+
     from,
     to: to.join(', '),
     subject: `${subjectPrefix}Invoice ${invoice.invoiceNo} — Smartious Homeschool Global`,
