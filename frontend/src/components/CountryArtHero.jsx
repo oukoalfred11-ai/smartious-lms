@@ -37,6 +37,11 @@ const CSS = `
 .cah-note{font-family:'DM Sans',system-ui,sans-serif;font-size:13px;color:#6B5A5E;margin:16px 0 0}
 .cah-also{font-family:'DM Sans',system-ui,sans-serif;font-size:14px;margin:0 0 18px}
 .cah-also a{color:#7D1025;font-weight:700}
+.cah-pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1.5px solid rgba(125,16,37,.22);color:#7D1025;padding:7px 14px;border-radius:99px;font-family:'DM Sans',system-ui,sans-serif;font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin:0 0 20px;line-height:1.4}
+.cah-slogan{font-family:'Source Serif 4',Georgia,serif;font-weight:700;color:#7D1025;font-size:clamp(2.2rem,3.6vw,3.5rem);line-height:1.04;letter-spacing:-.015em;margin:0 0 26px}
+.cah-stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:30px;padding-top:22px;border-top:1px solid rgba(125,16,37,.14)}
+.cah-stats b{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:1.7rem;color:#7D1025;line-height:1;font-weight:700}
+.cah-stats span{display:block;font-family:'DM Sans',system-ui,sans-serif;font-size:12px;color:#6B5A5E;margin-top:6px;letter-spacing:.03em}
 .cah-vp{background:#fff;border-bottom:1px solid #EFE6D8}
 .cah-vp{padding:14px 0}
 .cah-vp p{font-family:'DM Sans',system-ui,sans-serif;max-width:860px;margin:0 auto;padding:14px 24px;font-size:16px;line-height:1.7;color:#3B2A2F;text-align:center}
@@ -52,6 +57,8 @@ const CSS = `
   .cah-l2{font-size:clamp(2.7rem,12vw,3.6rem)}
   .cah-l2.long{font-size:clamp(2.1rem,9vw,2.8rem)}
   .cah-sub{font-size:16px}
+  .cah-slogan{font-size:clamp(2.1rem,10vw,2.8rem)}
+  .cah-stats{gap:20px}
   .cah-b1,.cah-b2{flex:1 1 auto;justify-content:center}
   .cah-vp p{font-size:15px;text-align:left;padding:12px 20px}
 }
@@ -76,9 +83,11 @@ const Arrow = () => (
  * eyebrow, subhead, valueProp — copy from the country data
  * cities    — city names for the chips
  * primary   — { label, href, onClick? }   secondary — same, optional
+ * children  — custom content for the text column (replaces the standard pieces)
+ * strip     — custom content for the strip under the hero
  * seeAlso   — [{ label, href }] links shown above the buttons
  */
-export default function CountryArtHero({ slug, tagline = 'Live classes with expert teachers', lead, name, eyebrow, subhead, valueProp, cities = [], primary, secondary, note, seeAlso = [], nav, alt }) {
+export default function CountryArtHero({ slug, tagline = 'Live classes with expert teachers', lead, name, eyebrow, subhead, valueProp, cities = [], primary, secondary, note, seeAlso = [], nav, alt, children, strip }) {
   const art = `/images/countries/${slug}-art-1920.webp`
   // A very long subhead would stretch the hero and over-zoom the artwork; it moves to the strip below.
   const longSub = (subhead || '').length > 500
@@ -88,7 +97,7 @@ export default function CountryArtHero({ slug, tagline = 'Live classes with expe
       <section className="cah">
         <div className="cah-grid">
           <div className="cah-text">
-            <div className="cah-box">
+            <div className="cah-box">{children || <>
               {tagline && <p className="cah-tag">{tagline}</p>}
               {eyebrow && <p className="cah-eb">{eyebrow}</p>}
               <h1>
@@ -109,7 +118,7 @@ export default function CountryArtHero({ slug, tagline = 'Live classes with expe
                 {secondary && <a className="cah-b2" href={secondary.href} onClick={go(nav, secondary.href, secondary.onClick)}>{secondary.label}</a>}
               </div>
               {note && <p className="cah-note">{note}</p>}
-            </div>
+            </>}</div>
           </div>
           <div className="cah-media">
             <img src={art} srcSet={`${art} 1920w, ${art.replace('-1920.', '-3840.')} 3840w`}
@@ -118,7 +127,8 @@ export default function CountryArtHero({ slug, tagline = 'Live classes with expe
           </div>
         </div>
       </section>
-      {(valueProp || longSub) && <div className="cah-vp">{longSub && <p>{subhead}</p>}{valueProp && <p>{valueProp}</p>}</div>}
+      {strip ? <div className="cah-vp">{strip}</div>
+        : (valueProp || longSub) && <div className="cah-vp">{longSub && <p>{subhead}</p>}{valueProp && <p>{valueProp}</p>}</div>}
     </>
   )
 }
