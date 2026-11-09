@@ -560,7 +560,7 @@ export function SalesPerformanceModule({ toast, refreshKey }) {
         : `<h2>${title}</h2><p class="empty">${note || 'Nothing this week.'}</p>`
       const delta = wk.newInquiries - wk.newPrevWeek
       const html = `<!doctype html><html><head><title>Smartious Weekly Sales Report</title><style>
-        body{font-family:Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
+        body{font-family:'Source Serif 4',Georgia,serif;color:#1a1a1a;margin:40px;line-height:1.5}
         h1{font-size:23px;margin:0;color:#7D1025}.sub{color:#666;font-size:12px;margin-bottom:18px}
         h2{font-size:14.5px;margin:22px 0 8px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px}
         table{width:100%;border-collapse:collapse;font-size:11.5px}

@@ -78,7 +78,7 @@ function PhotoCropper({ file, onCancel, onSave, busy }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,10,8,.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => !busy && onCancel()}>
       <div style={{ background: '#fff', borderRadius: 18, width: '100%', maxWidth: 380, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        <div style={{ padding: '16px 22px', background: 'linear-gradient(135deg,#7D1025,#5A0B1B)', color: '#FBFAF5', fontFamily: "'Playfair Display', Georgia, serif", fontSize: 20 }}>Position your photo</div>
+        <div style={{ padding: '16px 22px', background: 'linear-gradient(135deg,#7D1025,#5A0B1B)', color: '#FBFAF5', fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20 }}>Position your photo</div>
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
           <div onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}
             style={{ width: VIEW, height: VIEW, borderRadius: '50%', overflow: 'hidden', position: 'relative', cursor: 'grab', touchAction: 'none', background: '#F4EFEB', boxShadow: '0 0 0 4px ' + TOKENS.goldPale + ', 0 0 0 6px ' + TOKENS.gold }}>
@@ -187,7 +187,7 @@ export function ProfileEditor({ toast }) {
             <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { pick(e.target.files?.[0]); e.target.value = '' }} />
           </div>
           <div style={{ flex: 1, minWidth: 220, paddingBottom: 4 }}>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 26, color: TOKENS.s900, lineHeight: 1.15 }}>{me.firstName} {me.lastName}</div>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 26, color: TOKENS.s900, lineHeight: 1.15 }}>{me.firstName} {me.lastName}</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
               <span style={{ padding: '3px 11px', borderRadius: 99, fontSize: 11.5, fontWeight: 800, background: isPrincipal ? 'linear-gradient(135deg,#7D1025,#5A0B1B)' : TOKENS.goldPale, color: isPrincipal ? '#F0CC5A' : '#92400E', border: isPrincipal ? '1px solid ' + TOKENS.gold : 'none' }}>
                 {isPrincipal ? '★ ' : ''}{me.teamTitle}
@@ -245,7 +245,7 @@ export default function MyProfileModule({ toast, setPage }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 18 }}>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.14em', textTransform: 'uppercase', color: TOKENS.gold }}>Me</div>
-          <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 30, color: TOKENS.s900 }}>My <em style={{ color: CR }}>Profile</em></div>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, color: TOKENS.s900 }}>My <em style={{ color: CR }}>Profile</em></div>
         </div>
         {setPage && <button style={btnG} onClick={() => setPage('mystafffile')}>My staff file →</button>}
       </div>

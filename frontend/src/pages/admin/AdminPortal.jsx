@@ -41,7 +41,7 @@ const SMARTIOUS_THEME = `
     --bg: #FBFAF5;
   }
   .sm-admin-theme .serif {
-    font-family: 'Instrument Serif', 'DM Serif Display', Georgia, serif !important;
+    font-family: 'Source Serif 4',Georgia,serif !important;
     font-weight: 400 !important;
     letter-spacing: -0.01em;
   }

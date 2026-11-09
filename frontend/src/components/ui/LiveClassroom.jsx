@@ -238,7 +238,7 @@ function drawInstruments(ctx, insts, z) {
 function drawDiagram(ctx, op) {
   const { x1: cx, y1: cy } = op
   const S = 40
-  ctx.font = '13px Arial, sans-serif'
+  ctx.font = '13px "DM Sans",system-ui,sans-serif'
   const line = (a, b, c, d) => { ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke() }
   const arrowTip = (x, y, ang) => {
     ctx.beginPath()
@@ -746,7 +746,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       const r = Math.hypot(op.x2 - op.x1, op.y2 - op.y1)
       ctx.beginPath(); ctx.arc(op.x1, op.y1, r, 0, Math.PI * 2); ctx.stroke()
     } else if (op.kind === 'text') {
-      ctx.font = `${op.size || 18}px Arial, sans-serif`
+      ctx.font = `${op.size || 18}px 'DM Sans',system-ui,sans-serif`
       ctx.fillText(op.text || '', op.x1, op.y1)
     } else if (op.kind === 'arrow') {
       ctx.beginPath(); ctx.moveTo(op.x1, op.y1); ctx.lineTo(op.x2, op.y2); ctx.stroke()
@@ -781,7 +781,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       ctx.beginPath(); ctx.arc(V.x, V.y, r, a1, a1 + sweep, sweep < 0); ctx.stroke()
       const deg = Math.abs(sweep) * 180 / Math.PI
       const mid = a1 + sweep / 2
-      ctx.font = '13px Arial, sans-serif'
+      ctx.font = '13px "DM Sans",system-ui,sans-serif'
       ctx.fillText(deg.toFixed(1) + '\u00b0', V.x + (r + 14) * Math.cos(mid) - 12, V.y + (r + 14) * Math.sin(mid) + 4)
     } else if (op.kind === 'arc') {
       ctx.beginPath()
@@ -1628,7 +1628,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
       drawOp(ctx, { kind: d.active, x1: d.start.x, y1: d.start.y, x2: p2.x, y2: p2.y, color: colour, w: lineW })
       if (d.active === 'line' || d.active === 'arrow') {
         const lenUnits = Math.hypot(p2.x - d.start.x, p2.y - d.start.y) / 40
-        ctx.font = '12px Arial, sans-serif'
+        ctx.font = '12px "DM Sans",system-ui,sans-serif'
         ctx.fillStyle = colour
         ctx.fillText(lenUnits.toFixed(1) + ' u', (d.start.x + p2.x) / 2 + 8, (d.start.y + p2.y) / 2 - 8)
       }
@@ -2339,7 +2339,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   if (phase === 'lobby') {
     const isTeacherGuess = ['teacher', 'admin'].includes(user?.role)
     return (
-      <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif', padding: 16 }}>
+      <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: T.app, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 500, fontFamily: '"DM Sans",system-ui,sans-serif', padding: 16 }}>
         <div style={{ background: T.panel, border: '1px solid ' + T.border, borderRadius: 16, width: '100%', maxWidth: 420, padding: '26px 26px 22px', textAlign: 'center' }}>
           <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,#7D1025,#C9A030)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 900, fontSize: 19, margin: '0 auto 14px' }}>S</div>
           <div style={{ color: T.text, fontWeight: 800, fontSize: 17 }}>Smartious Classroom</div>
@@ -2655,7 +2655,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
 
   return (
     <SaverCtx.Provider value={dataSaver}>
-    <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: 'Inter, Arial, sans-serif' }}>
+    <div ref={rootRef} style={{ position: 'fixed', inset: 0, background: C.bg, display: 'flex', flexDirection: 'column', zIndex: 500, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
       {/* Audio rail lives at the ROOT of the classroom, mounted for the
           whole session and NEVER inside a conditional layout branch. The
           video column unmounts in focus mode and on narrow screens, so an
@@ -2670,7 +2670,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <SmartiousCrest size={32} />
           <div style={{ lineHeight: 1.1 }}>
-            <div style={{ fontFamily: "'DM Serif Display', Georgia, serif", fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 17, fontWeight: 700, color: '#FFFFFF' }}>
               Smart<em style={{ fontStyle: 'italic', color: '#C9973A', fontWeight: 500 }}>ious</em>
             </div>
             {!narrow && (

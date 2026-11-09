@@ -10,7 +10,7 @@ const SMARTIOUS_THEME = `
     --b300: #F19BAA; --b400: #E26B81; --b500: #C8334D; --b600: #A11A35;
     --b700: #7D1025; --b800: #5E0B1B; --bg: #FBFAF5;
   }
-  .sm-admin-theme .serif { font-family:'Instrument Serif','DM Serif Display',Georgia,serif!important; font-weight:400!important; letter-spacing:-0.01em; }
+  .sm-admin-theme .serif { font-family:'Source Serif 4',Georgia,serif!important; font-weight:400!important; letter-spacing:-0.01em; }
   .sm-admin-theme .sec-tag { color:var(--crimson)!important; font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:11px; margin-bottom:6px; }
   .sm-admin-theme .btn-p { background:var(--crimson)!important; color:var(--cream)!important; border-color:var(--crimson)!important; font-weight:700; }
   .sm-admin-theme .btn-p:hover { background:var(--crimson-deep)!important; border-color:var(--crimson-deep)!important; }

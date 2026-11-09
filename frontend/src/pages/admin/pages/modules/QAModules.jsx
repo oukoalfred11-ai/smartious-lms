@@ -103,7 +103,7 @@ function Stat({ label, value, sub, color = TOKENS.s900 }) {
   return (
     <div style={{ background: '#fff', border: '1px solid ' + TOKENS.s100, borderRadius: 14, padding: '14px 18px', flex: '1 1 160px', minWidth: 150 }}>
       <div style={lbl}>{label}</div>
-      <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 28, fontWeight: 500, color, lineHeight: 1.05 }}>{value}</div>
+      <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 500, color, lineHeight: 1.05 }}>{value}</div>
       {sub && <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 4 }}>{sub}</div>}
     </div>
   )
@@ -214,7 +214,7 @@ export async function printEvidencePack(toast) {
 
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>QA Evidence Pack — Smartious</title>
 <style>
-  body{font-family:Georgia,'Times New Roman',serif;color:#1A0F0E;margin:32px;font-size:12px}
+  body{font-family:'Source Serif 4',Georgia,serif;color:#1A0F0E;margin:32px;font-size:12px}
   h1{font-size:26px;margin:0;color:#7D1025} h2{font-size:16px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:4px;margin:28px 0 10px;page-break-after:avoid}
   .sub{color:#6B6B6B;font-family:sans-serif;font-size:11px} table{width:100%;border-collapse:collapse;font-family:sans-serif;font-size:10.5px}
   th,td{border:1px solid #E0D6CC;padding:5px 6px;text-align:left;vertical-align:top} th{background:#FBF6E3}
@@ -272,7 +272,7 @@ function printTeacherProfile(p) {
     return `<tr><td>${esc(c.label)}${c.required ? ' *' : ''}</td><td>${status}</td><td>${detail}</td></tr>`
   }).join('')
   w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${esc(fullName(t))} — Team profile</title>
-<style>body{font-family:Georgia,serif;color:#1A0F0E;margin:32px;font-size:12px}h1{color:#7D1025;margin:0;font-size:24px}
+<style>body{font-family:'Source Serif 4',Georgia,serif;color:#1A0F0E;margin:32px;font-size:12px}h1{color:#7D1025;margin:0;font-size:24px}
 h2{font-size:15px;color:#7D1025;border-bottom:2px solid #C9A030;padding-bottom:3px;margin:22px 0 8px}
 table{width:100%;border-collapse:collapse;font-family:sans-serif;font-size:11px}th,td{border:1px solid #E0D6CC;padding:5px 6px;text-align:left;vertical-align:top}th{background:#FBF6E3}
 .ok{color:#15803D;font-weight:700}.bad{color:#B91C1C;font-weight:700}.sub{font-family:sans-serif;color:#6B6B6B}</style></head><body>
@@ -517,11 +517,11 @@ export function TeamProfilesModule({ toast }) {
               <div style={{ position: 'relative', height: 210, background: `linear-gradient(135deg,${CR},#3D0712)` }}>
                 {t.avatar
                   ? <img src={t.avatar} alt="" className="qa-team-img" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                  : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontFamily: "'Playfair Display', Georgia, serif", fontSize: 64 }}>{((t.firstName || '?')[0] || '') + ((t.lastName || '')[0] || '')}</div>}
+                  : <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: GOLD, fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 64 }}>{((t.firstName || '?')[0] || '') + ((t.lastName || '')[0] || '')}</div>}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0) 45%, rgba(20,8,6,.78))' }} />
                 <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(255,255,255,.94)', borderRadius: 99, padding: 3 }}><Ring pct={t.file.pct} size={44} stroke={5} /></div>
                 <div style={{ position: 'absolute', left: 16, right: 16, bottom: 14, color: '#fff' }}>
-                  <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 21, lineHeight: 1.15, textShadow: '0 1px 8px rgba(0,0,0,.35)' }}>{fullName(t)}</div>
+                  <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 21, lineHeight: 1.15, textShadow: '0 1px 8px rgba(0,0,0,.35)' }}>{fullName(t)}</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#F0CC5A', marginTop: 3, letterSpacing: '.03em' }}>
                     {t.jobTitle && t.jobTitle !== titleOf(t) ? t.jobTitle : titleOf(t)}
                   </div>
@@ -648,7 +648,7 @@ function MemberProfile({ id, toast, onBack }) {
             <Avatar user={t} size={150} radius={22} />
           </div>
           <div style={{ flex: 1, minWidth: 240, paddingBottom: 4 }}>
-            <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 32, color: TOKENS.s900, lineHeight: 1.1 }}>{fullName(t)}</div>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 32, color: TOKENS.s900, lineHeight: 1.1 }}>{fullName(t)}</div>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 8 }}>
               <TitleChip u={t} />
               {t.jobTitle && t.jobTitle !== titleOf(t) && <span style={{ fontSize: 13.5, fontWeight: 700, color: CR }}>{t.jobTitle}</span>}
@@ -663,7 +663,7 @@ function MemberProfile({ id, toast, onBack }) {
               <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>Staff file {p.file.have}/{p.file.required}</div>
             </div>
             <div style={{ textAlign: 'center', alignSelf: 'center' }}>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: 34, color: GOLD, lineHeight: 1 }}>{p.trainingHours}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 34, color: GOLD, lineHeight: 1 }}>{p.trainingHours}</div>
               <div style={{ fontSize: 11, color: TOKENS.s500, marginTop: 4 }}>training hours</div>
             </div>
           </div>

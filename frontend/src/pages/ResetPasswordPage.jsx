@@ -29,7 +29,7 @@ const Logo = () => (
   <div style={{ display:'inline-flex', alignItems:'center', gap:12 }}>
     <SmartiousCrest size={42} />
     <div style={{ lineHeight:1.1 }}>
-      <div style={{ fontFamily:"'DM Serif Display',Georgia,serif", fontSize:23, fontWeight:700, color:'#fff' }}>
+      <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:23, fontWeight:700, color:'#fff' }}>
         Smart<em style={{ fontStyle:'italic', color:GD, fontWeight:500 }}>ious</em>
       </div>
       <div style={{ fontSize:8.5, fontWeight:600, letterSpacing:'.16em', color:'rgba(247,243,237,.5)', textTransform:'uppercase', marginTop:2 }}>
@@ -190,14 +190,14 @@ export default function ResetPasswordPage() {
         <div style={{ width:56,height:56,borderRadius:'50%',background:'rgba(34,197,94,.15)',border:'2px solid rgba(34,197,94,.4)',display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20 }}>
           <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="#22C55E" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <h1 style={{ fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',color:'#fff',margin:'0 0 12px' }}>Password updated!</h1>
+        <h1 style={{ fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',color:'#fff',margin:'0 0 12px' }}>Password updated!</h1>
         <p style={{ fontSize:14,color:'rgba(247,243,237,.65)',lineHeight:1.65 }}>Redirecting to login...</p>
       </>
     )
 
     if (step === 'email') return (
       <>
-        <h1 style={{ fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>Forgot your password?</h1>
+        <h1 style={{ fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>Forgot your password?</h1>
         <p style={{ fontSize:14,color:'rgba(247,243,237,.6)',lineHeight:1.6,marginBottom:32 }}>
           Enter your account email. We'll send a 6-digit verification code to confirm it's you.
         </p>
@@ -219,7 +219,7 @@ export default function ResetPasswordPage() {
 
     if (step === 'otp') return (
       <>
-        <h1 style={{ fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>Check your inbox</h1>
+        <h1 style={{ fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>Check your inbox</h1>
         <p style={{ fontSize:14,color:'rgba(247,243,237,.6)',lineHeight:1.6,marginBottom:8 }}>
           We sent a 6-digit code to <strong style={{color:'#fff'}}>{email}</strong>. Enter it below.
         </p>
@@ -253,7 +253,7 @@ export default function ResetPasswordPage() {
 
     if (step === 'password' || step === 'token_reset') return (
       <>
-        <h1 style={{ fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>
+        <h1 style={{ fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>
           {step === 'token_reset' ? 'Set a new password' : 'New password'}
         </h1>
         <p style={{ fontSize:14,color:'rgba(247,243,237,.6)',lineHeight:1.6,marginBottom:32 }}>
@@ -288,7 +288,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div style={{ minHeight:'100vh',display:'flex',background:'#080C14',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",overflow:'hidden' }}>
+    <div style={{ minHeight:'100vh',display:'flex',background:'#080C14',fontFamily:"'DM Sans',system-ui,sans-serif",overflow:'hidden' }}>
       <div style={{ flex:'0 0 460px',background:'linear-gradient(135deg,#8B1A2E 0%,#080C14 100%)',position:'relative',display:'flex',flexDirection:'column',padding:'56px 56px 40px',zIndex:2,boxShadow:'10px 0 40px rgba(0,0,0,.4)' }} className="rp-left">
         <div style={{ marginBottom:'auto' }}>
           <Link to="/" style={{ textDecoration:'none',display:'inline-block' }}><Logo/></Link>

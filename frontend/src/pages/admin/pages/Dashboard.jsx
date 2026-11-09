@@ -228,10 +228,10 @@ function PNavigation({ page, setPage, adminFirst, onLogout, forcedRole }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               boxShadow: '0 2px 8px ' + TOKENS.crimson + '40',
             }}>
-              <span style={{ color: TOKENS.goldLight, fontSize: 16, fontWeight: 800, fontFamily: "'Playfair Display', serif" }}>S</span>
+              <span style={{ color: TOKENS.goldLight, fontSize: 16, fontWeight: 800, fontFamily: "'Source Serif 4',Georgia,serif" }}>S</span>
             </div>
             <div style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
+              fontFamily: "'Source Serif 4',Georgia,serif",
               fontSize: 20, fontWeight: 600, color: TOKENS.s900,
               letterSpacing: '-.01em',
             }}>
@@ -452,7 +452,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
   return (
     <div style={{
       background: TOKENS.s50, minHeight: '100vh',
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, 'DM Sans',system-ui,sans-serif",
       color: TOKENS.s900,
     }}>
       <PNavigation page={page} setPage={setPage} adminFirst={adminFirst} forcedRole={forcedRole} onLogout={() => { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user'); window.location.href = '/login' }}/>
@@ -616,7 +616,7 @@ function RoleOverview({ role, setPage, userStats, pendingAllocations, auth }) {
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
-        <div style={{ fontFamily: 'Georgia, serif', fontSize: 26, fontWeight: 700, color: TOKENS.ink || '#080C14' }}>{meta.title}</div>
+        <div style={{ fontFamily: '"Source Serif 4",Georgia,serif', fontSize: 26, fontWeight: 700, color: TOKENS.ink || '#080C14' }}>{meta.title}</div>
         <div style={{ fontSize: 13.5, color: '#6B7280', marginTop: 4 }}>Welcome back, {auth?.user?.firstName || ''}. {meta.sub}</div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginBottom: 22 }}>

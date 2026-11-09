@@ -438,13 +438,13 @@ const ENROLMENT_DATA = {
 
 const styles = `
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  .lp{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
+  .lp{font-family:'DM Sans',system-ui,sans-serif;background:${V.bone};color:${V.ink};overflow-x:hidden;line-height:1.65}
   .lp a{color:inherit;text-decoration:none}
   /* Links that replaced <button>/<div> click handlers keep the old box:
      zero-specificity defaults, so classes and inline styles still win. */
   :where(.lp a.lp-btnlink){display:inline-block;text-align:center;font-size:13.333px;font-weight:400;line-height:normal;cursor:pointer}
   :where(.lp a.lp-divlink){display:block;cursor:pointer}
-  .lp button{font-family:'Plus Jakarta Sans',system-ui,sans-serif;cursor:pointer;border:none;background:none;outline:none}
+  .lp button{font-family:'DM Sans',system-ui,sans-serif;cursor:pointer;border:none;background:none;outline:none}
   .lp ::-webkit-scrollbar{width:4px}
   .lp ::-webkit-scrollbar-thumb{background:${V.cr};border-radius:2px}
   /* SCROLL REVEAL ANIMATIONS */
@@ -459,13 +459,13 @@ const styles = `
   .lp .sec{padding:96px 0}
   .lp .wrap{max-width:1440px;margin:0 auto;padding:0 48px}
   .lp .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'Fira Code',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:${V.gold3};margin-bottom:14px;font-weight:600}
-  .lp .display{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.4rem,4vw,4rem);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:${V.ink}}
+  .lp .display{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(2.4rem,4vw,4rem);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:${V.ink}}
   .lp .display em{color:${V.cr};font-style:italic}
   .lp .lead{font-size:17px;color:${V.sl};line-height:1.8;max-width:520px}
   .lp .sec-hd{margin-bottom:60px}
-  .lp .btn-p{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13.5px;font-weight:700;background:linear-gradient(135deg,${V.cr2},${V.cr});color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.3);transition:all .2s;cursor:pointer;border:none;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .btn-p{display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:6px;font-size:13.5px;font-weight:700;background:linear-gradient(135deg,${V.cr2},${V.cr});color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.3);transition:all .2s;cursor:pointer;border:none;font-family:'DM Sans',system-ui,sans-serif}
   .lp .btn-p:hover{background:linear-gradient(135deg,${V.cr},${V.cr2});transform:translateY(-2px);box-shadow:0 6px 20px rgba(139,26,46,.4)}
-  .lp .btn-o{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:6px;font-size:13.5px;font-weight:700;background:transparent;color:${V.ink};border:1.5px solid ${V.bone3};transition:all .2s;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .btn-o{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:6px;font-size:13.5px;font-weight:700;background:transparent;color:${V.ink};border:1.5px solid ${V.bone3};transition:all .2s;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif}
   .lp .btn-o:hover{border-color:${V.cr};color:${V.cr}}
   .lp .btn-o.lt{color:${V.white};border-color:rgba(255,255,255,.22)}
   .lp .btn-o.lt:hover{border-color:${V.gold3};color:${V.gold3}}
@@ -479,7 +479,7 @@ const styles = `
   .lp .nav-wrap{max-width:1440px;margin:0 auto;padding:0 48px;height:64px;display:flex;align-items:center;gap:0}
   .lp .logo-lockup{display:flex;align-items:center;gap:13px;cursor:pointer;flex-shrink:0}
   .lp .logo-emblem{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,${V.cr},${V.cr2});display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(139,26,46,.4)}
-  .lp .logo-name{font-family:'DM Serif Display',Georgia,serif;font-size:20px;font-weight:700;color:${V.white}}
+  .lp .logo-name{font-family:'Source Serif 4',Georgia,serif;font-size:20px;font-weight:700;color:${V.white}}
   .lp .logo-name em{color:${V.gold3};font-style:italic}
   .lp .logo-tag{font-size:8px;font-weight:600;letter-spacing:.14em;color:rgba(247,243,237,.28);text-transform:uppercase;margin-top:-2px}
   .lp .nav-links{display:flex;align-items:center;margin-left:40px;gap:0;flex:1}
@@ -490,9 +490,9 @@ const styles = `
   .lp .nl.on::after{content:'';position:absolute;bottom:-1px;left:12px;right:12px;height:1.5px;background:${V.gold3};border-radius:2px}
   .lp .nav-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
 
-  .lp .nav-login{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:600;color:rgba(247,243,237,.55);border:1px solid rgba(247,243,237,.12);transition:all .2s;cursor:pointer;background:none;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .nav-login{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:600;color:rgba(247,243,237,.55);border:1px solid rgba(247,243,237,.12);transition:all .2s;cursor:pointer;background:none;font-family:'DM Sans',system-ui,sans-serif}
   .lp .nav-login:hover{color:${V.white};border-color:rgba(247,243,237,.28)}
-  .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .nav-cta{display:flex;align-items:center;gap:7px;padding:9px 20px;border-radius:6px;font-size:12.5px;font-weight:700;background:${V.cr};color:${V.white};box-shadow:0 4px 14px rgba(139,26,46,.35);transition:all .2s;cursor:pointer;font-family:'DM Sans',system-ui,sans-serif}
   .lp .nav-cta:hover{background:${V.cr2};transform:translateY(-1px)}
   /* HERO */
   .lp #hero{position:relative;min-height:calc(100vh - 64px);background:${V.ink};display:flex;flex-direction:column;overflow:hidden}
@@ -500,7 +500,7 @@ const styles = `
   .lp .h-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(110deg,rgba(8,12,20,.55) 0%,rgba(20,10,8,.35) 38%,rgba(60,14,24,.22) 62%,rgba(8,12,20,.4) 100%)}
   .lp .h-vig{position:absolute;bottom:0;left:0;right:0;z-index:2;height:280px;background:linear-gradient(to top,${V.bone} 0%,transparent 100%)}
   .lp .h-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;justify-content:center;max-width:1440px;margin:0 auto;padding:80px 48px 60px;width:100%}
-  .lp .h1{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(8,12,20,.4)}
+  .lp .h1{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(3.5rem,7.5vw,7rem);font-weight:900;line-height:.98;letter-spacing:-.04em;color:${V.white};margin-bottom:28px;text-shadow:0 4px 24px rgba(8,12,20,.4)}
   .lp .h1 em{color:transparent;-webkit-text-stroke:1.5px ${V.gold3};font-style:italic}
   .lp .h1 span{display:block}
   .lp .h-sub{font-size:17px;color:rgba(247,243,237,.85);max-width:520px;line-height:1.8;margin-bottom:44px;text-shadow:0 2px 12px rgba(8,12,20,.5)}
@@ -509,14 +509,14 @@ const styles = `
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
   .lp .hs{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hs-n{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};line-height:1.2;word-break:break-word;white-space:normal}
+  .lp .hs-n{font-family:'Source Serif 4',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};line-height:1.2;word-break:break-word;white-space:normal}
   .lp .hs-n em{color:${V.gold3};font-style:normal}
   .lp .hs-l{font-size:10.5px;color:rgba(247,243,237,.65);margin-top:5px;letter-spacing:.04em;line-height:1.4}
   /* MOBILE HERO STATS — hidden by default, shown on mobile */
   .lp .h-mob-stats{display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:36px;max-width:340px}
   .lp .hms{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
   .lp .hms::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
-  .lp .hms-n{font-family:'DM Serif Display',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
+  .lp .hms-n{font-family:'Source Serif 4',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1}
   .lp .hms-n em{color:${V.gold3};font-style:normal}
   .lp .hms-l{font-size:10px;color:rgba(247,243,237,.68);margin-top:4px;letter-spacing:.04em}
   /* MOBILE HERO STATS STRIP — sits directly below the hero on phones */
@@ -539,20 +539,20 @@ const styles = `
   /* FLOATING ASSISTANCE + BOOK AN ASSESSMENT (.fab-wa kept as the class name) */
   .lp .fab-stack{position:fixed;right:20px;bottom:20px;z-index:9998;display:flex;flex-direction:column;gap:12px;align-items:flex-end;pointer-events:none}
   .lp .fab-stack > *{pointer-events:auto}
-  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:${V.gold3};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(201,151,58,.45),0 4px 10px rgba(201,151,58,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;text-decoration:none}
+  .lp .fab-wa{display:flex;align-items:center;gap:10px;background:${V.gold3};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(201,151,58,.45),0 4px 10px rgba(201,151,58,.35);transition:all .25s;font-family:'DM Sans',system-ui,sans-serif;text-decoration:none}
   .lp .fab-wa:hover{background:${V.cr};transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(139,26,46,.5),0 6px 14px rgba(139,26,46,.35)}
   .lp .fab-wa-ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:lp-pulse 2.4s ease-in-out infinite}
-  .lp .fab-help{display:flex;align-items:center;gap:10px;background:${V.cr};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(139,26,46,.45),0 4px 10px rgba(139,26,46,.35);transition:all .25s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .fab-help{display:flex;align-items:center;gap:10px;background:${V.cr};color:#fff;border:none;border-radius:50px;padding:13px 18px 13px 15px;font-size:13.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(139,26,46,.45),0 4px 10px rgba(139,26,46,.35);transition:all .25s;font-family:'DM Sans',system-ui,sans-serif}
   .lp .fab-help:hover{background:${V.cr2};transform:translateY(-2px) scale(1.02);box-shadow:0 14px 40px rgba(139,26,46,.55),0 6px 14px rgba(139,26,46,.4)}
   .lp .fab-help-ic{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
   .lp .fab-help-ic::after{content:'';position:absolute;width:10px;height:10px;border-radius:50%;background:#C9973A;top:8px;right:8px;box-shadow:0 0 0 2px ${V.cr};animation:lp-pulse 1.8s ease-in-out infinite}
   .lp .fab-help{position:relative}
   /* Assistance popup panel */
-  .lp .fab-panel{position:fixed;right:20px;bottom:152px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(8,12,20,.28),0 6px 18px rgba(8,12,20,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .fab-panel{position:fixed;right:20px;bottom:152px;width:340px;max-width:calc(100vw - 40px);background:${V.white};border-radius:18px;box-shadow:0 24px 60px rgba(8,12,20,.28),0 6px 18px rgba(8,12,20,.12);z-index:9999;overflow:hidden;border:1px solid ${V.bone3};animation:lp-fadeUp .25s cubic-bezier(.23,1,.32,1);font-family:'DM Sans',system-ui,sans-serif}
   .lp .fab-panel-hd{background:linear-gradient(135deg,${V.cr},${V.cr2});padding:20px 22px;color:#fff;position:relative}
   .lp .fab-panel-hd-row{display:flex;align-items:center;gap:12px}
-  .lp .fab-panel-av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(201,151,58,.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Serif Display',Georgia,serif;font-weight:700;font-size:17px;color:${V.gold3}}
-  .lp .fab-panel-ti{font-family:'DM Serif Display',Georgia,serif;font-size:17px;font-weight:700;line-height:1.2}
+  .lp .fab-panel-av{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(201,151,58,.6);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:17px;color:${V.gold3}}
+  .lp .fab-panel-ti{font-family:'Source Serif 4',Georgia,serif;font-size:17px;font-weight:700;line-height:1.2}
   .lp .fab-panel-sb{font-size:11.5px;color:rgba(255,255,255,.75);margin-top:2px;display:flex;align-items:center;gap:5px}
   .lp .fab-panel-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 2px rgba(74,222,128,.3)}
   .lp .fab-panel-cl{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.15);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:background .2s}
@@ -561,7 +561,7 @@ const styles = `
   .lp .fab-panel-msg{background:${V.bone};border:1px solid ${V.bone3};border-radius:12px;padding:14px 16px;font-size:13.5px;color:${V.ink2};line-height:1.6;margin-bottom:16px}
   .lp .fab-panel-msg strong{color:${V.cr}}
   .lp .fab-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
-  .lp .fab-opt{display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${V.white};border:1px solid ${V.bone3};border-radius:10px;cursor:pointer;transition:all .2s;text-align:left;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:${V.ink2};font-size:13px;font-weight:600}
+  .lp .fab-opt{display:flex;align-items:center;gap:11px;width:100%;padding:11px 14px;background:${V.white};border:1px solid ${V.bone3};border-radius:10px;cursor:pointer;transition:all .2s;text-align:left;font-family:'DM Sans',system-ui,sans-serif;color:${V.ink2};font-size:13px;font-weight:600}
   .lp .fab-opt:hover{border-color:${V.cr};background:rgba(139,26,46,.04);transform:translateX(2px)}
   .lp .fab-opt-ic{width:30px;height:30px;border-radius:8px;background:rgba(139,26,46,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:${V.cr}}
   .lp .fab-panel-ft{padding:12px 22px 16px;background:${V.bone};border-top:1px solid ${V.bone3};font-size:11px;color:${V.sl2};text-align:center;line-height:1.6}
@@ -591,7 +591,7 @@ const styles = `
   .lp .hl:hover .hl-ico{border-color:rgba(184,150,12,.3);background:rgba(139,26,46,.18)}
   .lp .hl:hover .hl-ico svg{stroke:${V.gold3}}
   .lp .hl-ico{width:44px;height:44px;border-radius:6px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:22px;transition:all .25s}
-  .lp .hl-n{font-family:'DM Serif Display',Georgia,serif;font-size:2.4rem;font-weight:700;color:${V.ink};line-height:1;transition:color .25s}
+  .lp .hl-n{font-family:'Source Serif 4',Georgia,serif;font-size:2.4rem;font-weight:700;color:${V.ink};line-height:1;transition:color .25s}
   .lp .hl-h{font-size:12px;font-weight:700;color:${V.ink};margin-top:6px;letter-spacing:.03em;transition:color .25s}
   .lp .hl-p{font-size:12px;color:${V.sl2};line-height:1.6;margin-top:4px;transition:color .25s}
   /* TESTIMONIALS */
@@ -600,7 +600,7 @@ const styles = `
   .lp .tc:hover{background:${V.white};box-shadow:0 12px 40px rgba(8,12,20,.14);border-color:transparent;transform:translateY(-4px)}
   .lp .t-stars{display:flex;gap:2px;margin-bottom:16px}
   .lp .t-s{width:13px;height:13px;fill:${V.gold2}}
-  .lp .t-q{font-family:'DM Serif Display',Georgia,serif;font-style:italic;font-size:1.05rem;color:${V.ink2};line-height:1.75;flex:1;margin-bottom:24px}
+  .lp .t-q{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-size:1.05rem;color:${V.ink2};line-height:1.75;flex:1;margin-bottom:24px}
   .lp .t-au{display:flex;align-items:center;gap:12px;margin-top:auto}
   .lp .t-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:${V.white};flex-shrink:0}
   .lp .t-nm{font-size:13.5px;font-weight:700;color:${V.ink}}
@@ -609,13 +609,13 @@ const styles = `
   .lp .cta-band{background:${V.ink};padding:96px 0;position:relative;overflow:hidden;text-align:center}
   .lp .cta-band::before{content:'';position:absolute;top:-40%;left:-10%;width:60%;height:200%;border-radius:50%;background:radial-gradient(ellipse,rgba(139,26,46,.18) 0%,transparent 70%)}
   .lp .cta-in{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:0 48px}
-  .lp .cta-h{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:700;color:${V.white};line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
+  .lp .cta-h{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(2.4rem,5vw,4rem);font-weight:700;color:${V.white};line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
   .lp .cta-h em{color:${V.gold3};font-style:italic}
   .lp .cta-sub{font-size:17px;color:rgba(247,243,237,.48);line-height:1.75;margin-bottom:40px}
   .lp .cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   /* PAGE HERO */
   .lp .pg-hero{background:${V.ink};padding:80px 0 60px;border-bottom:1px solid rgba(255,255,255,.06)}
-  .lp .pg-h{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:${V.white};line-height:1.05;letter-spacing:-.03em;margin-bottom:14px}
+  .lp .pg-h{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(2.8rem,5vw,4.5rem);font-weight:700;color:${V.white};line-height:1.05;letter-spacing:-.03em;margin-bottom:14px}
   .lp .pg-h em{color:${V.gold3};font-style:italic}
   .lp .pg-sub{font-size:17px;color:rgba(247,243,237,.5);max-width:560px;line-height:1.75}
   /* STATS */
@@ -623,7 +623,7 @@ const styles = `
   .lp .sg{background:${V.white};padding:36px 28px;text-align:center;position:relative;transition:background .25s}
   .lp .sg::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${V.cr},${V.gold2});opacity:0;transition:.3s}
   .lp .sg:hover::before{opacity:1}.lp .sg:hover{background:${V.bone}}
-  .lp .sg-n{font-family:'DM Serif Display',Georgia,serif;font-size:3rem;font-weight:700;color:${V.ink};line-height:1}
+  .lp .sg-n{font-family:'Source Serif 4',Georgia,serif;font-size:3rem;font-weight:700;color:${V.ink};line-height:1}
   .lp .sg-n em{color:${V.cr};font-style:normal}
   .lp .sg-l{font-size:12px;color:${V.sl2};margin-top:8px;font-weight:500;letter-spacing:.05em;line-height:1.5}
   /* PROCESS */
@@ -632,7 +632,7 @@ const styles = `
   .lp .ps:hover{background:${V.bone}}
   .lp .ps-n{font-family:'Fira Code',monospace;font-size:10.5px;color:${V.sl3};letter-spacing:.12em;margin-bottom:14px}
   .lp .ps-ico{width:40px;height:40px;border-radius:6px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-  .lp .ps-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.15rem;font-weight:700;color:${V.ink};margin-bottom:8px}
+  .lp .ps-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.15rem;font-weight:700;color:${V.ink};margin-bottom:8px}
   .lp .ps-p{font-size:13px;color:${V.sl};line-height:1.72}
   .lp .ps-arr{position:absolute;top:36px;right:-11px;width:22px;height:22px;background:${V.cr};border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2}
   .lp .ps:last-child .ps-arr{display:none}
@@ -643,7 +643,7 @@ const styles = `
   .lp .tm-stage::after{content:'';position:absolute;right:-60px;bottom:-40px;width:260px;height:260px;background:repeating-linear-gradient(115deg,${V.cr} 0 22px,transparent 22px 40px);opacity:.35;transform:skewX(-18deg);pointer-events:none}
   .lp .tm-head{text-align:center;max-width:720px;margin:0 auto 56px}
   .lp .tm-eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:${V.gold3}}
-  .lp .tm-title{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2.6rem,6vw,4.4rem);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 0;color:#fff}
+  .lp .tm-title{font-family:'Source Serif 4',Georgia,serif;font-size:clamp(2.6rem,6vw,4.4rem);font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:10px 0 0;color:#fff}
   .lp .tm-title em{color:${V.cr2};font-style:italic;text-shadow:0 0 30px rgba(168,32,58,.45)}
   .lp .tm-intro{font-style:italic;color:rgba(255,255,255,.72);font-size:15px;line-height:1.7;margin:14px auto 0}
   .lp .tm-empty{text-align:center;padding:60px 0;color:rgba(255,255,255,.6);font-size:14px}
@@ -661,7 +661,7 @@ const styles = `
   .lp .tm-accent{position:absolute;left:4px;top:0;width:58%;height:70%;background:linear-gradient(135deg,${V.cr2},${V.cr});transform:skewX(-14deg);border-radius:3px;transition:transform .35s}
   .lp .tm-shape{position:relative;aspect-ratio:3/3.7;overflow:hidden;transform:skewX(-14deg);border-radius:4px;background:linear-gradient(135deg,#2A2F38,#1B1F26);box-shadow:0 18px 40px rgba(0,0,0,.45)}
   .lp .tm-img{position:absolute;top:0;left:-18%;width:136%;height:100%;object-fit:cover;transform:skewX(14deg);transition:transform .6s}
-  .lp .tm-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:skewX(14deg);font-family:'DM Serif Display',Georgia,serif;font-size:3.6rem;font-weight:700;color:${V.gold3}}
+  .lp .tm-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:skewX(14deg);font-family:'Source Serif 4',Georgia,serif;font-size:3.6rem;font-weight:700;color:${V.gold3}}
   .lp .tm-person:hover .tm-img{transform:skewX(14deg) scale(1.06)}
   .lp .tm-person:hover .tm-accent{transform:skewX(-14deg) translate(-4px,-4px)}
   .lp .tm-years{position:absolute;right:6px;top:22px;background:rgba(14,16,21,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(201,151,58,.45);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px}
@@ -679,7 +679,7 @@ const styles = `
   .lp .tm-sheet-body{padding:30px 30px 28px}
   .lp .tm-x{position:absolute;top:12px;right:14px;width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(20,23,29,.7);color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:2}
   .lp .tm-badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#14171D;background:${V.gold3};padding:4px 11px;border-radius:99px;margin-bottom:10px}
-  .lp .tm-sheet-name{font-family:'DM Serif Display',Georgia,serif;font-size:2rem;margin:0;line-height:1.1;color:#fff}
+  .lp .tm-sheet-name{font-family:'Source Serif 4',Georgia,serif;font-size:2rem;margin:0;line-height:1.1;color:#fff}
   .lp .tm-sheet-role{font-style:italic;color:${V.gold3};font-size:14.5px;margin-top:6px}
   .lp .tm-exp{display:inline-block;margin-top:14px;font-size:12.5px;font-weight:700;color:#fff;background:rgba(168,32,58,.35);border:1px solid rgba(168,32,58,.6);padding:5px 12px;border-radius:99px}
   .lp .tm-exp strong{color:${V.gold3};font-size:14px}
@@ -701,7 +701,7 @@ const styles = `
   .lp .cc-top{padding:24px 24px 0}
   .lp .cc-bar{height:3px;background:linear-gradient(90deg,${V.cr},${V.gold2});border-radius:2px;margin-bottom:18px}
   .lp .cc-badge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:99px;font-size:10.5px;font-weight:700;color:${V.cr};margin-bottom:11px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.12)}
-  .lp .cc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:9px}
+  .lp .cc-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:9px}
   .lp .cc-desc{font-size:13px;color:${V.sl};line-height:1.72;margin-bottom:14px}
   .lp .cc-body{padding:0 24px 22px;flex:1;display:flex;flex-direction:column;justify-content:flex-end}
   .lp .cc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
@@ -713,7 +713,7 @@ const styles = `
   .lp .sc{background:${V.ink2};padding:42px 30px;transition:background .25s;display:flex;flex-direction:column}
   .lp .sc:hover{background:rgba(139,26,46,.065)}
   .lp .sc-ico{width:50px;height:50px;border-radius:10px;background:rgba(139,26,46,.13);border:1px solid rgba(139,26,46,.2);display:flex;align-items:center;justify-content:center;margin-bottom:20px}
-  .lp .sc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};margin-bottom:10px}
+  .lp .sc-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.25rem;font-weight:700;color:${V.white};margin-bottom:10px}
   .lp .sc-p{font-size:13px;color:rgba(247,243,237,.44);line-height:1.78;flex:1;margin-bottom:16px}
   .lp .sc-tags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:16px}
   .lp .sc-tag{background:rgba(255,255,255,.05);border-radius:4px;padding:2px 8px;font-size:10.5px;font-weight:600;color:rgba(247,243,237,.38)}
@@ -721,7 +721,7 @@ const styles = `
   .lp .sc:hover .sc-lnk{gap:10px}
   /* PRICING */
   .lp .p-tabs{display:flex;background:${V.bone2};border:1px solid ${V.bone3};border-radius:6px;padding:4px;width:fit-content;margin-bottom:44px;flex-wrap:wrap}
-  .lp .ptab{padding:9px 22px;border-radius:7px;font-size:13px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .ptab{padding:9px 22px;border-radius:7px;font-size:13px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;border:none;background:transparent;font-family:'DM Sans',system-ui,sans-serif}
   .lp .ptab.on{background:${V.white};color:${V.cr};box-shadow:0 4px 16px rgba(8,12,20,.10)}
   .lp .ppanel{display:none}.lp .ppanel.on{display:block}
   .lp .price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
@@ -731,9 +731,9 @@ const styles = `
   .lp .pbadge{background:linear-gradient(90deg,${V.gold},${V.gold2});color:${V.ink};font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;letter-spacing:.06em;display:inline-block;margin-bottom:14px}
   .lp .p-lbl{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${V.sl3};margin-bottom:6px}
   .lp .pc.ft .p-lbl{color:rgba(247,243,237,.35)}
-  .lp .p-ti{font-family:'DM Serif Display',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:10px}
+  .lp .p-ti{font-family:'Source Serif 4',Georgia,serif;font-size:1.35rem;font-weight:700;color:${V.ink};margin-bottom:10px}
   .lp .pc.ft .p-ti{color:${V.white}}
-  .lp .p-am{font-family:'DM Serif Display',Georgia,serif;font-size:3.2rem;font-weight:700;color:${V.cr};line-height:1}
+  .lp .p-am{font-family:'Source Serif 4',Georgia,serif;font-size:3.2rem;font-weight:700;color:${V.cr};line-height:1}
   .lp .pc.ft .p-am{color:${V.gold3}}
   .lp .p-am sup{font-size:1.4rem;vertical-align:super}
   .lp .p-pr{font-size:12.5px;color:${V.sl2};margin-bottom:22px}
@@ -743,7 +743,7 @@ const styles = `
   .lp .pc.ft .p-f{color:rgba(247,243,237,.6)}
   .lp .p-ck{width:18px;height:18px;border-radius:50%;background:rgba(139,26,46,.07);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
   .lp .pc.ft .p-ck{background:rgba(184,150,12,.15)}
-  .lp .p-btn{display:block;width:100%;padding:13px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;text-align:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;transition:all .2s;border:none}
+  .lp .p-btn{display:block;width:100%;padding:13px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;text-align:center;font-family:'DM Sans',system-ui,sans-serif;transition:all .2s;border:none}
   .lp .p-ol{background:transparent;color:${V.cr};border:1.5px solid ${V.cr}}
   .lp .p-ol:hover{background:${V.cr};color:${V.white}}
   .lp .p-gd{background:linear-gradient(90deg,${V.gold},${V.gold2});color:${V.ink}}
@@ -751,12 +751,12 @@ const styles = `
   /* GLOBAL */
   .lp .map-c{position:relative}
   .lp .cp-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:24px}
-  .lp .cp{background:${V.white};border:1px solid ${V.bone3};border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .cp{background:${V.white};border:1px solid ${V.bone3};border-radius:6px;padding:6px 16px;font-size:12px;font-weight:700;color:${V.sl};cursor:pointer;transition:all .2s;font-family:'DM Sans',system-ui,sans-serif}
   .lp .cp:hover{background:${V.cr};color:${V.white};border-color:${V.cr}}
   /* FAQ */
   .lp .faq-list{display:flex;flex-direction:column;gap:8px;margin-top:60px}
   .lp .fqi{background:${V.white};border:1px solid ${V.bone3};border-radius:16px;overflow:hidden}
-  .lp .fqq{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;font-weight:700;font-size:14.5px;color:${V.ink};transition:background .2s;border:none;background:transparent;width:100%;text-align:left;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .fqq{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;font-weight:700;font-size:14.5px;color:${V.ink};transition:background .2s;border:none;background:transparent;width:100%;text-align:left;font-family:'DM Sans',system-ui,sans-serif}
   .lp .fqq:hover{background:${V.bone}}
   .lp .fqi-ico{width:24px;height:24px;border-radius:50%;background:rgba(139,26,46,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;color:${V.cr};transition:transform .3s,background .3s;line-height:1}
   .lp .fqi.open .fqi-ico{transform:rotate(45deg);background:${V.cr};color:${V.white}}
@@ -765,7 +765,7 @@ const styles = `
   .lp .fqi.open .fqa{max-height:400px}
   /* BLOG */
   .lp .bf-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px}
-  .lp .bf{padding:7px 18px;border-radius:99px;font-size:12.5px;font-weight:700;color:${V.sl};cursor:pointer;border:1.5px solid ${V.bone3};background:${V.white};transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .bf{padding:7px 18px;border-radius:99px;font-size:12.5px;font-weight:700;color:${V.sl};cursor:pointer;border:1.5px solid ${V.bone3};background:${V.white};transition:all .2s;font-family:'DM Sans',system-ui,sans-serif}
   .lp .bf:hover{border-color:${V.cr};color:${V.cr}}.lp .bf.on{background:${V.cr};color:${V.white};border-color:${V.cr}}
   .lp .bfc{background:${V.ink2};border-radius:24px;overflow:hidden;margin-bottom:24px;cursor:pointer;display:grid;grid-template-columns:1fr 1.3fr;transition:all .3s;border:1px solid rgba(255,255,255,.05)}
   .lp .bfc:hover{box-shadow:0 32px 80px rgba(8,12,20,.20);transform:translateY(-4px)}
@@ -773,7 +773,7 @@ const styles = `
   .lp .bfc-badge{position:absolute;top:18px;left:18px;background:${V.cr};color:${V.white};font-size:10px;font-weight:700;padding:4px 12px;border-radius:99px;letter-spacing:.07em;text-transform:uppercase}
   .lp .bfc-r{padding:40px;display:flex;flex-direction:column;justify-content:center}
   .lp .bfc-date{font-size:11px;color:rgba(247,243,237,.35);margin-bottom:12px;font-weight:500;letter-spacing:.05em}
-  .lp .bfc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1.25;margin-bottom:14px}
+  .lp .bfc-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.6rem;font-weight:700;color:${V.white};line-height:1.25;margin-bottom:14px}
   .lp .bfc-p{font-size:14px;color:rgba(247,243,237,.5);line-height:1.75;margin-bottom:24px}
   .lp .bfc-au{display:flex;align-items:center;gap:12px}
   .lp .bfc-av{width:36px;height:36px;border-radius:50%;background:${V.cr};display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:${V.white}}
@@ -799,7 +799,7 @@ const styles = `
   .lp .bc-cat{position:absolute;bottom:11px;left:13px;background:${V.cr};color:${V.white};font-size:9px;font-weight:700;padding:3px 10px;border-radius:99px;letter-spacing:.07em;text-transform:uppercase}
   .lp .bc-body{padding:22px;flex:1;display:flex;flex-direction:column}
   .lp .bc-date{font-size:11px;color:${V.sl3};margin-bottom:7px;font-weight:500;letter-spacing:.04em}
-  .lp .bc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.35}
+  .lp .bc-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.35}
   .lp .bc-ex{font-size:13px;color:${V.sl};line-height:1.65;flex:1}
   .lp .bc-rd{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:${V.cr};margin-top:13px;transition:gap .2s}
   .lp .bc:hover .bc-rd{gap:9px}
@@ -815,16 +815,16 @@ const styles = `
   .lp .ws-l{font-size:11.5px;font-weight:700;color:rgba(247,243,237,.33);transition:color .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .lp .wst.on .ws-l{color:${V.white}}
   .lp .wiz-body{padding:48px}
-  .lp .wiz-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.7rem;font-weight:700;color:${V.ink};margin-bottom:5px}
+  .lp .wiz-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.7rem;font-weight:700;color:${V.ink};margin-bottom:5px}
   .lp .wiz-sub{font-size:14px;color:${V.sl};margin-bottom:28px;line-height:1.65}
   .lp .fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .lp .fgg{grid-column:1/-1}
   .lp .fl{font-size:11px;font-weight:700;color:${V.sl};letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;display:block}
-  .lp .fi-i{padding:11px 14px;border:1.5px solid ${V.bone3};border-radius:6px;font-size:14px;color:${V.ink};outline:none;transition:all .2s;background:${V.bone};width:100%;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  .lp .fi-i{padding:11px 14px;border:1.5px solid ${V.bone3};border-radius:6px;font-size:14px;color:${V.ink};outline:none;transition:all .2s;background:${V.bone};width:100%;font-family:'DM Sans',system-ui,sans-serif}
   .lp .fi-i:focus{border-color:${V.cr};background:${V.white}}
   .lp select.fi-i{appearance:none;padding-right:32px}
   .lp .wiz-nav{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:24px;border-top:1px solid ${V.bone3}}
-  .lp .wb{padding:13px 26px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:inline-flex;align-items:center;gap:7px}
+  .lp .wb{padding:13px 26px;border-radius:6px;font-weight:700;font-size:13.5px;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',system-ui,sans-serif;display:inline-flex;align-items:center;gap:7px}
   .lp .wb-nx{background:${V.cr};color:${V.white}}.lp .wb-nx:hover{background:${V.cr2}}
   .lp .wb-bk{background:transparent;color:${V.sl};border:1px solid ${V.bone3}}.lp .wb-bk:hover{border-color:${V.sl}}
   .lp .pay-o{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
@@ -835,15 +835,15 @@ const styles = `
   .lp .login-bg{min-height:100vh;background:${V.ink};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;position:relative;overflow:hidden}
   .lp .login-card{background:rgba(26,21,16,.96);border:1px solid rgba(184,150,12,.12);border-radius:24px;padding:44px;width:100%;max-width:440px;box-shadow:0 60px 120px rgba(8,12,20,.28);position:relative;z-index:1;backdrop-filter:blur(20px)}
   .lp .lrt-wrap{display:flex;background:rgba(255,255,255,.05);border-radius:6px;padding:3px;margin-bottom:26px}
-  .lp .lrt{flex:1;padding:8px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:rgba(247,243,237,.4);background:transparent;display:flex;align-items:center;justify-content:center;gap:6px}
+  .lp .lrt{flex:1;padding:8px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',system-ui,sans-serif;color:rgba(247,243,237,.4);background:transparent;display:flex;align-items:center;justify-content:center;gap:6px}
   .lp .lrt.on{background:${V.cr};color:${V.white};box-shadow:0 2px 8px rgba(139,26,46,.4)}
-  .lp .login-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.5rem;font-weight:700;color:${V.white};margin-bottom:4px}
+  .lp .login-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.5rem;font-weight:700;color:${V.white};margin-bottom:4px}
   .lp .login-sub{font-size:13px;color:rgba(247,243,237,.38);margin-bottom:24px;line-height:1.6}
   .lp .login-fl{font-size:11px;font-weight:700;color:rgba(247,243,237,.32);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:block}
-  .lp .login-inp{padding:12px 14px;border:1.5px solid rgba(255,255,255,.1);border-radius:6px;font-size:14px;color:${V.white};outline:none;transition:all .2s;background:rgba(255,255,255,.05);width:100%;font-family:'Plus Jakarta Sans',system-ui,sans-serif;margin-bottom:14px}
+  .lp .login-inp{padding:12px 14px;border:1.5px solid rgba(255,255,255,.1);border-radius:6px;font-size:14px;color:${V.white};outline:none;transition:all .2s;background:rgba(255,255,255,.05);width:100%;font-family:'DM Sans',system-ui,sans-serif;margin-bottom:14px}
   .lp .login-inp:focus{border-color:${V.gold3};background:rgba(255,255,255,.08)}
   .lp .login-inp::placeholder{color:rgba(247,243,237,.2)}
-  .lp .login-btn{width:100%;padding:14px;background:${V.cr};color:${V.white};border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Plus Jakarta Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
+  .lp .login-btn{width:100%;padding:14px;background:${V.cr};color:${V.white};border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'DM Sans',system-ui,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px}
   .lp .login-btn:hover{background:${V.cr2}}
   .lp .lpfs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:440px;margin-top:20px;position:relative;z-index:1}
   .lp .lpf{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;text-align:center}
@@ -854,11 +854,11 @@ const styles = `
   .lp .consult-card{background:${V.white};border:1px solid ${V.bone3};border-radius:24px;padding:48px;box-shadow:0 8px 40px rgba(8,12,20,.08)}
   .lp .consult-field{margin-bottom:20px}
   .lp .consult-label{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${V.sl};margin-bottom:7px}
-  .lp .consult-input{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;transition:border-color .2s}
+  .lp .consult-input{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'DM Sans',system-ui,sans-serif;outline:none;transition:border-color .2s}
   .lp .consult-input:focus{border-color:${V.cr};background:${V.white}}
-  .lp .consult-select{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;appearance:none;cursor:pointer;transition:border-color .2s}
+  .lp .consult-select{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'DM Sans',system-ui,sans-serif;outline:none;appearance:none;cursor:pointer;transition:border-color .2s}
   .lp .consult-select:focus{border-color:${V.cr}}
-  .lp .consult-textarea{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'Plus Jakarta Sans',system-ui,sans-serif;outline:none;resize:vertical;min-height:120px;line-height:1.65;transition:border-color .2s}
+  .lp .consult-textarea{width:100%;padding:12px 16px;border:1.5px solid ${V.bone3};border-radius:8px;font-size:14px;color:${V.ink};background:${V.bone};font-family:'DM Sans',system-ui,sans-serif;outline:none;resize:vertical;min-height:120px;line-height:1.65;transition:border-color .2s}
   .lp .consult-textarea:focus{border-color:${V.cr};background:${V.white}}
   .lp .consult-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .lp .consult-success{text-align:center;padding:48px 32px}
@@ -875,7 +875,7 @@ const styles = `
   /* FOOTER */
   .lp footer{background:${V.ink2};padding:72px 0 28px;border-top:1px solid rgba(184,150,12,.08)}
   .lp .ft-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr 1fr;gap:40px;margin-bottom:52px}
-  .lp .ft-h{font-family:'DM Serif Display',Georgia,serif;font-size:21px;font-weight:700;color:#FFFFFF}
+  .lp .ft-h{font-family:'Source Serif 4',Georgia,serif;font-size:21px;font-weight:700;color:#FFFFFF}
   .lp .ft-h em{color:${V.gold3};font-style:italic}
   .lp .ft-tag{font-size:8.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#A89F94;margin-top:2px;margin-bottom:14px}
   .lp .ft-d{font-size:13px;color:#C0B5A8;line-height:1.78;margin-bottom:20px;max-width:270px}
@@ -905,7 +905,7 @@ const styles = `
   .lp .sa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
   .lp .sa-d{border:1px solid ${V.bone3};border-radius:16px;overflow:hidden}
   .lp .sa-dt{padding:20px;text-align:center}
-  .lp .sa-dn{font-family:'DM Serif Display',Georgia,serif;font-size:1.05rem;font-weight:700;color:${V.white};margin-top:8px}
+  .lp .sa-dn{font-family:'Source Serif 4',Georgia,serif;font-size:1.05rem;font-weight:700;color:${V.white};margin-top:8px}
   .lp .sa-db{padding:16px}
   .lp .sa-dp{font-size:12.5px;color:${V.sl};line-height:1.65;margin-bottom:8px}
   .lp .sa-dm{font-size:11.5px;color:${V.sl2}}
@@ -916,12 +916,12 @@ const styles = `
   .lp .prog-sel-card.on{border-color:${V.cr};background:rgba(139,26,46,.03)}
   .lp .prog-sel-card.on::before{transform:scaleX(1)}
   .lp .psc-ico{width:52px;height:52px;border-radius:10px;background:rgba(139,26,46,.07);border:1px solid rgba(139,26,46,.1);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
-  .lp .psc-h{font-family:'DM Serif Display',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.2}
+  .lp .psc-h{font-family:'Source Serif 4',Georgia,serif;font-size:1.1rem;font-weight:700;color:${V.ink};margin-bottom:8px;line-height:1.2}
   .lp .psc-p{font-size:12.5px;color:${V.sl};line-height:1.68;font-weight:400;flex:1;margin-bottom:14px}
   .lp .psc-from{font-size:12px;font-weight:700;color:${V.cr};letter-spacing:.02em}
   .lp .prog-sub-panel{background:${V.bone};border-radius:10px;border:1px solid ${V.bone3};padding:22px;margin-bottom:4px;transition:all .3s;animation:lp-fadeUp .3s ease}
   /* TOAST */
-  #lp-toast{position:fixed;bottom:22px;right:22px;background:${V.ink2};color:${V.white};padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 20px 50px rgba(8,12,20,.28);z-index:9999;border-left:3px solid ${V.cr};display:none;max-width:340px;line-height:1.5;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  #lp-toast{position:fixed;bottom:22px;right:22px;background:${V.ink2};color:${V.white};padding:14px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 20px 50px rgba(8,12,20,.28);z-index:9999;border-left:3px solid ${V.cr};display:none;max-width:340px;line-height:1.5;font-family:'DM Sans',system-ui,sans-serif}
   #lp-toast.show{display:block;animation:lp-fadeUp .3s ease}
   /* ANIMATIONS */
   @keyframes lp-marq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -1030,7 +1030,7 @@ const styles = `
      Two breakpoints: ≤768px (tablet+phone), ≤480px (phone).
      ═══════════════════════════════════════════════════════ */
   @media(max-width:768px){
-    /* — display heading ('DM Serif Display' large headings) — */
+    /* — display heading (Source Serif 4 large headings) — */
     .lp .display{font-size:clamp(1.7rem,7vw,2.4rem) !important;line-height:1.15 !important}
 
     /* — wizard form scaling — */
@@ -1086,8 +1086,8 @@ const styles = `
 // ═══════════════════════════════════════════════════════════
 function GuideCrossLinks({ guideSlug, guideName, hubHref, hubName }) {
   const card = {display:'block',background:'#FFFFFF',border:'1px solid #E7E1D4',borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit'}
-  const kicker = {fontSize:11,fontWeight:800,letterSpacing:1.2,color:'#8B1A2E',marginBottom:6,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}
-  const title = {fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.08rem',color:'#080C14',lineHeight:1.35}
+  const kicker = {fontSize:11,fontWeight:800,letterSpacing:1.2,color:'#8B1A2E',marginBottom:6,fontFamily:"'DM Sans',system-ui,sans-serif"}
+  const title = {fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.08rem',color:'#080C14',lineHeight:1.35}
   return (
     <section style={{maxWidth:1080,margin:'0 auto',padding:'8px 24px 56px'}}>
       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
@@ -1213,7 +1213,7 @@ const SmartiousLogo = ({ size = 40, withText = false, tone = 'light' }) => {
       <SmartiousCrest size={size} />
       {withText && (
         <div style={{display:'flex',flexDirection:'column',lineHeight:1.1}}>
-          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:textColor}}>
+          <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize: size*0.55, fontWeight:700, color:textColor}}>
             Smart<em style={{fontStyle:'italic', color:iousColor, fontWeight:500}}>ious</em>
           </div>
           <div style={{fontSize: size*0.2, fontWeight:600, letterSpacing:'.16em', color:tone==='light'?'rgba(247,243,237,.45)':'rgba(8,12,20,.42)', textTransform:'uppercase', marginTop:2}}>
@@ -2287,11 +2287,11 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
   const baseSepBg   = isLight ? '#FDFAF4' : 'rgba(8,12,20,.3)'
 
   return (
-    <div style={{display:'flex',border:`1.5px solid ${baseBorder}`,borderRadius:8,overflow:'hidden',background:baseBg,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+    <div style={{display:'flex',border:`1.5px solid ${baseBorder}`,borderRadius:8,overflow:'hidden',background:baseBg,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
       <select
         value={code}
         onChange={e => emit(e.target.value, local)}
-        style={{padding:'11px 10px',border:'none',background:baseSepBg,color:textColor,fontSize:13.5,fontWeight:600,cursor:'pointer',outline:'none',borderRight:`1px solid ${baseBorder}`,minWidth:110,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}
+        style={{padding:'11px 10px',border:'none',background:baseSepBg,color:textColor,fontSize:13.5,fontWeight:600,cursor:'pointer',outline:'none',borderRight:`1px solid ${baseBorder}`,minWidth:110,fontFamily:"'DM Sans',system-ui,sans-serif"}}
       >
         {COUNTRY_CODES.map(c => (
           <option key={c.code + c.name} value={c.code} style={{background:'#FFFFFF',color:'#080C14'}}>
@@ -2306,7 +2306,7 @@ function PhoneInput({ value, onChange, placeholder = '7XX XXX XXX', tone = 'ligh
         value={local}
         onChange={e => emit(code, e.target.value)}
         placeholder={placeholder}
-        style={{flex:1,padding:'11px 14px',border:'none',background:'transparent',color:textColor,caretColor:textColor,fontSize:14,outline:'none',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",minWidth:0,WebkitTextFillColor:textColor}}
+        style={{flex:1,padding:'11px 14px',border:'none',background:'transparent',color:textColor,caretColor:textColor,fontSize:14,outline:'none',fontFamily:"'DM Sans',system-ui,sans-serif",minWidth:0,WebkitTextFillColor:textColor}}
       />
     </div>
   )
@@ -2371,7 +2371,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
           {/* Quick-jump TOC */}
           <div style={{background:'#FDFAF4',border:'1px solid #F0E8D4',borderRadius:10,padding:'18px 20px',marginBottom:36}}>
             <div style={{fontSize:11,fontWeight:700,color:'#8B1A2E',letterSpacing:'.14em',textTransform:'uppercase',marginBottom:10}}>On this page</div>
-            <ol style={{margin:0,paddingLeft:18,columns:2,columnGap:24,fontSize:13,lineHeight:1.9,color:'#121928',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+            <ol style={{margin:0,paddingLeft:18,columns:2,columnGap:24,fontSize:13,lineHeight:1.9,color:'#121928',fontFamily:"'DM Sans',system-ui,sans-serif"}}>
               {sections.map((s, i) => (
                 <li key={i} style={{breakInside:'avoid',listStyleType:'decimal'}}>
                   <a href={`#sec-${i}`} style={{color:'#121928',textDecoration:'none',transition:'color .15s'}}
@@ -2386,10 +2386,10 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
 
           {sections.map((s, i) => (
             <section key={i} id={`sec-${i}`} style={{marginBottom:32,scrollMarginTop:96}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:'#080C14',marginBottom:12,letterSpacing:'-.005em'}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:'#080C14',marginBottom:12,letterSpacing:'-.005em'}}>
                 {s.h}
               </h2>
-              <p style={{fontSize:14.5,color:'#121928',lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",margin:0}}>
+              <p style={{fontSize:14.5,color:'#121928',lineHeight:1.85,fontFamily:"'DM Sans',system-ui,sans-serif",margin:0}}>
                 {s.p}
               </p>
             </section>
@@ -2409,7 +2409,7 @@ function LegalPage({ P, title, em, subtitle, effective, sections }) {
         {/* Other legal pages navigation */}
         <div style={{maxWidth:820,margin:'32px auto 0',display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}}>
           {[['privacy','Privacy Policy'],['terms','Terms of Service'],['cookies','Cookie Policy'],['gdpr','GDPR'],['child-protection','Child Protection'],['academic-integrity','Academic Integrity'],['ai-policy','AI Use'],['inclusion-policy','Inclusion'],['language-policy','Language']].map(([id,lbl]) => (
-            <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #F0E8D4',background:'#FFFFFF',color:'#121928',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",transition:'all .2s'}}
+            <button key={id} onClick={() => P(id)} style={{padding:'8px 16px',border:'1px solid #F0E8D4',background:'#FFFFFF',color:'#121928',fontSize:12.5,fontWeight:600,borderRadius:20,cursor:'pointer',fontFamily:"'DM Sans',system-ui,sans-serif",transition:'all .2s'}}
               onMouseEnter={e=>{e.currentTarget.style.borderColor='#8B1A2E';e.currentTarget.style.color='#8B1A2E'}}
               onMouseLeave={e=>{e.currentTarget.style.borderColor='#F0E8D4';e.currentTarget.style.color='#121928'}}>
               {lbl}
@@ -5580,7 +5580,7 @@ export default function LandingPage() {
                     color: openCategory === group.cat ? '#C9973A' : 'rgba(247,243,237,.92)',
                     fontWeight: openCategory === group.cat ? 700 : 600,
                     fontSize: 15,
-                    fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                    fontFamily:"'DM Sans',system-ui,sans-serif",
                     letterSpacing:'.02em',
                     transition:'color .15s',
                   }}>
@@ -5624,7 +5624,7 @@ export default function LandingPage() {
                           color: page === id ? '#FFFFFF' : 'rgba(247,243,237,.72)',
                           fontWeight: page === id ? 700 : 500,
                           fontSize: 14.5,
-                          fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                          fontFamily:"'DM Sans',system-ui,sans-serif",
                           cursor:'pointer',
                           transition:'background .15s, border-color .15s, color .15s',
                           borderRadius:6,
@@ -5655,7 +5655,7 @@ export default function LandingPage() {
                   padding:'13px',
                   fontWeight:700,
                   fontSize:14,
-                  fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                  fontFamily:"'DM Sans',system-ui,sans-serif",
                   cursor:'pointer',
                   display:'inline-flex',
                   alignItems:'center',
@@ -5677,7 +5677,7 @@ export default function LandingPage() {
                   padding:'14px',
                   fontWeight:800,
                   fontSize:14,
-                  fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                  fontFamily:"'DM Sans',system-ui,sans-serif",
                   cursor:'pointer',
                   display:'inline-flex',
                   alignItems:'center',
@@ -5889,7 +5889,7 @@ export default function LandingPage() {
                   ['40+ countries', 'Homeschool families served'],
                 ].map(([h, sub]) => (
                   <div key={h}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,lineHeight:1.25}}>{h}</div>
                     <div style={{fontSize:11.5,color:V.sl,marginTop:4,letterSpacing:'.02em'}}>{sub}</div>
                   </div>
                 ))}
@@ -5930,7 +5930,7 @@ export default function LandingPage() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12l5 5L20 7"/></svg>
                   </div>
                   <div style={{flex:1}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}} dangerouslySetInnerHTML={{__html:p}}/>
                   </div>
                 </div>
@@ -5971,7 +5971,7 @@ export default function LandingPage() {
                 <div key={h} className="reveal" style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px'}}>
                   <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
                     <div style={{width:24,height:24,borderRadius:'50%',background:`rgba(139,26,46,.1)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700}}>!</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.cr,margin:0,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.cr,margin:0,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                   </div>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}} dangerouslySetInnerHTML={{__html:p}}/>
                 </div>
@@ -6078,7 +6078,7 @@ export default function LandingPage() {
                   </div>
                   {/* Body */}
                   <div style={{padding:'22px 24px',display:'flex',flexDirection:'column',flex:1}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,marginBottom:10,lineHeight:1.25,fontWeight:400}}>{card.title}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',color:V.ink,marginBottom:10,lineHeight:1.25,fontWeight:400}}>{card.title}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,marginBottom:14}}>{card.desc}</p>
                     <ul style={{listStyle:'none',padding:0,margin:'0 0 16px',display:'flex',flexDirection:'column',gap:6}}>
                       {card.bullets.map((b, i) => (
@@ -6147,7 +6147,7 @@ export default function LandingPage() {
             `}</style>
             <div className="wrap" style={{textAlign:'center',marginBottom:44}}>
               <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>Inside Smartious</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,4vw,2.4rem)',fontWeight:400,color:'#fff',marginTop:10,marginBottom:14,lineHeight:1.2,letterSpacing:'-.01em'}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,4vw,2.4rem)',fontWeight:400,color:'#fff',marginTop:10,marginBottom:14,lineHeight:1.2,letterSpacing:'-.01em'}}>
                 The Moments That <em style={{color:V.gold3,fontStyle:'italic'}}>Define Smartious</em>
               </h2>
               <p style={{fontSize:14.5,color:'rgba(247,243,237,.7)',lineHeight:1.65,maxWidth:640,margin:'0 auto'}}>
@@ -6195,7 +6195,7 @@ export default function LandingPage() {
                 border:`1.5px solid ${V.gold3}`,
                 padding:'11px 26px',borderRadius:6,
                 fontSize:13,fontWeight:700,cursor:'pointer',
-                fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",
+                fontFamily:"'DM Sans',system-ui,sans-serif",
                 display:'inline-flex',alignItems:'center',gap:8,
               }}>
                 Read our story
@@ -6240,7 +6240,7 @@ export default function LandingPage() {
                   position:'relative',
                 }}>
                   <div style={{
-                    fontFamily:"'DM Serif Display',Georgia,serif",
+                    fontFamily:"'Source Serif 4',Georgia,serif",
                     fontSize:'2.2rem',
                     fontWeight:400,
                     color:V.gold2,
@@ -6345,7 +6345,7 @@ export default function LandingPage() {
                 <thead style={{background:V.ink,color:'#fff'}}>
                   <tr>
                     <th style={{padding:'14px 16px',textAlign:'left',fontWeight:700,fontSize:12,letterSpacing:'.04em',textTransform:'uppercase',color:'rgba(255,255,255,.7)'}}>Feature</th>
-                    <th style={{padding:'14px 16px',textAlign:'center',fontWeight:700,color:V.gold3,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:15}}>Smartious</th>
+                    <th style={{padding:'14px 16px',textAlign:'center',fontWeight:700,color:V.gold3,fontFamily:"'Source Serif 4',Georgia,serif",fontSize:15}}>Smartious</th>
                     <th style={{padding:'14px 16px',textAlign:'center',fontWeight:600,color:'rgba(255,255,255,.75)',fontSize:12.5}}>Traditional School</th>
                     <th style={{padding:'14px 16px',textAlign:'center',fontWeight:600,color:'rgba(255,255,255,.75)',fontSize:12.5}}>International School</th>
                   </tr>
@@ -6405,7 +6405,7 @@ export default function LandingPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Curriculum</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{c.label}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{c.label}</h3>
                   <p style={{fontSize:12,color:V.sl,margin:'0 0 10px',lineHeight:1.5}}>{c.detail}</p>
                   <div style={{borderTop:`1px solid ${V.bone3}`,paddingTop:10,marginTop:'auto'}}>
                     <div style={{fontSize:13,fontWeight:700,color:V.cr}}>{c.from}</div>
@@ -6447,7 +6447,7 @@ export default function LandingPage() {
               ].map(d => (
                 <div key={d.region} className="reveal" style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>Region</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}} dangerouslySetInnerHTML={{__html: d.region}}/>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}} dangerouslySetInnerHTML={{__html: d.region}}/>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{d.detail}</p>
                 </div>
               ))}
@@ -6598,7 +6598,7 @@ export default function LandingPage() {
           <section style={{background:V.bone,color:V.sl,padding:'48px 0',borderTop:`1px solid ${V.bone3}`}}>
             <div className="wrap">
               <div style={{maxWidth:1000,margin:'0 auto'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginBottom:16,lineHeight:1.3}}>International Homeschooling &amp; Online School</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginBottom:16,lineHeight:1.3}}>International Homeschooling &amp; Online School</h2>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:18}}>
                   Smartious Homeschool &amp; eSchool is a global online school founded in Kenya in 2018, serving students and families across 40+ countries. We provide live, internationally accredited education for students preparing for <strong style={{color:V.ink}}>Cambridge IGCSE</strong>, <strong style={{color:V.ink}}>Cambridge International A-Level</strong>, <strong style={{color:V.ink}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:V.ink}}>International Baccalaureate Diploma Programme (IB DP)</strong>, <strong style={{color:V.ink}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible), and the <strong style={{color:V.ink}}>American High School Curriculum</strong> with Advanced Placement (AP) coursework.
                 </p>
@@ -6714,7 +6714,7 @@ export default function LandingPage() {
                     borderRadius:10,
                     textAlign:'center',
                   }}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,lineHeight:1.3}}>Alfred Ouko</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,lineHeight:1.3}}>Alfred Ouko</div>
                     <div style={{fontSize:11.5,color:V.sl,marginTop:3,letterSpacing:'.04em'}}>Founder &amp; CEO · Mathematics &amp; Physics Teacher</div>
                   </div>
                 </div>
@@ -6722,7 +6722,7 @@ export default function LandingPage() {
                 {/* Story column — A LETTER FROM THE FOUNDER (first person) */}
                 <div className="reveal">
                   <div className="eyebrow" style={{marginBottom:12}}>A letter from our founder</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:8,letterSpacing:'-.01em'}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:8,letterSpacing:'-.01em'}}>
                     From <em style={{color:V.cr,fontStyle:'italic'}}>Alfred Ouko,</em>
                   </h2>
                   <div style={{fontSize:13,color:V.sl2,marginBottom:24,letterSpacing:'.06em',textTransform:'uppercase',fontWeight:700}}>
@@ -6746,7 +6746,7 @@ export default function LandingPage() {
 
                   {/* Signature */}
                   <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${V.bone3}`}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.cr,fontStyle:'italic',lineHeight:1}}>Alfred Ouko</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',color:V.cr,fontStyle:'italic',lineHeight:1}}>Alfred Ouko</div>
                     <div style={{fontSize:12,color:V.sl2,marginTop:6,fontWeight:600}}>Founder &amp; Chief Executive · Smartious Homeschool &amp; eSchool</div>
                     <div style={{fontSize:11.5,color:V.sl2,marginTop:10,fontStyle:'italic',lineHeight:1.6}}>
                       BEd Mathematics &amp; Physics — University of Nairobi (2022). Founded Smartious in 2018 while still an undergraduate, having begun private tutoring earlier that year. Lives and works in Nairobi.
@@ -6757,7 +6757,7 @@ export default function LandingPage() {
                   <div style={{marginTop:24,padding:'18px 22px',background:V.ink,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'space-between',gap:16,flexWrap:'wrap'}}>
                     <div style={{flex:'1 1 220px'}}>
                       <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:4}}>Download</div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:'#fff',lineHeight:1.2}}>Smartious Company Portfolio <em style={{color:V.gold3,fontStyle:'italic'}}>2026</em></div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.6)',marginTop:4}}>21 pages · PDF · 94 KB · The full picture of Smartious</div>
                     </div>
                     <a href="/smartious-portfolio-2026.pdf"
@@ -6839,7 +6839,7 @@ export default function LandingPage() {
                     padding:'18px 22px',
                   }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{m.year}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{m.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{m.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{m.p}</p>
                   </div>
                 </div>
@@ -6907,7 +6907,7 @@ export default function LandingPage() {
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M5 12l5 5L20 7"/></svg>
                   </div>
                   <div style={{flex:1}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,marginBottom:6,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.6,margin:0}}>{p}</p>
                   </div>
                 </div>
@@ -6934,7 +6934,7 @@ export default function LandingPage() {
                 `}</style>
                 <div className="reveal">
                   <div className="eyebrow" style={{marginBottom:12}}>Safeguarding</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:14,letterSpacing:'-.01em'}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem, 3.5vw, 2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.2,marginBottom:14,letterSpacing:'-.01em'}}>
                     A child\u2019s safety comes <em style={{color:V.cr,fontStyle:'italic'}}>before everything.</em>
                   </h2>
                   <div style={{width:60,height:2,background:V.cr,marginBottom:20}}/>
@@ -6994,7 +6994,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div className="reveal" style={{textAlign:'center',marginBottom:48}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:14}}>What we stand for</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem, 4.5vw, 3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,letterSpacing:'-.01em'}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem, 4.5vw, 3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,letterSpacing:'-.01em'}}>
                     Vision, mission <em style={{color:V.gold3,fontStyle:'italic'}}>&amp; values</em>
                   </h2>
                 </div>
@@ -7009,7 +7009,7 @@ export default function LandingPage() {
                   marginBottom:18,
                 }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:14}}>Our vision</div>
-                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2.1rem)',color:'#fff',lineHeight:1.3,margin:0,fontWeight:400,fontStyle:'italic'}}>
+                  <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2.1rem)',color:'#fff',lineHeight:1.3,margin:0,fontWeight:400,fontStyle:'italic'}}>
                     &ldquo;<span style={{color:V.gold3}}>A world where every learner, anywhere,</span> can access an education that meets them as an individual.&rdquo;
                   </p>
                 </div>
@@ -7024,7 +7024,7 @@ export default function LandingPage() {
                   marginBottom:36,
                 }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:12}}>Our mission</div>
-                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.15rem, 2vw, 1.45rem)',color:'#fff',lineHeight:1.45,margin:0,fontWeight:400}}>
+                  <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.15rem, 2vw, 1.45rem)',color:'#fff',lineHeight:1.45,margin:0,fontWeight:400}}>
                     To deliver premium homeschooling, online schooling and tuition that combines <em style={{color:V.gold3,fontStyle:'italic'}}>academic rigour</em> with <em style={{color:V.gold3,fontStyle:'italic'}}>deep personalisation</em> — built on the foundation of qualified, caring teachers, robust technology, and lasting relationships with the families we serve.
                   </p>
                 </div>
@@ -7058,8 +7058,8 @@ export default function LandingPage() {
                       }}
                       onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(201,151,58,.35)'; e.currentTarget.style.background = V.ink3; }}
                       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,.08)'; e.currentTarget.style.background = V.ink2; }}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.6rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{num}</div>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:12,fontWeight:400,lineHeight:1.2}}>{name}</h3>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.6rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{num}</div>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#fff',marginBottom:12,fontWeight:400,lineHeight:1.2}}>{name}</h3>
                         <div style={{width:32,height:2,background:V.cr2,marginBottom:14}}/>
                         <p style={{fontSize:13,color:'rgba(255,255,255,.7)',lineHeight:1.7,margin:0}}>{desc}</p>
                       </div>
@@ -7069,7 +7069,7 @@ export default function LandingPage() {
 
                 {/* Closing line + portfolio link */}
                 <div className="reveal" style={{textAlign:'center',marginTop:48,paddingTop:32,borderTop:'1px solid rgba(255,255,255,.1)'}}>
-                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontStyle:'italic',fontSize:'1.15rem',color:V.gold3,marginBottom:14}}>
+                  <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontStyle:'italic',fontSize:'1.15rem',color:V.gold3,marginBottom:14}}>
                     Education is the most consequential thing one generation passes to the next.
                   </p>
                   <p style={{fontSize:13,color:'rgba(255,255,255,.6)',marginBottom:18}}>
@@ -7138,7 +7138,7 @@ export default function LandingPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
                   <div style={{fontSize:20,marginBottom:4}}>{country.flag}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'.95rem',color:V.ink,fontWeight:400,lineHeight:1.3}}>{country.c}</div>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'.95rem',color:V.ink,fontWeight:400,lineHeight:1.3}}>{country.c}</div>
                   <div style={{fontSize:10.5,color:V.sl2,marginTop:3,lineHeight:1.4}}>{country.cities}</div>
                 </a>
               ))}
@@ -7199,7 +7199,7 @@ export default function LandingPage() {
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                 Real families only
               </div>
-              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:12,lineHeight:1.25,fontWeight:400}}>Share your <em style={{color:V.cr,fontStyle:'italic'}}>Smartious story</em></h3>
+              <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:12,lineHeight:1.25,fontWeight:400}}>Share your <em style={{color:V.cr,fontStyle:'italic'}}>Smartious story</em></h3>
               <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:20,maxWidth:540,margin:'0 auto 20px'}}>
                 If your family has used Smartious — for full homeschool, 1-on-1 tuition, IGCSE/IB/A-Level preparation, or anything else — we'd love to feature your story here (with your permission). Real testimonials from real families build trust for parents considering Smartious for their own children.
               </p>
@@ -7236,7 +7236,7 @@ export default function LandingPage() {
           <section style={{background:V.ink2,color:'rgba(247,243,237,.75)',padding:'48px 0',borderTop:'1px solid rgba(247,243,237,.06)'}}>
             <div className="wrap">
               <div style={{maxWidth:1000,margin:'0 auto'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:'#fff',marginBottom:16,lineHeight:1.3}}>About Smartious Homeschool</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:'#fff',marginBottom:16,lineHeight:1.3}}>About Smartious Homeschool</h2>
                 <p style={{fontSize:13.5,lineHeight:1.75,marginBottom:14}}>
                   Smartious Homeschool &amp; eSchool is an international online school founded in Nairobi, Kenya in 2018 by Alfred Ouko, a Mathematics and Physics teacher educated at the University of Nairobi (BEd Science, 2022). We provide live, internationally recognised education for students preparing for <strong style={{color:'#fff'}}>Cambridge IGCSE</strong>, <strong style={{color:'#fff'}}>Cambridge International A-Level</strong>, <strong style={{color:'#fff'}}>Pearson Edexcel International GCSE and A-Level</strong>, the <strong style={{color:'#fff'}}>International Baccalaureate Diploma Programme</strong>, <strong style={{color:'#fff'}}>Kenya CBC</strong> (KICD-aligned, KCSE-eligible) and the <strong style={{color:'#fff'}}>American High School Curriculum</strong> with Advanced Placement (AP).
                 </p>
@@ -7275,7 +7275,7 @@ export default function LandingPage() {
                   <div className="cc-body">
                     <div className="cc-tags">{c.tags.map(t => <span key={t} className="cc-tag">{t}</span>)}</div>
                     <div className="cc-meta">{c.meta.map(m => <span key={m}>{m}</span>)}</div>
-                    <div style={{marginTop:14,display:'flex',alignItems:'center',gap:6,color:c.gold?V.gold:V.cr,fontWeight:700,fontSize:13,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+                    <div style={{marginTop:14,display:'flex',alignItems:'center',gap:6,color:c.gold?V.gold:V.cr,fontWeight:700,fontSize:13,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
                       View full details
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                     </div>
@@ -7297,7 +7297,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',maxWidth:780,margin:'0 auto 40px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>How the curricula map together</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                 Your child's pathway, <em style={{color:V.cr}}>from age 6 to university</em>
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Every curriculum we offer fits into a recognised global pathway. Here is how the eight pathways line up against your child's age, and which qualifications they earn at each stage.</p>
@@ -7316,36 +7316,36 @@ export default function LandingPage() {
                   return (
                     <g key={age}>
                       <line x1={x} y1="52" x2={x} y2="60" stroke="#080C14" strokeWidth="1.5" opacity="0.5"/>
-                      <text x={x} y="40" textAnchor="middle" fontFamily="'Plus Jakarta Sans', sans-serif" fontWeight="700" fontSize="13" fill="#080C14">Age {age}</text>
+                      <text x={x} y="40" textAnchor="middle" fontFamily="'DM Sans',system-ui,sans-serif" fontWeight="700" fontSize="13" fill="#080C14">Age {age}</text>
                     </g>
                   )
                 })}
                 <rect x="60" y="78" width="840" height="42" rx="6" fill="#8B1A2E" opacity="0.92"/>
-                <text x="78" y="105" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Kenya CBC · KCSE</text>
+                <text x="78" y="105" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Kenya CBC · KCSE</text>
                 <text x="78" y="118" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.9">PRIMARY → JUNIOR → SENIOR SECONDARY</text>
                 <rect x="60" y="130" width="560" height="42" rx="6" fill="#2E3D55" opacity="0.85"/>
-                <text x="78" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">British National Curriculum</text>
+                <text x="78" y="157" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="14" fill="#FFFFFF">British National Curriculum</text>
                 <text x="78" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#FFFFFF" opacity="0.75">YEAR 1 → YEAR 9</text>
                 <rect x="620" y="130" width="140" height="42" rx="6" fill="#B8960C" opacity="0.95"/>
-                <text x="638" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#080C14">IGCSE / Edexcel</text>
+                <text x="638" y="157" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="13" fill="#080C14">IGCSE / Edexcel</text>
                 <text x="638" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#080C14" opacity="0.65">YEAR 10–11</text>
                 <rect x="760" y="130" width="140" height="42" rx="6" fill="#8B1A2E"/>
-                <text x="778" y="157" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#FFFFFF">A-Level</text>
+                <text x="778" y="157" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="13" fill="#FFFFFF">A-Level</text>
                 <text x="778" y="170" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A">YEAR 12–13</text>
                 <rect x="410" y="182" width="350" height="42" rx="6" fill="#121928" opacity="0.92"/>
-                <text x="428" y="209" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">IB Middle Years Programme</text>
+                <text x="428" y="209" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="14" fill="#FFFFFF">IB Middle Years Programme</text>
                 <text x="428" y="222" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.85">AGES 11–16</text>
                 <rect x="760" y="182" width="140" height="42" rx="6" fill="#8B1A2E"/>
-                <text x="778" y="209" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="13" fill="#FFFFFF">IB Diploma</text>
+                <text x="778" y="209" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="13" fill="#FFFFFF">IB Diploma</text>
                 <text x="778" y="222" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A">AGES 16–19</text>
                 <rect x="60" y="234" width="840" height="42" rx="6" fill="#0D1220" opacity="0.85"/>
-                <text x="78" y="261" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">American Curriculum</text>
+                <text x="78" y="261" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="14" fill="#FFFFFF">American Curriculum</text>
                 <text x="78" y="274" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#C9973A" opacity="0.85">K → GRADE 12 · HIGH SCHOOL DIPLOMA</text>
                 <rect x="410" y="286" width="490" height="42" rx="6" fill="url(#blendedGrad)"/>
-                <text x="428" y="313" fontFamily="'DM Serif Display', serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Smartious Blended <tspan fontFamily="'Fira Code', monospace" fontSize="9" letterSpacing="0.08em" fill="#C9973A" opacity="0.9">  ★ OUR SIGNATURE</tspan></text>
+                <text x="428" y="313" fontFamily="'Source Serif 4',Georgia,serif" fontWeight="700" fontSize="14" fill="#FFFFFF">Smartious Blended <tspan fontFamily="'Fira Code', monospace" fontSize="9" letterSpacing="0.08em" fill="#C9973A" opacity="0.9">  ★ OUR SIGNATURE</tspan></text>
                 <text x="428" y="326" fontFamily="'Fira Code', monospace" fontSize="10" letterSpacing="0.06em" fill="#FFFFFF" opacity="0.8">CAMBRIDGE + CBC + AI LITERACY · AGES 11–18</text>
                 <path d="M 900 348 L 920 348 M 916 344 L 920 348 L 916 352" stroke="#8B1A2E" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-                <text x="850" y="370" textAnchor="end" fontFamily="'DM Serif Display', serif" fontStyle="italic" fontWeight="700" fontSize="15" fill="#8B1A2E">University worldwide →</text>
+                <text x="850" y="370" textAnchor="end" fontFamily="'Source Serif 4',Georgia,serif" fontStyle="italic" fontWeight="700" fontSize="15" fill="#8B1A2E">University worldwide →</text>
                 <text x="850" y="388" textAnchor="end" fontFamily="'Fira Code', monospace" fontSize="9.5" letterSpacing="0.08em" fill="#2E3D55">UoN · STRATHMORE · USIU · OXFORD · MIT · TORONTO</text>
               </svg>
             </div>
@@ -7379,7 +7379,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={c.gold?{background:V.ink}:{}}>
               <div className="wrap">
                 <a className="lp-btnlink" href={pageToPath('curricula')} onClick={linkClick(() => P('curricula'))}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Curricula
                 </a>
@@ -7409,21 +7409,21 @@ export default function LandingPage() {
               )}
               {/* Overview */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'30px 32px',marginBottom:20}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
               </div>
 
               {/* Detail sections */}
               {d.sections.map((s,i) => (
                 <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{s.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{s.h}</h3>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>{s.p}</p>
                 </div>
               ))}
 
               {/* Subjects / tags */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
                 <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                   {c.tags.map(t => (
                     <span key={t} style={{padding:'6px 13px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:20,fontSize:12.5,fontWeight:600,color:V.ink2}}>{t}</span>
@@ -7441,13 +7441,13 @@ export default function LandingPage() {
 
               {/* Why choose this curriculum */}
               <div style={{background:c.gold?'linear-gradient(135deg,#121928,#0D1220)':V.cr,borderRadius:16,padding:'30px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:c.gold?V.gold3:V.white,marginBottom:10}}>Why choose {c.h}?</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:c.gold?V.gold3:V.white,marginBottom:10}}>Why choose {c.h}?</h3>
                 <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whyChoose}</p>
               </div>
 
               {/* Why Smartious for this curriculum */}
               <div style={{background:V.white,border:`2px solid ${V.gold}`,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.cr,marginBottom:10}}>Why Smartious is a top {c.h} provider</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.cr,marginBottom:10}}>Why Smartious is a top {c.h} provider</h3>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>
                   {d.whySmartious || `Smartious has taught the ${c.h} curriculum since 2018, with degree-qualified subject specialists, a full library of past papers and marking schemes, and a structured system of lesson planning, assessment and parent reporting. Families across Kenya and the diaspora choose Smartious for ${c.h} because it is delivered as a genuine, accredited school programme — online or at our Parklands, Nairobi centre — not informal tutoring. Every student is supported by the Mshauri AI tutor and a dedicated teacher, and prepared thoroughly for ${c.h} examinations.`}
                 </p>
@@ -7512,7 +7512,7 @@ export default function LandingPage() {
             <div className="pg-hero" style={{background:V.ink}}>
               <div className="wrap">
                 <a className="lp-btnlink" href={pageToPath('services')} onClick={linkClick(() => P('services'))}
-                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
+                  style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6}}>
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                   All Services
                 </a>
@@ -7527,7 +7527,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap" style={{maxWidth:860}}>
               {/* Overview */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'30px 32px',marginBottom:20}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:12}}>Overview</h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.85,margin:0}}>{d.overview}</p>
               </div>
 
@@ -7547,14 +7547,14 @@ export default function LandingPage() {
               {/* Detail sections */}
               {d.sections.map((sec,i) => (
                 <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{sec.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:10}}>{sec.h}</h3>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.85,margin:0}}>{sec.p}</p>
                 </div>
               ))}
 
               {/* At a glance */}
               <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:16,padding:'26px 32px',marginBottom:16}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',fontWeight:700,color:V.cr,marginBottom:14}}>At a glance</h3>
                 <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
                   {s.tags.map(t => (
                     <span key={t} style={{padding:'6px 13px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:20,fontSize:12.5,fontWeight:600,color:V.ink2}}>{t}</span>
@@ -7564,7 +7564,7 @@ export default function LandingPage() {
 
               {/* Why Smartious */}
               <div style={{background:V.cr,borderRadius:16,padding:'30px 32px',marginBottom:24}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.white,marginBottom:10}}>Why choose Smartious?</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.white,marginBottom:10}}>Why choose Smartious?</h3>
                 <p style={{fontSize:14.5,color:'rgba(255,255,255,.85)',lineHeight:1.85,margin:0}}>{d.whySmartious}</p>
               </div>
 
@@ -8354,7 +8354,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780}}>
                 <div className="eyebrow">Why families in {ctry.country} choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Real curriculum continuity. <em style={{color:V.cr}}>Real exam credentials.</em>
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.pains}</p>
@@ -8365,7 +8365,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Curricula in {ctry.country}</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
                   Globally recognised, <em style={{color:V.cr}}>locally available</em>
                 </h2>
               </div>
@@ -8387,13 +8387,13 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow">Legal &amp; Regulatory</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                   Homeschooling in {ctry.country}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:24}}>{ctry.regulation}</p>
 
                 <div className="eyebrow">Examination centres</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14}}>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14}}>
                   Where students sit their exams
                 </h3>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{ctry.examCentres}</p>
@@ -8408,7 +8408,7 @@ export default function LandingPage() {
                   <svg width="48" height="48" viewBox="0 0 24 24" fill={V.gold2} style={{opacity:.7,marginBottom:18}}>
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
-                  <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
+                  <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontStyle:'italic',lineHeight:1.5,color:'#fff',marginBottom:20}}>
                     "{ctry.testimonial}"
                   </p>
                   <div style={{fontSize:12,color:V.gold3,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase'}}>
@@ -8423,7 +8423,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Questions from {ctry.country} <em style={{color:V.cr}}>families</em>
                   </h2>
                 </div>
@@ -8449,7 +8449,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:24}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve in {ctry.country}</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Online learning, available <em style={{color:V.cr}}>everywhere</em>
                 </h2>
               </div>
@@ -8472,7 +8472,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyKenyans.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyKenyans.intro}</p>
@@ -8480,7 +8480,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyKenyans.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -8494,7 +8494,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:40,alignItems:'center',maxWidth:1100,margin:'0 auto'}} className="kenya-centre-grid">
                     <div>
                       <div className="eyebrow">Nairobi · Parklands</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                         {ctry.learningCentre.heading}
                       </h2>
                       <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:18}}>{ctry.learningCentre.intro}</p>
@@ -8533,7 +8533,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -8550,7 +8550,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.comparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.comparison.intro}</p>
@@ -8575,7 +8575,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.universities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.universities.intro}</p>
@@ -8583,7 +8583,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Kenya</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Local universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Local universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.universities.local.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -8592,7 +8592,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.universities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -8606,7 +8606,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Kenya</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pricingTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pricingTable.intro}</p>
@@ -8617,7 +8617,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.kes && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.kes}</div>}
@@ -8637,7 +8637,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:48,alignItems:'center',maxWidth:1000,margin:'0 auto'}} className="kenya-video-grid">
                     <div>
                       <div className="eyebrow" style={{color:V.gold3}}>Student voice</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,marginTop:8,marginBottom:14,lineHeight:1.25,color:'#fff'}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,marginTop:8,marginBottom:14,lineHeight:1.25,color:'#fff'}}>
                         Hear from a <em style={{color:V.gold3}}>Smartious student</em>
                       </h2>
                       <p style={{fontSize:14.5,color:'rgba(255,255,255,.78)',lineHeight:1.75,marginBottom:18}}>
@@ -8664,7 +8664,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Verified Google reviews</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.googleReviews.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.googleReviews.intro}</p>
@@ -8686,7 +8686,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UAE parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyExpats.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyExpats.intro}</p>
@@ -8694,7 +8694,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyExpats.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -8707,7 +8707,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -8724,7 +8724,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaeComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeComparison.intro}</p>
@@ -8749,7 +8749,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaeUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaeUniversities.intro}</p>
@@ -8757,7 +8757,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>UAE & Region</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.uaeUniversities.regional.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -8766,7 +8766,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.uaeUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -8781,7 +8781,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UAE</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.uaePricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.uaePricing.intro}</p>
@@ -8792,7 +8792,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.aed && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.aed}</div>}
@@ -8816,7 +8816,7 @@ export default function LandingPage() {
                   <div style={{maxWidth:980,margin:'0 auto'}}>
                     <div style={{textAlign:'center',marginBottom:36}}>
                       <div className="eyebrow" style={{justifyContent:'center'}}>The legal picture</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                         Is homeschooling <em style={{color:V.cr,fontStyle:'italic'}}>legal in the UAE?</em>
                       </h2>
                       <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
@@ -8885,7 +8885,7 @@ export default function LandingPage() {
                   <div style={{maxWidth:1200,margin:'0 auto'}}>
                     <div style={{textAlign:'center',marginBottom:36}}>
                       <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                         Best <em style={{color:V.cr,fontStyle:'italic'}}>homeschool providers</em> for UAE families
                       </h2>
                       <p style={{fontSize:14,color:V.sl,maxWidth:720,margin:'14px auto 0',lineHeight:1.7}}>
@@ -8945,7 +8945,7 @@ export default function LandingPage() {
                   <div style={{maxWidth:1000,margin:'0 auto'}}>
                     <div style={{textAlign:'center',marginBottom:36}}>
                       <div className="eyebrow" style={{justifyContent:'center'}}>Step-by-step</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                         How to start <em style={{color:V.cr,fontStyle:'italic'}}>homeschooling</em> in the UAE
                       </h2>
                       <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
@@ -8962,7 +8962,7 @@ export default function LandingPage() {
                         { n:'06', h:'Plan examination centres', p:'Cambridge, Edexcel and IB examinations are sat at registered centres in UAE — British Council Dubai, British Council Abu Dhabi, KHDA-approved centres, and specific schools that accept external candidates. We coordinate registration timing with your child\'s exam readiness.' },
                       ].map(s => (
                         <div key={s.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',display:'flex',gap:16,alignItems:'flex-start'}}>
-                          <div style={{flexShrink:0,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,minWidth:42}}>{s.n}</div>
+                          <div style={{flexShrink:0,fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,minWidth:42}}>{s.n}</div>
                           <div>
                             <h3 style={{fontSize:14.5,fontWeight:700,color:V.ink,marginBottom:5,lineHeight:1.3}}>{s.h}</h3>
                             <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0}}>{s.p}</p>
@@ -8982,7 +8982,7 @@ export default function LandingPage() {
                   <div style={{maxWidth:1100,margin:'0 auto'}}>
                     <div style={{textAlign:'center',marginBottom:36}}>
                       <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                         Where <em style={{color:V.cr,fontStyle:'italic'}}>UAE homeschoolers</em> go to university
                       </h2>
                       <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
@@ -9030,7 +9030,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from UK parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUk.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUk.intro}</p>
@@ -9038,7 +9038,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUk.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9051,7 +9051,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9068,7 +9068,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukComparison.intro}</p>
@@ -9093,7 +9093,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukUniversities.intro}</p>
@@ -9101,7 +9101,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>United Kingdom</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>UK universities (UCAS)</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>UK universities (UCAS)</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ukUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9110,7 +9110,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>International</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ukUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9124,7 +9124,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the UK</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ukPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ukPricing.intro}</p>
@@ -9135,7 +9135,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.gbp && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.gbp}</div>}
@@ -9160,7 +9160,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Nigerian parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyNigerians.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyNigerians.intro}</p>
@@ -9168,7 +9168,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyNigerians.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9181,7 +9181,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9198,7 +9198,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaComparison.intro}</p>
@@ -9223,7 +9223,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaUniversities.intro}</p>
@@ -9231,7 +9231,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Nigeria</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Nigerian universities (JAMB)</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Nigerian universities (JAMB)</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.nigeriaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9240,7 +9240,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.nigeriaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9255,7 +9255,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Nigeria</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.nigeriaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.nigeriaPricing.intro}</p>
@@ -9266,7 +9266,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -9290,7 +9290,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in the USA</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUs.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUs.intro}</p>
@@ -9298,7 +9298,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUs.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9311,7 +9311,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>African diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
@@ -9319,7 +9319,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
                       <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -9332,7 +9332,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9349,7 +9349,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.usaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.usaComparison.intro}</p>
@@ -9374,7 +9374,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in the USA</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.usaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.usaPricing.intro}</p>
@@ -9385,7 +9385,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -9409,7 +9409,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in Canada</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyCanada.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyCanada.intro}</p>
@@ -9417,7 +9417,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyCanada.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9430,7 +9430,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>African & Caribbean diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
@@ -9438,7 +9438,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
                       <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -9451,7 +9451,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Provincial homeschool guide</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.provinceTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.provinceTable.intro}</p>
@@ -9476,7 +9476,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9493,7 +9493,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaComparison.intro}</p>
@@ -9518,7 +9518,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaUniversities.intro}</p>
@@ -9526,7 +9526,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Canada</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Canadian universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Canadian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.canadaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9535,7 +9535,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.canadaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9549,7 +9549,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Canada</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.canadaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.canadaPricing.intro}</p>
@@ -9560,7 +9560,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.cad && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.cad}</div>}
@@ -9585,7 +9585,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Who Smartious is for in Australia</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyAustralia.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyAustralia.intro}</p>
@@ -9593,7 +9593,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyAustralia.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9606,7 +9606,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center',color:V.gold3}}>South Asian & African diaspora · The bridge between two worlds</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.diasporaSection.heading}
                     </h2>
                     <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.8}}>{ctry.diasporaSection.intro}</p>
@@ -9614,7 +9614,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
                     {ctry.diasporaSection.points.map((pt,i) => (
                       <div key={i} style={{background:'rgba(255,255,255,.06)',border:'1px solid rgba(201,151,58,.25)',borderRadius:14,padding:'22px 20px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.gold3,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:13.5,color:'rgba(255,255,255,.82)',lineHeight:1.7}}>{pt.p}</p>
@@ -9627,7 +9627,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>State homeschool guide</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.stateTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.stateTable.intro}</p>
@@ -9654,7 +9654,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9671,7 +9671,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaComparison.intro}</p>
@@ -9696,7 +9696,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaUniversities.intro}</p>
@@ -9704,7 +9704,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Australia · Group of Eight</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Australian universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Australian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.australiaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9713,7 +9713,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.australiaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9727,7 +9727,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Australia</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.australiaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.australiaPricing.intro}</p>
@@ -9738,7 +9738,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.aud && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.aud}</div>}
@@ -9763,7 +9763,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Bahrain parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyBahrain.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyBahrain.intro}</p>
@@ -9771,7 +9771,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyBahrain.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -9784,7 +9784,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -9801,7 +9801,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainComparison.intro}</p>
@@ -9826,7 +9826,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainUniversities.intro}</p>
@@ -9834,7 +9834,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Bahrain & Gulf</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Regional universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.bahrainUniversities.regional.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9843,7 +9843,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.bahrainUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -9857,7 +9857,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Bahrain</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.bahrainPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.bahrainPricing.intro}</p>
@@ -9868,7 +9868,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.bhd && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.bhd}</div>}
@@ -9893,7 +9893,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Doha parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyQatar.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{ctry.whyQatar.intro}</p>
@@ -9904,7 +9904,7 @@ export default function LandingPage() {
                         background:V.bone,border:'1px solid '+V.line,borderRadius:14,
                         padding:'22px 22px',
                       }}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{p.h}</h3>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{p.h}</h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{p.p}</p>
                       </div>
                     ))}
@@ -9915,7 +9915,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarUniversities.intro}</p>
@@ -9937,7 +9937,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Pricing for Qatar</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.qatarPricing.intro}</p>
@@ -9952,7 +9952,7 @@ export default function LandingPage() {
                         borderTop:i===0?'none':'1px solid '+V.line,
                         alignItems:'center',
                       }} className="qatar-pricing-row">
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{r.tier}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{r.tier}</div>
                         <div style={{fontSize:13,color:V.sl,lineHeight:1.55}}>{r.detail}</div>
                         <div style={{fontSize:14,fontWeight:800,color:V.cr,textAlign:'right'}}>{r.priceUSD}</div>
                         <div style={{fontSize:12,color:V.sl3,textAlign:'right'}}>{r.priceLocal}</div>
@@ -9969,7 +9969,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Comparison</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.qatarComparison.heading}
                     </h2>
                     <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.qatarComparison.intro}</p>
@@ -10001,7 +10001,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:28,maxWidth:760,margin:'0 auto 28px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Beyond academics</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{ctry.activitiesTeaser.intro}</p>
@@ -10033,7 +10033,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Pakistani parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyPakistan.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyPakistan.intro}</p>
@@ -10041,7 +10041,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyPakistan.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -10054,7 +10054,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -10071,7 +10071,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanComparison.intro}</p>
@@ -10096,7 +10096,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanUniversities.intro}</p>
@@ -10104,7 +10104,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Pakistan</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Pakistani universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Pakistani universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.pakistanUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10113,7 +10113,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.pakistanUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10127,7 +10127,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Pakistan</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.pakistanPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.pakistanPricing.intro}</p>
@@ -10138,7 +10138,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.pkr && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.pkr}</div>}
@@ -10163,7 +10163,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from SA parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whySouthAfrica.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whySouthAfrica.intro}</p>
@@ -10171,7 +10171,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whySouthAfrica.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -10184,7 +10184,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Matric pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saMatricTable.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saMatricTable.intro}</p>
@@ -10211,7 +10211,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -10228,7 +10228,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saComparison.intro}</p>
@@ -10253,7 +10253,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saUniversities.intro}</p>
@@ -10261,7 +10261,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>South Africa</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>SA universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>SA universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.saUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10270,7 +10270,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.saUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10284,7 +10284,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in South Africa</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.saPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.saPricing.intro}</p>
@@ -10295,7 +10295,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.zar && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.zar}</div>}
@@ -10320,7 +10320,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Kampala parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyUganda.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyUganda.intro}</p>
@@ -10328,7 +10328,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyUganda.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -10341,7 +10341,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Honest regulatory framing</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       Two setups for Ugandan families
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -10351,7 +10351,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Setup 1 · Ugandan citizen families</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Dual enrolment</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Dual enrolment</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Child enrolled at a local Ugandan or international school for formal registration with the Ministry of Education</li>
                         <li style={{paddingBottom:10}}>Local school handles UNEB or international exam pathway compliance</li>
@@ -10361,7 +10361,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Setup 2 · Expat & globally mobile families</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Primary online enrolment</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Primary online enrolment</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Expat children resident in Uganda or Ugandan families with international plans</li>
                         <li style={{paddingBottom:10}}>Smartious is the primary school — Cambridge, A-Level, IB or Edexcel pathway</li>
@@ -10379,7 +10379,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -10396,7 +10396,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaComparison.intro}</p>
@@ -10421,7 +10421,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaUniversities.intro}</p>
@@ -10429,7 +10429,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Uganda</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Ugandan universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Ugandan universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ugandaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10438,7 +10438,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.ugandaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10452,7 +10452,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Uganda</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.ugandaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.ugandaPricing.intro}</p>
@@ -10463,7 +10463,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.ugx && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.ugx}</div>}
@@ -10488,7 +10488,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Mogadishu parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whySomalia.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whySomalia.intro}</p>
@@ -10496,7 +10496,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whySomalia.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -10509,7 +10509,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone,padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -10526,7 +10526,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaComparison.intro}</p>
@@ -10551,7 +10551,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaUniversities.intro}</p>
@@ -10559,7 +10559,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Somalia</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Somali universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Somali universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.somaliaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10568,7 +10568,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.somaliaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10582,7 +10582,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Somalia</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.somaliaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.somaliaPricing.intro}</p>
@@ -10593,7 +10593,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                           </div>
@@ -10617,7 +10617,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:44,maxWidth:780,margin:'0 auto 44px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we hear from Dar es Salaam parents</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.whyTanzania.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8}}>{ctry.whyTanzania.intro}</p>
@@ -10625,7 +10625,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:20,maxWidth:1100,margin:'0 auto'}}>
                     {ctry.whyTanzania.points.map((pt,i) => (
                       <div key={i} style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
-                        <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
+                        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>
                           {pt.h}
                         </h3>
                         <p style={{fontSize:14,color:V.sl,lineHeight:1.7}}>{pt.p}</p>
@@ -10638,7 +10638,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:820,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Honest pathway framing</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       NECTA, Cambridge and the Tanzanian pathway choice
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -10648,7 +10648,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>NECTA pathway · Not Smartious</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian national examinations</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian national examinations</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>PSLE (Primary), CSEE (O-Level), ACSEE (A-Level)</li>
                         <li style={{paddingBottom:10}}>Delivered only at NECTA-registered Tanzanian schools</li>
@@ -10658,7 +10658,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Cambridge pathway · Smartious delivers</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International qualifications</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International qualifications</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0,fontSize:14,color:V.sl,lineHeight:1.7}}>
                         <li style={{paddingBottom:10}}>Cambridge IGCSE (O-Level equivalent) and Cambridge A-Level</li>
                         <li style={{paddingBottom:10}}>Or Pearson Edexcel International or IB Diploma</li>
@@ -10676,7 +10676,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff',padding:'56px 0'}}><div className="wrap">
                   <div style={{maxWidth:760,margin:'0 auto',textAlign:'center'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Wednesday enrichment</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.3}}>
                       {ctry.activitiesTeaser.heading}
                     </h2>
                     <p style={{fontSize:15,color:V.sl,lineHeight:1.8,marginBottom:22}}>{ctry.activitiesTeaser.body}</p>
@@ -10693,7 +10693,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>How we compare</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaComparison.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaComparison.intro}</p>
@@ -10718,7 +10718,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:'#fff'}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>University pathways</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaUniversities.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaUniversities.intro}</p>
@@ -10726,7 +10726,7 @@ export default function LandingPage() {
                   <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="kenya-uni-grid">
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>Tanzania</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>Tanzanian universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.tanzaniaUniversities.domestic.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10735,7 +10735,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'26px 24px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:10}}>Worldwide</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:14}}>International universities</h3>
                       <ul style={{listStyle:'none',padding:0,margin:0}}>
                         {ctry.tanzaniaUniversities.international.map((u,i) => (
                           <li key={i} style={{padding:'7px 0',fontSize:14,color:V.sl,borderTop:i===0?'none':'1px solid '+V.line}}>{u}</li>
@@ -10749,7 +10749,7 @@ export default function LandingPage() {
                 <section className="sec" style={{background:V.bone}}><div className="wrap">
                   <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Fees in Tanzania</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                       {ctry.tanzaniaPricing.heading}
                     </h2>
                     <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{ctry.tanzaniaPricing.intro}</p>
@@ -10760,7 +10760,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:12,paddingBottom:12,borderBottom:'1px solid '+V.line}}>{m.mode}</div>
                         {m.plans.map((p,j) => (
                           <div key={j} style={{paddingBottom:14,marginBottom:14,borderBottom:j===m.plans.length-1?'none':'1px solid '+V.line}}>
-                            <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
+                            <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:3}}>{p.name}</div>
                             <div style={{fontSize:12,color:V.sl3,marginBottom:6}}>{p.who}</div>
                             <div style={{fontSize:18,fontWeight:800,color:V.cr,letterSpacing:'-.01em'}}>USD {p.usd}</div>
                             {p.tzs && <div style={{fontSize:12,color:V.sl3,marginTop:2}}>{p.tzs}</div>}
@@ -10780,7 +10780,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
                 Ready to enrol your child in <em style={{color:V.gold2}}>{ctry.country}?</em>
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -10833,7 +10833,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>The key difference</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.25}}>
                   {cmp.keyDifference.split('.')[0]}.
                   {cmp.keyDifference.includes('.') && (
                     <em style={{color:V.cr,display:'block',marginTop:6}}>{cmp.keyDifference.split('.').slice(1).join('.').trim()}</em>
@@ -10848,7 +10848,7 @@ export default function LandingPage() {
               <section className="sec" style={{background:'#fff'}}><div className="wrap">
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>From our community</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>
                     {cmp.testimonial.title}
                   </h2>
                   <p style={{fontSize:13.5,color:V.sl,maxWidth:540,margin:'10px auto 0',lineHeight:1.7}}>
@@ -10864,7 +10864,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Side by side</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Feature <em style={{color:V.cr}}>comparison</em>
                 </h2>
               </div>
@@ -10897,7 +10897,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:'#fff'}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow">What {cmp.competitor} does well</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:24}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:24}}>
                   Genuine strengths to consider
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
@@ -10915,7 +10915,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.ink,color:'#fff'}}><div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div className="eyebrow" style={{color:V.gold2}}>Where Smartious differs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:24}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:'#fff',marginTop:8,marginBottom:24}}>
                   What you get with <em style={{color:V.gold3}}>Smartious</em>
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(280px, 1fr))',gap:14}}>
@@ -10942,7 +10942,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Which is right for you</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                   Honest <em style={{color:V.cr}}>recommendations</em>
                 </h2>
                 <p style={{fontSize:13.5,color:V.sl,maxWidth:580,margin:'10px auto 0',lineHeight:1.7}}>
@@ -10956,7 +10956,7 @@ export default function LandingPage() {
                     borderTop:'4px solid '+(i===0?V.sl2:V.cr),
                     borderRadius:8,
                   }}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>
                       {b.who}
                     </h3>
                     <ul style={{listStyle:'none',padding:0,margin:0}}>
@@ -10984,7 +10984,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Smartious vs {cmp.competitor} <em style={{color:V.cr}}>FAQs</em>
                   </h2>
                 </div>
@@ -11007,7 +11007,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
                 Ready to see Smartious in <em style={{color:V.gold2}}>action?</em>
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -11048,7 +11048,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Clear fees for every family</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Fees, <em style={{color:V.gold3,fontStyle:'italic'}}>simply</em> stated
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720,margin:'0 auto 24px'}}>
@@ -11076,7 +11076,7 @@ export default function LandingPage() {
                 ].map(s => (
                   <div key={s.h} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
                     <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:10}}>{s.h}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{s.v}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{s.v}</div>
                     <div style={{fontSize:13,color:V.sl2,lineHeight:1.55}}>{s.sub}</div>
                   </div>
                 ))}
@@ -11093,7 +11093,7 @@ export default function LandingPage() {
             <div style={{maxWidth:720,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Request Personalized Pricing</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
                   Tell us about your family
                 </h2>
                 <p style={{fontSize:15,color:V.sl2,lineHeight:1.6,maxWidth:560,margin:'0 auto'}}>
@@ -11104,7 +11104,7 @@ export default function LandingPage() {
               {pricingRequestSent ? (
                 <div style={{background:V.bone,border:`1px solid ${V.gold3}`,borderRadius:12,padding:'36px 28px',textAlign:'center'}}>
                   <div style={{fontSize:44,marginBottom:12}}>✓</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginBottom:10}}>Request received</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginBottom:10}}>Request received</h3>
                   <p style={{fontSize:14,color:V.sl2,lineHeight:1.6,maxWidth:480,margin:'0 auto'}}>
                     Thank you. Our admissions team has received your request and will email a personalized quote to <strong>{pricingRequestEmail}</strong> within 24 hours (usually much sooner).
                   </p>
@@ -11205,7 +11205,7 @@ export default function LandingPage() {
             <div style={{maxWidth:920,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>What every family gets</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Included in every Smartious enrolment
                 </h2>
               </div>
@@ -11250,7 +11250,7 @@ export default function LandingPage() {
                 <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
                   <span aria-hidden="true">🇺🇸</span> K-12 Online School &amp; Homeschool in the USA
                 </h1>
-                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
+                <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
                 </p>
@@ -11277,7 +11277,7 @@ export default function LandingPage() {
                     ['From $423/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.65)',marginTop:6,letterSpacing:'.04em'}}>{l}</div>
                     </div>
                   ))}
@@ -11291,7 +11291,7 @@ export default function LandingPage() {
             <div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>The current options</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:18}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:18}}>
                   Most American homeschool platforms <em style={{color:V.cr,fontStyle:'italic'}}>aren't actually schools.</em>
                 </h2>
                 <p style={{fontSize:16,color:V.sl,lineHeight:1.75,maxWidth:720,margin:'0 auto'}}>
@@ -11309,7 +11309,7 @@ export default function LandingPage() {
                   {h:'"Where are the international options?"', p:'Globally-mobile American families need credentials that travel. IGCSE and A-Level are recognised by every major university worldwide. Most US providers don\'t offer them.'},
                 ].map(c => (
                   <div key={c.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,fontStyle:'italic',marginBottom:10,fontWeight:400}}>{c.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,fontStyle:'italic',marginBottom:10,fontWeight:400}}>{c.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
                   </div>
                 ))}
@@ -11323,7 +11323,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1200,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Side-by-side</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Smartious vs. the <em style={{color:V.cr,fontStyle:'italic'}}>biggest US providers</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11383,7 +11383,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Built for families who <em style={{color:V.cr,fontStyle:'italic'}}>refuse to compromise.</em>
                   </h2>
                 </div>
@@ -11398,8 +11398,8 @@ export default function LandingPage() {
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{c.n}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,fontWeight:400,marginBottom:12,lineHeight:1.25}}>{c.h}</h3>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.8rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{c.n}</div>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,fontWeight:400,marginBottom:12,lineHeight:1.25}}>{c.h}</h3>
                       <div style={{width:32,height:2,background:V.cr,marginBottom:14}}/>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
                     </div>
@@ -11415,7 +11415,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Live classes across US time zones</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Our schedule fits <em style={{color:V.cr,fontStyle:'italic'}}>your morning.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11469,7 +11469,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Pricing · In USD</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Less than half of <em style={{color:V.cr,fontStyle:'italic'}}>premium US alternatives.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11493,9 +11493,9 @@ export default function LandingPage() {
                         <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 12px',borderRadius:99}}>★ Most popular</div>
                       )}
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color: t.popular ? V.gold3 : V.sl2, marginBottom:12, marginTop: t.popular ? 8 : 0}}>Online / Virtual</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.55rem',fontWeight:400,color: t.popular ? '#fff' : V.ink, marginBottom:16}}>{t.tier}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.55rem',fontWeight:400,color: t.popular ? '#fff' : V.ink, marginBottom:16}}>{t.tier}</h3>
                       <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:8}}>
-                        <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color: t.popular ? V.gold3 : V.cr, lineHeight:1, fontWeight:400}}>{t.price}</span>
+                        <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.8rem',color: t.popular ? V.gold3 : V.cr, lineHeight:1, fontWeight:400}}>{t.price}</span>
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
@@ -11532,7 +11532,7 @@ export default function LandingPage() {
               <div style={{maxWidth:960,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>How enrolment works</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Four <em style={{color:V.cr,fontStyle:'italic'}}>simple steps.</em>
                   </h2>
                 </div>
@@ -11545,8 +11545,8 @@ export default function LandingPage() {
                     {n:'4',h:'First live class',p:'Within 7-14 days. Your child joins their first live class. We check in after week 1, week 4, and monthly thereafter.'},
                   ].map(s => (
                     <div key={s.n} style={{textAlign:'center',padding:'8px 16px'}}>
-                      <div style={{width:54,height:54,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',margin:'0 auto 16px'}}>{s.n}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:10,fontWeight:400,lineHeight:1.3}}>{s.h}</h3>
+                      <div style={{width:54,height:54,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',margin:'0 auto 16px'}}>{s.n}</div>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:10,fontWeight:400,lineHeight:1.3}}>{s.h}</h3>
                       <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65}}>{s.p}</p>
                     </div>
                   ))}
@@ -11561,7 +11561,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Questions American families ask</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Frequently <em style={{color:V.cr,fontStyle:'italic'}}>asked.</em>
                   </h2>
                 </div>
@@ -11593,7 +11593,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.cr,marginBottom:14}}>Find your state</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:10,lineHeight:1.15}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:10,lineHeight:1.15}}>
                   State-specific homeschool guides for <em style={{color:V.cr}}>your family</em>
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:600,margin:'0 auto'}}>
@@ -11619,7 +11619,7 @@ export default function LandingPage() {
                           boxShadow:'0 2px 4px rgba(0,0,0,.08)',
                         }}>{st.abbr}</span>
                       </div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{st.name}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{st.name}</div>
                       {st.pop && <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{st.pop} families</div>}
                       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                         <span style={{fontSize:10,padding:'3px 8px',background:V.bone3,borderRadius:99,color:V.sl2,fontWeight:600}}>{st.difficulty}</span>
@@ -11641,7 +11641,7 @@ export default function LandingPage() {
             <div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:18}}>Ready to begin?</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:18}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:18}}>
                   Talk to us. <em style={{color:V.gold3,fontStyle:'italic'}}>It's free.</em>
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.75,marginBottom:30,maxWidth:600,margin:'0 auto 30px'}}>
@@ -11684,7 +11684,7 @@ export default function LandingPage() {
                 <h1 style={{display:'inline-flex',alignItems:'center',gap:8,background:'rgba(201,151,58,.15)',color:V.gold3,padding:'7px 14px',borderRadius:99,fontSize:11.5,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',margin:'0 0 20px',fontFamily:'inherit',lineHeight:1.4}}>
                   <span aria-hidden="true">🇨🇦</span> Online OSSD School &amp; Homeschool in Canada
                 </h1>
-                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
+                <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.4rem, 6vw, 4rem)',fontWeight:400,color:'#fff',lineHeight:1.02,marginTop:0,marginBottom:22,letterSpacing:'-.015em'}}>
                   Real teachers. <em style={{color:V.gold3,fontStyle:'italic'}}>Real rigour.</em><br/>
                   Real college pathways.
                 </p>
@@ -11711,7 +11711,7 @@ export default function LandingPage() {
                     ['From $423/mo','Starting price'],
                   ].map(([n,l]) => (
                     <div key={l}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1}}>{n}</div>
                       <div style={{fontSize:11.5,color:'rgba(255,255,255,.65)',marginTop:6,letterSpacing:'.04em'}}>{l}</div>
                     </div>
                   ))}
@@ -11725,7 +11725,7 @@ export default function LandingPage() {
             <div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>The current options</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:18}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:18}}>
                   Most Canadian and international homeschool platforms <em style={{color:V.cr,fontStyle:'italic'}}>aren't actually schools.</em>
                 </h2>
                 <p style={{fontSize:16,color:V.sl,lineHeight:1.75,maxWidth:720,margin:'0 auto'}}>
@@ -11743,7 +11743,7 @@ export default function LandingPage() {
                   {h:'"Where are the international options?"', p:'Globally-mobile Canadian families need credentials that travel. IGCSE and A-Level are recognised by every major university worldwide. Most Canadian and US providers don\'t offer them.'},
                 ].map(c => (
                   <div key={c.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,fontStyle:'italic',marginBottom:10,fontWeight:400}}>{c.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,fontStyle:'italic',marginBottom:10,fontWeight:400}}>{c.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
                   </div>
                 ))}
@@ -11757,7 +11757,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1200,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Side-by-side</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Smartious vs. the <em style={{color:V.cr,fontStyle:'italic'}}>biggest US providers</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11817,7 +11817,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Built for families who <em style={{color:V.cr,fontStyle:'italic'}}>refuse to compromise.</em>
                   </h2>
                 </div>
@@ -11832,8 +11832,8 @@ export default function LandingPage() {
                     {n:'06',h:'Real founder access',p:'Smartious is founder-led. Alfred Ouko personally interviews every family who joins. If something breaks, you can WhatsApp the founder. No call centres. No outsourced support.'},
                   ].map(c => (
                     <div key={c.n} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'26px 28px'}}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{c.n}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,fontWeight:400,marginBottom:12,lineHeight:1.25}}>{c.h}</h3>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.8rem',color:V.gold3,lineHeight:1,marginBottom:8,fontWeight:400}}>{c.n}</div>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,fontWeight:400,marginBottom:12,lineHeight:1.25}}>{c.h}</h3>
                       <div style={{width:32,height:2,background:V.cr,marginBottom:14}}/>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
                     </div>
@@ -11849,7 +11849,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Live classes across US time zones</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Our schedule fits <em style={{color:V.cr,fontStyle:'italic'}}>your morning.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11903,7 +11903,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Pricing · In CAD</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12,marginBottom:14}}>
                     Less than half of <em style={{color:V.cr,fontStyle:'italic'}}>premium US alternatives.</em>
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,maxWidth:680,margin:'0 auto',lineHeight:1.7}}>
@@ -11927,9 +11927,9 @@ export default function LandingPage() {
                         <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',padding:'5px 12px',borderRadius:99}}>★ Most popular</div>
                       )}
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color: t.popular ? V.gold3 : V.sl2, marginBottom:12, marginTop: t.popular ? 8 : 0}}>Online / Virtual</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.55rem',fontWeight:400,color: t.popular ? '#fff' : V.ink, marginBottom:16}}>{t.tier}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.55rem',fontWeight:400,color: t.popular ? '#fff' : V.ink, marginBottom:16}}>{t.tier}</h3>
                       <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:8}}>
-                        <span style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.8rem',color: t.popular ? V.gold3 : V.cr, lineHeight:1, fontWeight:400}}>{t.price}</span>
+                        <span style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.8rem',color: t.popular ? V.gold3 : V.cr, lineHeight:1, fontWeight:400}}>{t.price}</span>
                         <span style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.6)' : V.sl}}>{t.sub}</span>
                       </div>
                       <p style={{fontSize:13,color: t.popular ? 'rgba(255,255,255,.75)' : V.sl, lineHeight:1.6, marginBottom:22}}>{t.desc}</p>
@@ -11966,7 +11966,7 @@ export default function LandingPage() {
               <div style={{maxWidth:960,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:42}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>How enrolment works</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Four <em style={{color:V.cr,fontStyle:'italic'}}>simple steps.</em>
                   </h2>
                 </div>
@@ -11979,8 +11979,8 @@ export default function LandingPage() {
                     {n:'4',h:'First live class',p:'Within 7-14 days. Your child joins their first live class. We check in after week 1, week 4, and monthly thereafter.'},
                   ].map(s => (
                     <div key={s.n} style={{textAlign:'center',padding:'8px 16px'}}>
-                      <div style={{width:54,height:54,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',margin:'0 auto 16px'}}>{s.n}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:10,fontWeight:400,lineHeight:1.3}}>{s.h}</h3>
+                      <div style={{width:54,height:54,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',margin:'0 auto 16px'}}>{s.n}</div>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:10,fontWeight:400,lineHeight:1.3}}>{s.h}</h3>
                       <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65}}>{s.p}</p>
                     </div>
                   ))}
@@ -11995,7 +11995,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Questions Canadian families ask</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginTop:12}}>
                     Frequently <em style={{color:V.cr,fontStyle:'italic'}}>asked.</em>
                   </h2>
                 </div>
@@ -12027,7 +12027,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.cr,marginBottom:14}}>Find your state</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:10,lineHeight:1.15}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:10,lineHeight:1.15}}>
                   State-specific homeschool guides for <em style={{color:V.cr}}>your family</em>
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:600,margin:'0 auto'}}>
@@ -12053,7 +12053,7 @@ export default function LandingPage() {
                           boxShadow:'0 2px 4px rgba(0,0,0,.08)',
                         }}>{pr.abbr}</span>
                       </div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{pr.name}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{pr.name}</div>
                       <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{pr.pop} families</div>
                       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                         <span style={{fontSize:10,padding:'3px 8px',background:V.bone3,borderRadius:99,color:V.sl2,fontWeight:600}}>{pr.difficulty}</span>
@@ -12074,7 +12074,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1080}}>
               <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.cr,marginBottom:12}}>Provincial funding deep-dives</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:14}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',color:V.ink,fontWeight:400,marginBottom:14}}>
                   Three provinces, three funding models — explained in plain language
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.65}}>
@@ -12099,11 +12099,11 @@ export default function LandingPage() {
                         fontSize:13,fontWeight:800,letterSpacing:'.05em',
                       }}>{f.abbr}</span>
                       <div>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,color:V.ink}}>{f.name}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:18,color:V.ink}}>{f.name}</div>
                         <div style={{fontSize:11,color:V.sl,marginTop:2}}>{f.model}</div>
                       </div>
                     </div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:24,color:f.color,fontWeight:400,marginBottom:8}}>{f.amount}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,color:f.color,fontWeight:400,marginBottom:8}}>{f.amount}</div>
                     <div style={{color:V.cr,fontSize:13,fontWeight:600,marginTop:8}}>Read full guide →</div>
                   </a>
                 ))}
@@ -12117,7 +12117,7 @@ export default function LandingPage() {
             <div className="wrap">
               <div style={{maxWidth:780,margin:'0 auto',textAlign:'center'}}>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.18em',textTransform:'uppercase',color:V.gold3,marginBottom:18}}>Ready to begin?</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:18}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:18}}>
                   Talk to us. <em style={{color:V.gold3,fontStyle:'italic'}}>It's free.</em>
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.75,marginBottom:30,maxWidth:600,margin:'0 auto 30px'}}>
@@ -12162,7 +12162,7 @@ export default function LandingPage() {
                 <span style={{display:'inline-block',width:18,height:12,background:s.accentColor,borderRadius:2}}/>
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
                 {US_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
@@ -12217,7 +12217,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,padding:'72px 0'}}>
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>The Smartious offer</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:14,fontWeight:400}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:14,fontWeight:400}}>
                 Why <em style={{color:V.cr}}>{s.name}</em> families choose Smartious
               </h2>
               <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:36,maxWidth:740}}>
@@ -12235,10 +12235,10 @@ export default function LandingPage() {
                       display:'inline-flex',alignItems:'center',justifyContent:'center',
                       width:30,height:30,borderRadius:99,
                       background:s.accentColor+'22',color:s.accentColor,
-                      fontFamily:"'DM Serif Display',Georgia,serif",fontSize:15,fontWeight:700,
+                      fontFamily:"'Source Serif 4',Georgia,serif",fontSize:15,fontWeight:700,
                       marginBottom:14,
                     }}>{i+1}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:17,color:V.ink,marginBottom:8,fontWeight:400}}>{c.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:17,color:V.ink,marginBottom:8,fontWeight:400}}>{c.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
                   </div>
                 ))}
@@ -12252,7 +12252,7 @@ export default function LandingPage() {
               <div style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'flex-start'}}>
                 <div style={{flex:'1 1 380px'}}>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:14}}>Legal framework</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:24,color:V.ink,marginBottom:14,lineHeight:1.2,fontWeight:400}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,color:V.ink,marginBottom:14,lineHeight:1.2,fontWeight:400}}>
                     {s.name} homeschool law in plain English
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:18}}>{s.legalSummary}</p>
@@ -12266,7 +12266,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div style={{flex:'1 1 280px',background:V.bone2,border:'1px solid '+V.gold3+'33',borderRadius:12,padding:22}}>
                     <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:10}}>{s.voucher.name} voucher</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:30,color:V.ink,marginBottom:8,fontWeight:400}}>{s.voucher.amount}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,color:V.ink,marginBottom:8,fontWeight:400}}>{s.voucher.amount}</div>
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
@@ -12284,7 +12284,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {s.name} families</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
@@ -12294,7 +12294,7 @@ export default function LandingPage() {
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
                     <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:14}}>
                       <span style={{fontSize:32,fontWeight:800,color:V.ink}}>{t.price}</span>
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
@@ -12324,7 +12324,7 @@ export default function LandingPage() {
               <div className="wrap" style={{maxWidth:1000}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Cities we serve</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.9rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.9rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
                     Local guides for major <em style={{color:s.accentColor}}>{s.name}</em> metros
                   </h2>
                 </div>
@@ -12336,7 +12336,7 @@ export default function LandingPage() {
                         display:'block',padding:18,background:V.bone,border:'1px solid '+V.bone3,borderLeft:'3px solid '+s.accentColor,borderRadius:10,
                         textDecoration:'none'
                       }}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{ct.name}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{ct.name}</div>
                         <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{ct.metroPop}</div>
                         <div style={{fontSize:11,color:s.accentColor,fontWeight:700,letterSpacing:'.04em'}}>View {ct.name} guide →</div>
                       </a>
@@ -12354,7 +12354,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,padding:'56px 0'}}>
             <div className="wrap" style={{maxWidth:980}}>
               <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:14,textAlign:'center'}}>Universities our {s.name} students target</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,2.8vw,2rem)',color:V.ink,marginBottom:28,textAlign:'center',fontWeight:400}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,2.8vw,2rem)',color:V.ink,marginBottom:28,textAlign:'center',fontWeight:400}}>
                 From {s.universities[0]} to <em style={{color:V.cr}}>the Ivy League</em>
               </h2>
               <div style={{display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center',marginBottom:24}}>
@@ -12373,7 +12373,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:820}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Frequently asked questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
                   Common questions from <em style={{color:V.cr}}>{s.name}</em> families
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto'}}>
@@ -12436,7 +12436,7 @@ export default function LandingPage() {
           {/* Final CTA */}
           <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
             <div className="wrap" style={{maxWidth:760}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
                 Ready to start {s.name} homeschool with real teachers?
               </h2>
               <p style={{fontSize:'clamp(1rem,1.5vw,1.1rem)',color:'rgba(255,255,255,.85)',marginBottom:28,maxWidth:560,margin:'0 auto 28px'}}>
@@ -12480,7 +12480,7 @@ export default function LandingPage() {
                 <span style={{display:'inline-block',width:18,height:12,background:s.accentColor,borderRadius:2}}/>
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {s.name}</span>
               </div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
                 {CA_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{s.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
@@ -12529,7 +12529,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,padding:'72px 0'}}>
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>The Smartious offer</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:14,fontWeight:400}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:14,fontWeight:400}}>
                 Why <em style={{color:V.cr}}>{s.name}</em> families choose Smartious
               </h2>
               <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:36,maxWidth:740}}>
@@ -12547,10 +12547,10 @@ export default function LandingPage() {
                       display:'inline-flex',alignItems:'center',justifyContent:'center',
                       width:30,height:30,borderRadius:99,
                       background:s.accentColor+'22',color:s.accentColor,
-                      fontFamily:"'DM Serif Display',Georgia,serif",fontSize:15,fontWeight:700,
+                      fontFamily:"'Source Serif 4',Georgia,serif",fontSize:15,fontWeight:700,
                       marginBottom:14,
                     }}>{i+1}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:17,color:V.ink,marginBottom:8,fontWeight:400}}>{c.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:17,color:V.ink,marginBottom:8,fontWeight:400}}>{c.h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
                   </div>
                 ))}
@@ -12564,7 +12564,7 @@ export default function LandingPage() {
               <div style={{display:'flex',gap:32,flexWrap:'wrap',alignItems:'flex-start'}}>
                 <div style={{flex:'1 1 380px'}}>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:14}}>Legal framework</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:24,color:V.ink,marginBottom:14,lineHeight:1.2,fontWeight:400}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:24,color:V.ink,marginBottom:14,lineHeight:1.2,fontWeight:400}}>
                     {s.name} homeschool law in plain English
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:18}}>{s.legalSummary}</p>
@@ -12578,7 +12578,7 @@ export default function LandingPage() {
                 {s.voucher && (
                   <div style={{flex:'1 1 280px',background:V.bone2,border:'1px solid '+V.gold3+'33',borderRadius:12,padding:22}}>
                     <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:10}}>{s.voucher.name} voucher</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:30,color:V.ink,marginBottom:8,fontWeight:400}}>{s.voucher.amount}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:30,color:V.ink,marginBottom:8,fontWeight:400}}>{s.voucher.amount}</div>
                     <div style={{fontSize:13,color:V.sl,marginBottom:14}}>per child / year via {s.voucher.org}</div>
                     {s.voucher.smartiousEligible && (
                       <div style={{padding:'10px 12px',background:V.white,border:'1px dashed '+V.gold3,borderRadius:8,fontSize:12.5,color:V.ink,lineHeight:1.5}}>
@@ -12617,7 +12617,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {s.name} families</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
@@ -12627,7 +12627,7 @@ export default function LandingPage() {
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
                     <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:14}}>
                       <span style={{fontSize:32,fontWeight:800,color:V.ink}}>{t.price}</span>
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
@@ -12657,7 +12657,7 @@ export default function LandingPage() {
               <div className="wrap" style={{maxWidth:1000}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Cities we serve</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.9rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.9rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
                     Local guides for major <em style={{color:s.accentColor}}>{s.name}</em> metros
                   </h2>
                 </div>
@@ -12669,7 +12669,7 @@ export default function LandingPage() {
                         display:'block',padding:18,background:V.bone,border:'1px solid '+V.bone3,borderLeft:'3px solid '+s.accentColor,borderRadius:10,
                         textDecoration:'none'
                       }}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{ct.name}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:18,fontWeight:400,color:V.ink,marginBottom:6}}>{ct.name}</div>
                         <div style={{fontSize:12,color:V.sl,marginBottom:8,lineHeight:1.5}}>{ct.metroPop}</div>
                         <div style={{fontSize:11,color:s.accentColor,fontWeight:700,letterSpacing:'.04em'}}>View {ct.name} guide →</div>
                       </a>
@@ -12687,7 +12687,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,padding:'56px 0'}}>
             <div className="wrap" style={{maxWidth:980}}>
               <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:14,textAlign:'center'}}>Universities our {s.name} students target</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,2.8vw,2rem)',color:V.ink,marginBottom:28,textAlign:'center',fontWeight:400}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,2.8vw,2rem)',color:V.ink,marginBottom:28,textAlign:'center',fontWeight:400}}>
                 From {s.universities[0]} to <em style={{color:V.cr}}>the Ivy League</em>
               </h2>
               <div style={{display:'flex',flexWrap:'wrap',gap:10,justifyContent:'center',marginBottom:24}}>
@@ -12706,7 +12706,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:820}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Frequently asked questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
                   Common questions from <em style={{color:V.cr}}>{s.name}</em> families
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:580,margin:'0 auto'}}>
@@ -12769,7 +12769,7 @@ export default function LandingPage() {
           {/* Final CTA */}
           <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
             <div className="wrap" style={{maxWidth:760}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
                 Ready to start {s.name} homeschool with real teachers?
               </h2>
               <p style={{fontSize:'clamp(1rem,1.5vw,1.1rem)',color:'rgba(255,255,255,.85)',marginBottom:28,maxWidth:560,margin:'0 auto 28px'}}>
@@ -12823,7 +12823,7 @@ export default function LandingPage() {
                 <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:30,height:18,background:s.accentColor,borderRadius:3,fontSize:9,fontWeight:800,color:'#fff'}}>{s.abbr}</span>
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
                 {US_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
@@ -12872,7 +12872,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'minmax(0,1.4fr) minmax(0,1fr)',gap:48,alignItems:'start'}}>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Why {c.name}</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:18,fontWeight:400}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:18,fontWeight:400}}>
                     What makes <em style={{color:V.cr}}>{c.name}</em> different
                   </h2>
                   <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:18}}>
@@ -12902,7 +12902,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in USD for {c.name} families</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
@@ -12912,7 +12912,7 @@ export default function LandingPage() {
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
                     <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:14}}>
                       <span style={{fontSize:32,fontWeight:800,color:V.ink}}>{t.price}</span>
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
@@ -12941,7 +12941,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:980}}>
               <div style={{textAlign:'center',marginBottom:24}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Neighborhoods served</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.8rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.8rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
                   We serve all of greater {c.name}
                 </h2>
                 <p style={{fontSize:13.5,color:V.sl,maxWidth:520,margin:'0 auto'}}>
@@ -12961,7 +12961,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:820}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>{c.name} FAQ</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
                   Common questions from <em style={{color:V.cr}}>{c.name}</em> families
                 </h2>
               </div>
@@ -13003,7 +13003,7 @@ export default function LandingPage() {
           {/* Final CTA — uses state color identity */}
           <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
             <div className="wrap" style={{maxWidth:760}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
                 Ready to start homeschool in {c.name}?
               </h2>
               <p style={{fontSize:'clamp(1rem,1.5vw,1.1rem)',color:'rgba(255,255,255,.85)',marginBottom:28,maxWidth:560,margin:'0 auto 28px'}}>
@@ -13056,7 +13056,7 @@ export default function LandingPage() {
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>$850 CAD per child · universal · no income test</div>
-                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                <h1 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   Alberta Home Education Funding — every dollar of your $850 CAD covers Smartious Cambridge instruction
                 </h1>
                 <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
@@ -13072,25 +13072,25 @@ export default function LandingPage() {
           {/* HOW IT WORKS */}
           <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>How Alberta funding actually flows</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>How Alberta funding actually flows</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>The mechanics in three steps — no jargon.</p>
 
               <div style={{display:'grid',gridTemplateColumns:'1fr',gap:20}}>
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 1</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register with an Alberta school authority</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register with an Alberta school authority</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Pick any school authority that accepts traditional (parent-directed) home education. Popular Alberta choices: Wisdom Home Schooling, Mosaic Home Schooling, Foundations for the Future, Heritage Christian Online School, Argyll Centre (public). Annual registration is free for parents. The school authority becomes your administrative partner with Alberta Education.</p>
                 </div>
 
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 2</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Spend on eligible educational expenses — including Smartious tuition</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Spend on eligible educational expenses — including Smartious tuition</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Alberta Education guidelines specify eligible categories: curriculum and instructional materials, tutoring and lessons, educational supplies, exam fees (including Cambridge IGCSE &amp; A-Level series), and technology with clear educational purpose. Smartious live Cambridge instruction is classed as curriculum + tutoring — every monthly invoice qualifies, whichever programme tier you choose.</p>
                 </div>
 
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 3</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts to your school authority — get reimbursed</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts to your school authority — get reimbursed</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Smartious provides itemised CAD invoices (Cloudinary-hosted PDFs) with the curriculum description Alberta Education needs. Submit them to your school authority through their portal. Reimbursement up to your annual allocation flows back as cash transfer, cheque, or vendor direct-pay depending on the school authority\'s system.</p>
                 </div>
               </div>
@@ -13100,7 +13100,7 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>What your $850 CAD covers</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Your funding allocation applied to Smartious fees, which start from USD 423/month for Primary and vary by curriculum and level.</p>
 
               <div style={{overflowX:'auto'}}>
@@ -13130,7 +13130,7 @@ export default function LandingPage() {
           {/* WHAT'S ELIGIBLE */}
           <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 24px'}}>Smartious products that qualify</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 24px'}}>Smartious products that qualify</h2>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))',gap:16}}>
                 {[
                   {h:'Cambridge IGCSE live tuition', d:'Years 10–11 Mathematics, Sciences, English, Humanities — classed as curriculum + instruction'},
@@ -13142,7 +13142,7 @@ export default function LandingPage() {
                 ].map((it,i) => (
                   <div key={i} style={{background:'#fff',padding:'20px 22px',borderRadius:10,borderTop:`3px solid ${V.cr}`}}>
                     <div style={{color:V.cr,fontSize:18,marginBottom:6}}>[+]</div>
-                    <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:18,color:V.ink,margin:'0 0 8px'}}>{it.h}</h3>
+                    <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:18,color:V.ink,margin:'0 0 8px'}}>{it.h}</h3>
                     <p style={{color:V.sl,fontSize:14,lineHeight:1.55,margin:0}}>{it.d}</p>
                   </div>
                 ))}
@@ -13153,7 +13153,7 @@ export default function LandingPage() {
           {/* FAQs */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:840}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Alberta funding FAQs</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Alberta funding FAQs</h2>
               <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 {[
                   {q:'Is Alberta Home Education Funding really universal — no income test?', a:'Yes. Every Alberta family with a child being home-educated is eligible regardless of household income. Funding flows through a school authority partner annually — most parents access ~$850 CAD per child after the school authority retains its administrative portion.'},
@@ -13175,7 +13175,7 @@ export default function LandingPage() {
           {/* FINAL CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
             <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Use your $850 CAD allocation on Smartious this year</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute call to confirm your school authority partnership and what your specific funding lets you book. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
@@ -13220,7 +13220,7 @@ export default function LandingPage() {
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>BC DL · resource allocation $200–$700 CAD/yr</div>
-                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                <h1 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   BC Distributed Learning funding + Smartious Cambridge — the realistic pathway
                 </h1>
                 <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
@@ -13236,13 +13236,13 @@ export default function LandingPage() {
           {/* TWO PATHWAYS */}
           <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:1080}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Two paths BC families actually use</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Two paths BC families actually use</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Honest framing — BC funding is genuinely more complex than Alberta\'s universal model.</p>
 
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(320px,1fr))',gap:20}}>
                 <div style={{background:'#fff',padding:'26px 28px',borderRadius:10,borderTop:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Path A — Self-registered homeschooler</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Simple. No funding. Full curriculum freedom.</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Simple. No funding. Full curriculum freedom.</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:'0 0 12px'}}>Register annually with your local BC school district as a homeschooler under Section 12 of the BC School Act. No required curriculum, no testing, no portfolio review. Pay Smartious directly. Best for families who want zero administrative overhead and full Cambridge focus.</p>
                   <ul style={{paddingLeft:18,color:V.sl,fontSize:14,lineHeight:1.8,margin:'12px 0 0'}}>
                     <li>Annual registration with your school district — free</li>
@@ -13254,7 +13254,7 @@ export default function LandingPage() {
 
                 <div style={{background:'#fff',padding:'26px 28px',borderRadius:10,borderTop:`4px solid ${V.gold2}`}}>
                   <div style={{fontSize:13,color:V.gold,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:8}}>Path B — BC DL school + Smartious</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Resource allocation $200–$700 CAD/yr. More structure.</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 12px'}}>Resource allocation $200–$700 CAD/yr. More structure.</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:'0 0 12px'}}>Register with a flexible BC DL school (Heritage Christian Online, EBUS Academy, Self Design Learning Community, Insignis Christian Academy, others). The DL school enrols your child and provides a resource allocation. Many flexible DL schools allow that allocation to be used for outside curriculum and tutoring providers — including Smartious. The DL school remains the primary academic record-keeper.</p>
                   <ul style={{paddingLeft:18,color:V.sl,fontSize:14,lineHeight:1.8,margin:'12px 0 0'}}>
                     <li>DL school enrolment — free for parents</li>
@@ -13270,7 +13270,7 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B — DL resource allocation against Smartious fees</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Path B — DL resource allocation against Smartious fees</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Assumes a flexible DL school with mid-range $500 CAD resource allocation usable on outside vendors.</p>
 
               <div style={{overflowX:'auto'}}>
@@ -13300,7 +13300,7 @@ export default function LandingPage() {
           {/* FAQs */}
           <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:840}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>BC DL funding FAQs</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>BC DL funding FAQs</h2>
               <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 {[
                   {q:'Is Smartious itself a BC Distributed Learning school?', a:'No. BC DL schools are licensed under the BC Ministry of Education to deliver the BC curriculum to enrolled students. Smartious delivers international curricula (Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, American) and isn\'t licensed as a BC DL school. We complement DL schools — we don\'t replace them.'},
@@ -13322,7 +13322,7 @@ export default function LandingPage() {
           {/* FINAL CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
             <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>BC families — find your pathway in one 15-minute call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>We\'ll help you pick between Path A (self-registered) and Path B (DL + Smartious) based on your specific family situation.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
@@ -13367,7 +13367,7 @@ export default function LandingPage() {
               <div style={{maxWidth:840}}>
                 <a onClick={() => P('ca-families')} style={{color:V.bone3,fontSize:13,textDecoration:'none',cursor:'pointer',display:'inline-block',marginBottom:12}}>← Canada</a>
                 <div style={{display:'inline-block',background:V.cr,padding:'6px 14px',borderRadius:999,fontSize:12,fontWeight:600,letterSpacing:'.05em',textTransform:'uppercase',marginBottom:20}}>SK · $500–$1,500 CAD/yr · division-dependent</div>
-                <h1 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
+                <h1 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(36px,5.5vw,60px)',lineHeight:1.1,margin:'0 0 18px',color:'#fff'}}>
                   Saskatchewan homeschool funding — depends entirely on your school division
                 </h1>
                 <p style={{fontSize:18,lineHeight:1.6,color:V.bone3,maxWidth:680,margin:'0 0 28px'}}>
@@ -13383,25 +13383,25 @@ export default function LandingPage() {
           {/* HOW IT WORKS */}
           <section className="sec" style={{background:V.bone,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Step by step — Saskatchewan funding mechanics</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Step by step — Saskatchewan funding mechanics</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Your school division is the single most important variable. Check their policy first.</p>
 
               <div style={{display:'grid',gridTemplateColumns:'1fr',gap:20}}>
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 1</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Identify your Saskatchewan school division</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Identify your Saskatchewan school division</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>The 28 SK school divisions each set their own homeschool policy. Major divisions: Saskatoon Public, Regina Public, Prairie Spirit, Sun West, Greater Saskatoon Catholic, Regina Catholic, Holy Family, Prairie Valley, Horizon. Their funding amounts and approved-vendor rules vary widely. Confirm policy with your division\'s homeschool coordinator before enrolling with any provider — including Smartious.</p>
                 </div>
 
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 2</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register annually + submit your education plan</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Register annually + submit your education plan</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>Saskatchewan requires annual registration and an education plan describing what your child will learn. Cambridge IGCSE / A-Level qualifies as a complete plan in most divisions. Smartious provides curriculum documentation matching SK education plan formats — saving you the planning work.</p>
                 </div>
 
                 <div style={{background:'#fff',padding:'24px 26px',borderRadius:10,borderLeft:`4px solid ${V.cr}`}}>
                   <div style={{fontSize:13,color:V.cr,fontWeight:700,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:6}}>Step 3</div>
-                  <h3 style={{fontFamily:'DM Serif Display, serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts for reimbursement</h3>
+                  <h3 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:22,color:V.ink,margin:'0 0 10px'}}>Submit receipts for reimbursement</h3>
                   <p style={{color:V.sl,fontSize:15,lineHeight:1.65,margin:0}}>If your division allows outside curriculum providers — most flexible ones do — submit Smartious invoices for reimbursement up to your division\'s annual cap. Smartious provides itemised CAD invoices on letterhead matching the documentation SK divisions expect.</p>
                 </div>
               </div>
@@ -13411,7 +13411,7 @@ export default function LandingPage() {
           {/* PRICING WITH FUNDING OFFSET */}
           <section className="sec" style={{background:'#fff',padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:920}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Scenarios — three funding levels modelled</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 8px'}}>Scenarios — three funding levels modelled</h2>
               <p style={{color:V.sl,fontSize:15,margin:'0 0 32px'}}>Use the row that matches your division. Cross-check the exact figure with their homeschool coordinator.</p>
 
               <div style={{overflowX:'auto'}}>
@@ -13449,7 +13449,7 @@ export default function LandingPage() {
           {/* FAQs */}
           <section className="sec" style={{background:V.bone2,padding:'64px 0'}}>
             <div className="wrap" style={{maxWidth:840}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Saskatchewan funding FAQs</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,42px)',color:V.ink,margin:'0 0 32px'}}>Saskatchewan funding FAQs</h2>
               <div style={{display:'flex',flexDirection:'column',gap:14}}>
                 {[
                   {q:'Why does Saskatchewan funding vary so much between divisions?', a:'Saskatchewan delegates homeschool administration to its 28 school divisions. Each division sets its own funding amount, allowable expense categories, and approved-vendor rules. Some prioritise direct cash reimbursement; others provide curriculum materials and library/facility access instead of cash. The Ministry of Education sets the broad framework (Education Act, Home-Based Education Program), but funding mechanics live at division level.'},
@@ -13471,7 +13471,7 @@ export default function LandingPage() {
           {/* FINAL CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',padding:'56px 0 64px'}}>
             <div className="wrap" style={{maxWidth:760,textAlign:'center'}}>
-              <h2 style={{fontFamily:'DM Serif Display, serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
+              <h2 style={{fontFamily:'"Source Serif 4",Georgia,serif',fontSize:'clamp(28px,4vw,40px)',margin:'0 0 14px'}}>Get your Saskatchewan division\'s funding answer in one call</h2>
               <p style={{color:V.bone3,fontSize:16,lineHeight:1.6,margin:'0 0 24px'}}>15-minute consult — we\'ll help you call your division\'s homeschool coordinator and walk you through the questions that matter. No commitment.</p>
               <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.cr,color:'#fff',border:'none',padding:'14px 28px',borderRadius:8,fontSize:15,fontWeight:600,cursor:'pointer'}}>Book assessment</a>
@@ -13511,7 +13511,7 @@ export default function LandingPage() {
                 <span style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:30,height:18,background:s.accentColor,borderRadius:3,fontSize:9,fontWeight:800,color:'#fff'}}>{s.abbr}</span>
                 <span style={{opacity:.95,fontWeight:700}}>Online Homeschool · {c.name}</span>
               </div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,5vw,3.4rem)',lineHeight:1.08,fontWeight:400,marginBottom:18,letterSpacing:'-0.01em'}}>
                 {CA_HEADLINE} for <em style={{color:s.accentColor,fontStyle:'normal'}}>{c.name}</em> Families
               </h1>
               <p style={{fontSize:'clamp(1rem,1.6vw,1.18rem)',color:'rgba(255,255,255,.85)',maxWidth:760,lineHeight:1.6,marginBottom:28}}>
@@ -13560,7 +13560,7 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'minmax(0,1.4fr) minmax(0,1fr)',gap:48,alignItems:'start'}}>
                 <div>
                   <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>Why {c.name}</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:18,fontWeight:400}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.5vw,2.4rem)',lineHeight:1.15,color:V.ink,marginBottom:18,fontWeight:400}}>
                     What makes <em style={{color:V.cr}}>{c.name}</em> different
                   </h2>
                   <p style={{fontSize:15,color:V.sl,lineHeight:1.7,marginBottom:18}}>
@@ -13590,7 +13590,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:1100}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:12}}>Pricing in CAD for {c.name} families</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,marginBottom:8}}>Transparent monthly tuition</h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:560,margin:'0 auto'}}>Fees from USD 423/month for Primary, payable termly; fees vary by curriculum and level. One-to-one tuition USD 15/hour.</p>
               </div>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:18,maxWidth:1000,margin:'0 auto'}}>
@@ -13600,7 +13600,7 @@ export default function LandingPage() {
                 ].map((t,i)=>(
                   <div key={i} style={{background:V.white,border: t.popular ? '2px solid '+V.gold3 : '1px solid '+V.bone3,borderRadius:14,padding:24,position:'relative'}}>
                     {t.popular && <div style={{position:'absolute',top:-12,left:24,background:V.gold3,color:V.ink,fontSize:10,fontWeight:800,letterSpacing:'.1em',padding:'4px 10px',borderRadius:99,textTransform:'uppercase'}}>Most popular</div>}
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:V.ink,marginBottom:6,fontWeight:400}}>{t.name}</h3>
                     <div style={{display:'flex',alignItems:'baseline',gap:6,marginBottom:14}}>
                       <span style={{fontSize:32,fontWeight:800,color:V.ink}}>{t.price}</span>
                       <span style={{fontSize:12,color:V.sl}}>{t.sub}</span>
@@ -13629,7 +13629,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:980}}>
               <div style={{textAlign:'center',marginBottom:24}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold,fontWeight:700,marginBottom:12}}>Neighborhoods served</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.8rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem,2.6vw,1.8rem)',color:V.ink,fontWeight:400,marginBottom:6}}>
                   We serve all of greater {c.name}
                 </h2>
                 <p style={{fontSize:13.5,color:V.sl,maxWidth:520,margin:'0 auto'}}>
@@ -13649,7 +13649,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:820}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div style={{fontSize:11,letterSpacing:'.12em',textTransform:'uppercase',color:V.cr,fontWeight:700,marginBottom:14}}>{c.name} FAQ</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.7rem,3.2vw,2.2rem)',color:V.ink,fontWeight:400,lineHeight:1.2,marginBottom:10}}>
                   Common questions from <em style={{color:V.cr}}>{c.name}</em> families
                 </h2>
               </div>
@@ -13691,7 +13691,7 @@ export default function LandingPage() {
           {/* Final CTA — uses state color identity */}
           <section className="sec" style={{background:s.heroGradient,color:'#fff',padding:'72px 0',textAlign:'center'}}>
             <div className="wrap" style={{maxWidth:760}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,3.6vw,2.6rem)',color:'#fff',marginBottom:14,fontWeight:400,lineHeight:1.15}}>
                 Ready to start homeschool in {c.name}?
               </h2>
               <p style={{fontSize:'clamp(1rem,1.5vw,1.1rem)',color:'rgba(255,255,255,.85)',marginBottom:28,maxWidth:560,margin:'0 auto 28px'}}>
@@ -13745,7 +13745,7 @@ export default function LandingPage() {
           <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:12,letterSpacing:'.14em'}}>Online school founded in Nairobi in 2018 &middot; Virtual school &middot; Homeschool</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
                 <em style={{color:V.gold3,fontStyle:'italic'}}>Virtual School</em> in Kenya for <em style={{color:V.gold3,fontStyle:'italic'}}>IGCSE, A-Level, IB &amp; CBC</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
@@ -13778,7 +13778,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:40}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Why we beat the competition 10-0</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Ten reasons Kenyan families choose Smartious
                 </h2>
               </div>
@@ -13796,7 +13796,7 @@ export default function LandingPage() {
                   {n:'10',h:'Personalized pricing (fair-play)',p:'Every family gets a quote calibrated to grade level, curriculum choice, enrolment period, and specific needs. No one-size-fits-all pricing. Free consultation call included. Response within 24 hours.'},
                 ].map(item => (
                   <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'26px 24px',boxShadow:'0 2px 10px rgba(8,12,20,.04)',transition:'all .18s ease'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',color:V.gold3,marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',color:V.gold3,marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
                     <div style={{fontSize:16,fontWeight:700,color:V.ink,marginBottom:8}} dangerouslySetInnerHTML={{__html:item.h}}/>
                     <div style={{fontSize:13.5,color:V.sl2,lineHeight:1.6}} dangerouslySetInnerHTML={{__html:item.p}}/>
                   </div>
@@ -13810,7 +13810,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Head-to-head comparison</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Smartious vs the alternatives
                 </h2>
               </div>
@@ -13865,7 +13865,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:920,margin:'0 auto',textAlign:'center'}}>
               <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Trusted by more than 650 families in over 40 countries</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:24,letterSpacing:'-.01em'}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,marginBottom:24,letterSpacing:'-.01em'}}>
                 Real results from real families
               </h2>
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))',gap:20,marginTop:32}}>
@@ -13876,7 +13876,7 @@ export default function LandingPage() {
                   {n:'8 yr', l:'Teaching since 2018 &middot; Nairobi HQ 2022'},
                 ].map(s => (
                   <div key={s.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'28px 20px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.4rem',color:V.cr,lineHeight:1,marginBottom:10,fontWeight:400}}>{s.n}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.4rem',color:V.cr,lineHeight:1,marginBottom:10,fontWeight:400}}>{s.n}</div>
                     <div style={{fontSize:12.5,color:V.sl2,lineHeight:1.5}} dangerouslySetInnerHTML={{__html:s.l}}/>
                   </div>
                 ))}
@@ -13889,7 +13889,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:40}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>What Smartious parents say</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Real families, real outcomes
                 </h2>
               </div>
@@ -13920,7 +13920,7 @@ export default function LandingPage() {
                     {q:'Alfred personally answered my questions when we were deciding. That doesn\'t happen at CHS Online — you get a form response from a UK admissions clerk. Smartious feels like a real Kenyan school that happens to be online.', n:'Mercy A.', r:'Parent · Westlands · Grade 6 CBC'},
                   ].map(t => (
                     <div key={t.n} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',position:'relative'}}>
-                      <div style={{fontSize:36,color:V.gold3,lineHeight:0.5,marginBottom:6,fontFamily:'Georgia,serif'}}>&ldquo;</div>
+                      <div style={{fontSize:36,color:V.gold3,lineHeight:0.5,marginBottom:6,fontFamily:'"Source Serif 4",Georgia,serif'}}>&ldquo;</div>
                       <p style={{fontSize:14,color:V.ink,lineHeight:1.65,margin:'0 0 14px 0',fontStyle:'italic'}}>{t.q}</p>
                       <div style={{display:'flex',alignItems:'center',gap:12,paddingTop:12,borderTop:`1px solid ${V.bone3}`}}>
                         <div style={{width:38,height:38,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:14}}>{t.n[0]}</div>
@@ -13945,7 +13945,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Common questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   What Kenyan families ask most
                 </h2>
               </div>
@@ -13986,7 +13986,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Read the full analysis</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,3.5vw,2.2rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   The complete Kenya virtual school guide
                 </h2>
               </div>
@@ -13996,7 +13996,7 @@ export default function LandingPage() {
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = V.gold3; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                 <div style={{fontSize:12,fontWeight:700,color:V.cr,letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 10 min read</div>
-                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
                   Virtual School in Kenya 2026: Smartious vs Every Other Option
                 </div>
                 <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:18}}>
@@ -14014,7 +14014,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff',paddingTop:72,paddingBottom:80}}><div className="wrap">
             <div style={{maxWidth:820,margin:'0 auto',textAlign:'center'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:12}}>Ready to switch?</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
                 Join the Kenyan families choosing <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em>
               </h2>
               <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.6,marginBottom:32,maxWidth:640,margin:'0 auto 32px'}}>
@@ -14053,7 +14053,7 @@ export default function LandingPage() {
           <section className="sec" style={{position:'relative',background:`linear-gradient(135deg, ${V.ink} 0%, #0057B8 100%)`,color:'#fff',padding:'80px 0 64px',overflow:'hidden'}}>
             <div className="wrap" style={{maxWidth:1080,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:'#FFDD00',marginBottom:12,letterSpacing:'.14em'}}>For Ukrainian families &middot; In-country &amp; diaspora</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.4rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:22,letterSpacing:'-.01em',maxWidth:920}}>
                 Smartious &mdash; Online &amp; Virtual School for <em style={{color:'#FFDD00',fontStyle:'italic'}}>Ukrainian Families</em> &mdash; IB, IGCSE, Cambridge, Edexcel
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:820,marginBottom:32}}>
@@ -14086,7 +14086,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:40}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Who Smartious serves in Ukraine</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Four Ukrainian family situations
                 </h2>
               </div>
@@ -14111,7 +14111,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>University pathways for Ukrainian students</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Where Cambridge A-Level and IB Diploma take Ukrainian students
                 </h2>
               </div>
@@ -14139,7 +14139,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:40}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Why Ukrainian families choose Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Built for education continuity through displacement
                 </h2>
               </div>
@@ -14157,7 +14157,7 @@ export default function LandingPage() {
                   {n:'10', h:'Post-war planning portability', p:'Cambridge, IB, American qualifications internationally portable — valid regardless of how post-war Ukrainian education system evolves. Ukrainian returnee planning families maintain international mobility options.'},
                 ].map(item => (
                   <div key={item.n} style={{background:'#fff',border:`1px solid ${V.bone3}`,borderRadius:12,padding:'24px 22px',boxShadow:'0 2px 10px rgba(8,12,20,.04)'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',color:'#0057B8',marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',color:'#0057B8',marginBottom:8,lineHeight:1,fontWeight:400}}>{item.n}</div>
                     <div style={{fontSize:15,fontWeight:700,color:V.ink,marginBottom:8}}>{item.h}</div>
                     <div style={{fontSize:13.5,color:V.sl2,lineHeight:1.6}}>{item.p}</div>
                   </div>
@@ -14171,7 +14171,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Common questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   What Ukrainian families ask most
                 </h2>
               </div>
@@ -14205,7 +14205,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1080,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{color:V.cr,marginBottom:10}}>Further reading</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.8rem,4vw,2.6rem)',fontWeight:400,color:V.ink,lineHeight:1.15,letterSpacing:'-.01em'}}>
                   Full guides for Ukrainian families
                 </h2>
               </div>
@@ -14216,7 +14216,7 @@ export default function LandingPage() {
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0057B8'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:12,fontWeight:700,color:'#0057B8',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 11 min read</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
                     Virtual School for Ukrainian Families in 2026: A Guide for Displaced Children
                   </div>
                   <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:16}}>
@@ -14231,7 +14231,7 @@ export default function LandingPage() {
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0057B8'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(8,12,20,.08)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:12,fontWeight:700,color:'#0057B8',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:12}}>Article &middot; 10 min read</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',color:V.ink,lineHeight:1.25,marginBottom:12,fontWeight:400}}>
                     Online Homeschool in Ukraine 2026: Legal Framework and Practical Guide
                   </div>
                   <div style={{fontSize:14,color:V.sl2,lineHeight:1.6,marginBottom:16}}>
@@ -14247,7 +14247,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, #0057B8 100%)`,color:'#fff',paddingTop:72,paddingBottom:80}}><div className="wrap">
             <div style={{maxWidth:820,margin:'0 auto',textAlign:'center'}}>
               <div className="eyebrow" style={{color:'#FFDD00',marginBottom:12}}>Ready to explore</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:20,letterSpacing:'-.01em'}}>
                 Education continuity for your <em style={{color:'#FFDD00',fontStyle:'italic'}}>Ukrainian family</em>
               </h2>
               <p style={{fontSize:16,color:'rgba(255,255,255,.9)',lineHeight:1.6,marginBottom:32,maxWidth:640,margin:'0 auto 32px'}}>
@@ -14287,7 +14287,7 @@ export default function LandingPage() {
               <div className="prog-bar"/>
               <div className="prog-body">
                 <span className="chip" style={{marginBottom:16}}>University Pathway</span>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>International University Foundation Programme (IUFP)</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>International University Foundation Programme (IUFP)</h2>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:14}}>The IUFP is a one-year intensive programme for students who have completed secondary school and want direct entry into Year 1 of a UK, US, Australian or European university. Accepted by 200+ partner universities worldwide.</p>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:28}}>Students study 4 core academic modules alongside Academic English, Critical Thinking, Research Methods and Digital Literacy, concluding with a Capstone Project and full university application support.</p>
                 <div className="prog-info-grid">
@@ -14298,13 +14298,13 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Four Academic Pathways</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Four Academic Pathways</h3>
                 <div className="prog-path-grid">
                   {[['Sciences Pathway','For Medicine, Pharmacy, Biology, Chemistry, Environmental Science. Includes lab report writing and scientific methodology.'],['Business & Economics Pathway','For Finance, Accounting, Management, Economics. Includes financial modelling and business case analysis.'],['Engineering & Technology Pathway','For Engineering, Computer Science, Architecture. Includes mathematics, physics and technical drawing fundamentals.'],['Arts & Humanities Pathway','For Law, Politics, Literature, Psychology, Media. Includes essay structure, argumentation and academic citation.']].map(([h,p]) => (
                     <div key={h} className="prog-path"><div className="prog-path-h">{h}</div><div className="prog-path-p">{p}</div></div>
                   ))}
                 </div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Sample Partner Universities</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',fontWeight:700,color:V.ink,marginBottom:14}}>Sample Partner Universities</h3>
                 <div className="prog-unis">
                   {['University of Birmingham','Coventry University','University of Manchester','Purdue Global','Northeastern University','Deakin University','Griffith University','RWTH Aachen','Maastricht University','+ 190 more'].map(u => <span key={u} className="prog-uni">{u}</span>)}
                 </div>
@@ -14317,7 +14317,7 @@ export default function LandingPage() {
               <div className="prog-bar" style={{background:`linear-gradient(90deg,${V.gold2},${V.cr})`}}/>
               <div className="prog-body">
                 <span className="chip" style={{marginBottom:16}}>International Experience</span>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>Study Abroad Programme</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:V.ink,marginBottom:14}}>Study Abroad Programme</h2>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8,marginBottom:28}}>Placements at partner schools in 6 countries — UK, USA, Australia, Germany, UAE and Canada. We handle school placement, visa guidance, accommodation, airport transfers and 24/7 pastoral support throughout.</p>
                 <div className="sa-grid">
                   {[
@@ -14348,7 +14348,7 @@ export default function LandingPage() {
                         backgroundRepeat:'no-repeat',
                         position:'relative',height:150,padding:0,overflow:'hidden'
                       }}>
-                        <div style={{position:'absolute',bottom:10,left:0,right:0,textAlign:'center',color:V.white,fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,textShadow:'0 2px 10px rgba(8,12,20,.85)'}}>{country}</div>
+                        <div style={{position:'absolute',bottom:10,left:0,right:0,textAlign:'center',color:V.white,fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,textShadow:'0 2px 10px rgba(8,12,20,.85)'}}>{country}</div>
                       </div>
                       <div className="sa-db">
                         <div className="sa-dp">{desc}</div>
@@ -14434,7 +14434,7 @@ export default function LandingPage() {
             }}/>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:14}}>Tuition Services · Nairobi</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:700,color:'#fff',lineHeight:1.05,marginBottom:18}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:700,color:'#fff',lineHeight:1.05,marginBottom:18}}>
                 Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>Nairobi</em> — Home &amp; Online Tutors
               </h1>
               <p style={{
@@ -14471,7 +14471,7 @@ export default function LandingPage() {
                     border:'1px solid rgba(201,151,58,.25)',
                     borderRadius:10,padding:'14px 16px',
                   }}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:800,color:V.gold3,lineHeight:1}}>{n}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:800,color:V.gold3,lineHeight:1}}>{n}</div>
                     <div style={{fontSize:11,color:'rgba(255,255,255,.7)',marginTop:6,letterSpacing:'.04em',textTransform:'uppercase'}}>{l}</div>
                   </div>
                 ))}
@@ -14483,7 +14483,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>What sets us apart</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Why Nairobi parents <em style={{color:V.cr}}>choose Smartious</em>
               </h2>
               <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
@@ -14503,7 +14503,7 @@ export default function LandingPage() {
                   background:V.bone,border:'1px solid '+V.line,borderRadius:14,
                   padding:'22px 22px',
                 }}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{item.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',fontWeight:700,color:V.cr,marginBottom:10,lineHeight:1.3}}>{item.h}</h3>
                   <p style={{fontSize:14,color:V.sl,lineHeight:1.65}}>{item.p}</p>
                 </div>
               ))}
@@ -14514,7 +14514,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Subjects we teach</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Every subject, every level
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -14547,7 +14547,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>How tuition works</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Four ways to learn with Smartious
               </h2>
             </div>
@@ -14561,7 +14561,7 @@ export default function LandingPage() {
                 <div key={s.h} style={{
                   background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px',
                 }}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10,lineHeight:1.3}}>{s.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10,lineHeight:1.3}}>{s.h}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,marginBottom:12}}>{s.d}</p>
                   <div style={{
                     paddingTop:10,borderTop:'1px dashed '+V.line,
@@ -14576,7 +14576,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Areas we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Home tuition across <em style={{color:V.cr}}>20 Nairobi neighbourhoods</em>
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -14597,7 +14597,7 @@ export default function LandingPage() {
                   }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.boxShadow='0 10px 20px rgba(125,16,37,.1)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow='none' }}>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink,marginBottom:4}}>{area.name}</div>
                   <div style={{fontSize:11,color:V.sl3,lineHeight:1.4}}>{area.region}</div>
                   <div style={{marginTop:10,fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.02em',display:'inline-flex',alignItems:'center',gap:4}}>
                     Tuition details
@@ -14612,7 +14612,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36,maxWidth:760,margin:'0 auto 36px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:12}}>
                 Frequently asked questions
               </h2>
             </div>
@@ -14665,7 +14665,7 @@ export default function LandingPage() {
             background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,
             color:'#fff',
           }}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.1rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
               Book a <em style={{color:V.gold3}}>Book assessment</em>
             </h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.7}}>
@@ -14751,7 +14751,7 @@ export default function LandingPage() {
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.region}</div>
                 <h1 style={{
-                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontFamily:"'Source Serif 4',Georgia,serif",
                   fontSize:'clamp(2rem,4.5vw,3rem)',
                   fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
                 }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
@@ -14779,12 +14779,12 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="tuition-area-grid">
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>The {area.name} parent</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7}}>{area.parentProfile}</p>
                 </div>
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>Local schools we work with</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
                   <ul style={{listStyle:'none',padding:0,margin:0}}>
                     {area.localSchools.map((s,i) => (
                       <li key={i} style={{padding:'6px 0',fontSize:13.5,color:V.sl,borderTop: i===0?'none':'1px dashed '+V.line}}>
@@ -14802,12 +14802,12 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}} className="tuition-area-grid">
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>Commute & timing</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.commuteNote}</p>
                 </div>
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Pricing for {area.name}</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.pricingNote}</p>
                 </div>
               </div>
@@ -14819,7 +14819,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
                       Most-requested subjects
                     </h2>
                     <p style={{fontSize:13.5,color:V.sl3,marginTop:10,lineHeight:1.6,maxWidth:560,margin:'10px auto 0'}}>
@@ -14848,7 +14848,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Frequently asked
                   </h2>
                 </div>
@@ -14890,7 +14890,7 @@ export default function LandingPage() {
               <section className="sec" style={{background:'#fff'}}><div className="wrap">
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Nearby</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Tuition in nearby areas
                   </h2>
                 </div>
@@ -14903,7 +14903,7 @@ export default function LandingPage() {
                         style={{background:V.bone,border:'1px solid '+V.line,borderRadius:10,padding:'14px 16px',textDecoration:'none',color:V.ink,transition:'border-color .2s, transform .2s'}}
                         onMouseEnter={e => { e.currentTarget.style.borderColor=V.cr; e.currentTarget.style.transform='translateY(-2px)' }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor=V.line; e.currentTarget.style.transform='translateY(0)' }}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{near.name}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',fontWeight:700,color:V.ink}}>{near.name}</div>
                         <div style={{fontSize:11,color:V.sl3,marginTop:4}}>{near.region}</div>
                       </a>
                     )
@@ -14921,7 +14921,7 @@ export default function LandingPage() {
 
             {/* FINAL CTA */}
             <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`,color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:680,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:700,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Ready to start in <em style={{color:V.gold3}}>{area.name}</em>?
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:22,lineHeight:1.7}}>
@@ -14992,7 +14992,7 @@ export default function LandingPage() {
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Premium online tuition · United Arab Emirates</div>
               <h1 style={{
-                fontFamily:"'DM Serif Display',Georgia,serif",
+                fontFamily:"'Source Serif 4',Georgia,serif",
                 fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',
                 fontWeight:400,color:'#fff',lineHeight:1.05,
                 marginBottom:18,letterSpacing:'-.01em',
@@ -15018,7 +15018,7 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <div style={{flex:1,minWidth:280}}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.3}}>Smartious in UAE is online-only</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.3}}>Smartious in UAE is online-only</h3>
                   <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
                     We do not send tutors to your villa or apartment, and we do not operate a physical centre in the Emirates. UAE private tutoring is regulated by <strong style={{color:V.ink}}>KHDA</strong> (Dubai), <strong style={{color:V.ink}}>ADEK</strong> (Abu Dhabi) and <strong style={{color:V.ink}}>SPEA</strong> (Sharjah), which license in-person tutoring within the emirates. Smartious operates as an internationally accredited online school based in <strong style={{color:V.ink}}>Nairobi, Kenya</strong> — our online sessions are delivered remotely from outside the country and are therefore not subject to in-person tutoring licensing requirements. <strong style={{color:V.ink}}>The educational quality is the same as in-person tutoring</strong> — shared whiteboards, screen sharing, real-time video — only the delivery method differs.
                   </p>
@@ -15031,7 +15031,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Areas we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                 Online tuition across the <em style={{color:V.cr,fontStyle:'italic'}}>UAE</em>
               </h2>
               <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>
@@ -15051,7 +15051,7 @@ export default function LandingPage() {
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                   <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{area.emirate}</div>
-                  <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{area.name}</div>
+                  <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{area.name}</div>
                   <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{area.region}</p>
                   <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                     View area details
@@ -15067,7 +15067,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36,maxWidth:720,margin:'0 auto 36px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious for UAE families</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   Internationally qualified tutors at UAE-tier pricing
                 </h2>
               </div>
@@ -15081,7 +15081,7 @@ export default function LandingPage() {
                   ['University admissions support','UCAS for UK, Common App for US, plus Canadian, Australian and UAE branch-campus (NYU Abu Dhabi, Sorbonne Abu Dhabi) admissions support.'],
                 ].map(([h, p], i) => (
                   <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{h}</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{p}</p>
                   </div>
                 ))}
@@ -15094,7 +15094,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Common questions from UAE families
                 </h2>
               </div>
@@ -15180,7 +15180,7 @@ export default function LandingPage() {
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.emirate} · {area.region}</div>
                 <h1 style={{
-                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontFamily:"'Source Serif 4',Georgia,serif",
                   fontSize:'clamp(2rem,4.5vw,3rem)',
                   fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:16,letterSpacing:'-.01em',
                 }}>Online tuition for <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em></h1>
@@ -15222,7 +15222,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                       Most-requested subjects
                     </h2>
                   </div>
@@ -15244,7 +15244,7 @@ export default function LandingPage() {
                 {area.localSchools && (
                   <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>Schools we work with</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Local schools in {area.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Local schools in {area.name}</h3>
                     <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:6}}>
                       {area.localSchools.map((s, i) => (
                         <li key={i} style={{fontSize:13,color:V.sl,lineHeight:1.5,paddingLeft:14,position:'relative'}}>
@@ -15258,7 +15258,7 @@ export default function LandingPage() {
                 {area.parentProfile && (
                   <div style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:10}}>Family profile</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{area.name} families typically</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{area.name} families typically</h3>
                     <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{area.parentProfile}</p>
                   </div>
                 )}
@@ -15270,7 +15270,7 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Practical details</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Pricing, scheduling, licensing
                   </h2>
                 </div>
@@ -15294,7 +15294,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Frequently asked
                   </h2>
                 </div>
@@ -15319,7 +15319,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:24}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Nearby</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                       Other UAE areas we serve
                     </h2>
                   </div>
@@ -15407,7 +15407,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschooling in <em style={{color:V.gold3,fontStyle:'italic'}}>Dubai and the UAE</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -15429,7 +15429,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -15445,7 +15445,7 @@ export default function LandingPage() {
             <section id="uae-fees" className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div className="eyebrow">Homeschooling in the UAE: fees</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   What online school costs in Dubai and the UAE
                 </h2>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14,marginBottom:18}}>
@@ -15455,7 +15455,7 @@ export default function LandingPage() {
                   ].map(f => (
                     <div key={f.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 22px'}}>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>{f.h}</div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{f.v}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.ink,marginBottom:8,lineHeight:1.15}}>{f.v}</div>
                       <div style={{fontSize:13,color:V.sl2,lineHeight:1.6}}>{f.sub}</div>
                     </div>
                   ))}
@@ -15475,7 +15475,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div className="eyebrow">Home schooling curriculum in the UAE</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Curriculum options for UAE families
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:20}}>
@@ -15500,13 +15500,13 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:980,margin:'0 auto',display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))',gap:18}}>
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>A timetable on Gulf time</h2>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>A timetable on Gulf time</h2>
                   <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
                     The UAE is on Gulf Standard Time (GMT+4), one hour ahead of our Nairobi teaching base (GMT+3). Live classes are timetabled in the UAE school day, so a 9:00 lesson in Nairobi starts at 10:00 in Dubai, Abu Dhabi or Sharjah. Your child&rsquo;s timetable is created after the assessment.
                   </p>
                 </div>
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>Where exams are sat</h2>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',fontWeight:400,color:V.ink,margin:'0 0 10px',lineHeight:1.25}}>Where exams are sat</h2>
                   <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>
                     IGCSE and A-Level exams are sat in person, as a private candidate, at an exam centre in the UAE, for example the British Council in Dubai or Abu Dhabi. Each centre sets its own entry deadlines and fees; we help you plan entries for the May–June and October–November series.
                   </p>
@@ -15518,7 +15518,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Recognition</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.2}}>
                   Is online school recognised in the UAE?
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -15543,7 +15543,7 @@ export default function LandingPage() {
             {/* ─── DUBAI, ABU DHABI, SHARJAH ─── */}
             <section className="sec" style={{background:V.bone,paddingTop:40,paddingBottom:40}}><div className="wrap">
               <div style={{maxWidth:980,margin:'0 auto',textAlign:'center'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.2}}>
                   Online school and homeschooling in Dubai, Abu Dhabi and Sharjah
                 </h2>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap'}}>
@@ -15565,7 +15565,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -15578,7 +15578,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -15594,7 +15594,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -15639,14 +15639,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -15659,7 +15659,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -15668,7 +15668,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -15681,7 +15681,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -15696,7 +15696,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -15717,7 +15717,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -15739,7 +15739,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -17195,7 +17195,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -17217,7 +17217,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -17230,7 +17230,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -17243,7 +17243,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -17259,7 +17259,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -17304,14 +17304,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -17324,7 +17324,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -17333,7 +17333,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -17346,7 +17346,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -17361,7 +17361,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -17382,7 +17382,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -17404,7 +17404,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -17480,7 +17480,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -17502,7 +17502,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -17515,7 +17515,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -17528,7 +17528,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -17544,7 +17544,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -17589,14 +17589,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -17609,7 +17609,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -17618,7 +17618,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -17631,7 +17631,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -17646,7 +17646,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -17667,7 +17667,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -17689,7 +17689,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -17765,7 +17765,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -17787,7 +17787,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -17800,7 +17800,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -17813,7 +17813,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -17829,7 +17829,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -17874,14 +17874,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -17894,7 +17894,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -17903,7 +17903,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -17916,7 +17916,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -17931,7 +17931,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -17952,7 +17952,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -17974,7 +17974,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -18050,7 +18050,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -18072,7 +18072,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -18085,7 +18085,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -18098,7 +18098,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -18114,7 +18114,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -18159,14 +18159,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -18179,7 +18179,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -18188,7 +18188,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -18201,7 +18201,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -18216,7 +18216,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -18237,7 +18237,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -18259,7 +18259,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -18335,7 +18335,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -18357,7 +18357,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -18370,7 +18370,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -18383,7 +18383,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -18399,7 +18399,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -18444,14 +18444,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -18464,7 +18464,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -18473,7 +18473,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -18486,7 +18486,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -18501,7 +18501,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -18522,7 +18522,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -18544,7 +18544,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -18619,7 +18619,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
               <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -18641,7 +18641,7 @@ export default function LandingPage() {
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
                   {country.trustSignals.map((t,i) => (
                     <div key={i}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                       <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                       <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
                     </div>
@@ -18654,7 +18654,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
               <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                   {country.citiesSectionTitle}
                 </h2>
                 <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -18667,7 +18667,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
                     <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                       View {c.name} details
@@ -18683,7 +18683,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
                     How Smartious compares to top {country.name} schools
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -18728,14 +18728,14 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Regulatory framework</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
                   Homeschool laws & regulatory framework in the {country.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
                 <div style={{display:'flex',flexDirection:'column',gap:14}}>
                   {country.legalFramework.map((item, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                       <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
                     </div>
                   ))}
@@ -18748,7 +18748,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     Why {country.name} families choose Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -18757,7 +18757,7 @@ export default function LandingPage() {
                   {country.whySmartious.map((r, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                       <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
                     </div>
                   ))}
@@ -18770,7 +18770,7 @@ export default function LandingPage() {
               <div style={{maxWidth:980,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
                     What you can verify about Smartious
                   </h2>
                   <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -18785,7 +18785,7 @@ export default function LandingPage() {
                     {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
                   ].map((t, i) => (
                     <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
                     </div>
                   ))}
@@ -18806,7 +18806,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
                   Common questions from {country.name} families
                 </h2>
                 <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -18828,7 +18828,7 @@ export default function LandingPage() {
               <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
               <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
                 <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
                 <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
                 <div style={{display:'flex',gap:12,justifyContent:'center',flexWrap:'wrap',marginBottom:24}}>
                   <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))} style={{background:V.gold3,color:V.ink,border:'none',padding:'15px 32px',borderRadius:8,fontSize:14,fontWeight:800,cursor:'pointer',display:'inline-flex',alignItems:'center',gap:8}}>Book assessment <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
@@ -18895,7 +18895,7 @@ export default function LandingPage() {
                   Homeschooling Kenya
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{city.county} · {city.region}</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,4.5vw,3rem)',fontWeight:400,color:'#fff',lineHeight:1.1,marginBottom:14,letterSpacing:'-.01em'}}>
                   {city.primaryKeyword}
                 </h1>
                 <p style={{fontSize:14,color:V.gold3,fontStyle:'italic',marginBottom:18,maxWidth:720,lineHeight:1.5}}>{city.heroTagline}</p>
@@ -18913,7 +18913,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Education in {city.name}</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
                   Challenges {city.name} families face
                 </h2>
                 <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
@@ -18932,14 +18932,14 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Why {city.name} families choose Smartious</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     What we offer that's genuinely different
                   </h2>
                 </div>
                 <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:14}}>
                   {city.whyChoose.map((w, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{w.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.cr,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{w.h}</h3>
                       <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
                     </div>
                   ))}
@@ -18951,7 +18951,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Service detail</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
                   Homeschooling services in {city.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.homeschoolDetail}</p>
@@ -18961,7 +18961,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Service detail</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
                   Home tuition services in {city.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.homeTuitionDetail}</p>
@@ -18971,7 +18971,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Service detail</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
                   Online learning for {city.name} students
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.onlineLearningDetail}</p>
@@ -18983,7 +18983,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Curricula offered</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     All major curricula supported
                   </h2>
                 </div>
@@ -18996,7 +18996,7 @@ export default function LandingPage() {
                   ].filter(cur => cur.text).map((cur, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                       <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Curriculum</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{cur.label}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{cur.label}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{cur.text}</p>
                     </div>
                   ))}
@@ -19009,7 +19009,7 @@ export default function LandingPage() {
               <div style={{maxWidth:900,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Subjects available</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Core subjects we cover for {city.name} students
                   </h2>
                 </div>
@@ -19030,7 +19030,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:20}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Areas near {city.name} we serve</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                       Communities across the {city.county}
                     </h2>
                   </div>
@@ -19047,7 +19047,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Local insight</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.3}}>
                   Why homeschooling is growing in {city.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,margin:0}}>{city.growingReason}</p>
@@ -19059,7 +19059,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>How we help</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.3}}>
                     {city.name} family situations we typically help with
                   </h2>
                   <p style={{fontSize:13,color:V.sl2,fontStyle:'italic',maxWidth:580,margin:'0 auto'}}>Illustrative scenarios — not specific named families. We protect privacy by describing the kinds of situations we typically support.</p>
@@ -19078,7 +19078,7 @@ export default function LandingPage() {
             {/* SHARE YOUR STORY CTA */}
             <section className="sec" style={{background:V.bone,paddingTop:32,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:720,margin:'0 auto',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',textAlign:'center'}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Share your Smartious story</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>Share your Smartious story</h3>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:16}}>
                   If your {city.name} family has used Smartious, we'd love to feature your story (with your permission). Email us at <a href="mailto:hello@smartioushomeschool.com" style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>hello@smartioushomeschool.com</a> or WhatsApp us at.
                 </p>
@@ -19090,7 +19090,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Common questions from {city.name} families</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Frequently asked questions
                   </h2>
                 </div>
@@ -19110,7 +19110,7 @@ export default function LandingPage() {
             {/* MORE IN KENYA — back to the hub and across to the other cities */}
             <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
               <nav aria-label="More in Kenya" style={{maxWidth:880,margin:'0 auto'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>More in Kenya</h2>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>More in Kenya</h2>
                 <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
                   <a href="/online-school/kenya" onClick={linkClick(() => { nav('/online-school/kenya'); window.scrollTo(0, 0) })} style={{color:V.cr,fontWeight:700,textDecoration:'none'}}>Homeschooling and online school in Kenya</a>
                   {KENYA_CITIES.filter(c => c.slug !== city.slug).map(c => (
@@ -19125,7 +19125,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to enrol</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Start your {city.name} child's Smartious journey
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
@@ -19163,7 +19163,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Global test preparation</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Master the tests that <em style={{color:V.gold3,fontStyle:'italic'}}>open universities</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
@@ -19180,7 +19180,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:32}}><div className="wrap">
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div className="eyebrow">Tier 1 · English Proficiency</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
                 English language tests for <em style={{color:V.cr,fontStyle:'italic'}}>university and migration</em>
               </h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:680,marginBottom:32}}>
@@ -19194,7 +19194,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:6}}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
                       <div style={{fontSize:11,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99}}>{test.fee}</div>
                     </div>
                     <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{test.fullName}</div>
@@ -19214,7 +19214,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:64}}><div className="wrap">
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div className="eyebrow">Tier 2 · Graduate &amp; Undergraduate Admissions</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:8,lineHeight:1.2}}>
                 Standardised admissions tests for <em style={{color:V.cr,fontStyle:'italic'}}>graduate &amp; undergraduate</em> programmes
               </h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:680,marginBottom:32}}>
@@ -19228,7 +19228,7 @@ export default function LandingPage() {
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
                     <div style={{display:'flex',alignItems:'baseline',justifyContent:'space-between',marginBottom:6}}>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.ink,lineHeight:1.1}}>{test.code}</div>
                       <div style={{fontSize:11,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99}}>{test.fee}</div>
                     </div>
                     <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{test.fullName}</div>
@@ -19285,7 +19285,7 @@ export default function LandingPage() {
                   All test preparation
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{test.tier}</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.2rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:8,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.2rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:8,letterSpacing:'-.01em'}}>
                   {test.code} <em style={{color:V.gold3,fontStyle:'italic'}}>Preparation</em>
                 </h1>
                 <div style={{fontSize:14,color:'rgba(255,255,255,.6)',marginBottom:18,letterSpacing:'.02em'}}>{test.fullName}</div>
@@ -19299,19 +19299,19 @@ export default function LandingPage() {
                 }}>
                   <div>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Tuition</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.fee}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.fee}</div>
                     <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.feeUsd}</div>
                   </div>
                   <div style={{borderLeft:'1px solid rgba(255,255,255,.1)'}}/>
                   <div>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Sessions</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.sessions}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.sessions}</div>
                     <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.sessionLength} each</div>
                   </div>
                   <div style={{borderLeft:'1px solid rgba(255,255,255,.1)'}}/>
                   <div>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Duration</div>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.duration.split('(')[0].trim()}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#fff'}}>{test.duration.split('(')[0].trim()}</div>
                     <div style={{fontSize:11,color:'rgba(255,255,255,.55)'}}>{test.duration.match(/\((.*?)\)/)?.[1] || ''}</div>
                   </div>
                 </div>
@@ -19326,7 +19326,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">About {test.code}</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                   What is {test.code}?
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{test.intro}</p>
@@ -19337,7 +19337,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">Who this is for</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:20,lineHeight:1.25}}>
                   {test.code} is right for you if you're
                 </h2>
                 <ul style={{listStyle:'none',padding:0,margin:0,display:'flex',flexDirection:'column',gap:12}}>
@@ -19356,7 +19356,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Test format</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     {test.code} structure &amp; sections
                   </h2>
                 </div>
@@ -19364,7 +19364,7 @@ export default function LandingPage() {
                   {test.sections.map((s, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
                       <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>Section {i + 1}</div>
-                      <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{s.h}</h3>
+                      <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:10,lineHeight:1.3,fontWeight:400}}>{s.h}</h3>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{s.p}</p>
                     </div>
                   ))}
@@ -19377,7 +19377,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>What's included</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Your {test.fee} {test.code} preparation package
                   </h2>
                 </div>
@@ -19397,7 +19397,7 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>What scores mean</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     {test.code} score &amp; what it unlocks
                   </h2>
                 </div>
@@ -19427,7 +19427,7 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Key facts</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     Everything you need to know about {test.code}
                   </h2>
                 </div>
@@ -19447,7 +19447,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Frequently asked</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.3}}>
                     {test.code} preparation questions
                   </h2>
                 </div>
@@ -19468,7 +19468,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to start</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Start your <em style={{color:V.gold3,fontStyle:'italic'}}>{test.code}</em> journey today
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
@@ -19507,7 +19507,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Foreign languages</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5.2vw,3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5.2vw,3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Language coaching that <em style={{color:V.gold3,fontStyle:'italic'}}>opens worlds</em>
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
@@ -19525,7 +19525,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>8 languages</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Which language <em style={{color:V.cr,fontStyle:'italic'}}>opens your future?</em>
                 </h2>
               </div>
@@ -19540,7 +19540,7 @@ export default function LandingPage() {
                       <div style={{fontSize:'2rem',lineHeight:1}}>{lang.flag}</div>
                       <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99,letterSpacing:'.04em'}}>{lang.pricing.hourly[0].rate.split('/')[0]}+</div>
                     </div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:4,lineHeight:1.1,fontWeight:400}}>{lang.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:4,lineHeight:1.1,fontWeight:400}}>{lang.name}</h3>
                     <div style={{fontSize:13,color:V.sl2,marginBottom:12,fontStyle:'italic'}}>{lang.nativeName}</div>
                     <div style={{fontSize:12,color:V.sl,lineHeight:1.55,marginBottom:14}}>
                       <div style={{marginBottom:3}}><strong style={{color:V.ink}}>{lang.speakers}</strong></div>
@@ -19560,7 +19560,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Standard pricing</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Transparent <em style={{color:V.cr,fontStyle:'italic'}}>language tuition</em> pricing
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
@@ -19575,7 +19575,7 @@ export default function LandingPage() {
                 ].map(p => (
                   <div key={p.tier} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
                     <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:5}}>{p.cefr}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.2,fontWeight:400}}>{p.tier}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginBottom:8,lineHeight:1.2,fontWeight:400}}>{p.tier}</h3>
                     <div style={{fontSize:16,fontWeight:700,color:V.cr,marginBottom:4}}>{p.rate}</div>
                     <div style={{fontSize:12,color:V.sl2,marginBottom:10}}>or {p.bundle}</div>
                     <div style={{fontSize:12.5,color:V.sl,lineHeight:1.6}}>{p.desc}</div>
@@ -19591,7 +19591,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>language journey</em>
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -19648,7 +19648,7 @@ export default function LandingPage() {
                     <div style={{fontSize:13,color:'rgba(255,255,255,.6)',fontStyle:'italic'}}>{lang.nativeName}</div>
                   </div>
                 </div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> with Smartious
                 </h1>
                 <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>{lang.heroTagline}</p>
@@ -19678,7 +19678,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:48,paddingBottom:32}}><div className="wrap">
               <div style={{maxWidth:860,margin:'0 auto'}}>
                 <div className="eyebrow">About {lang.name}</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                   Why learn {lang.name}?
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{lang.intro}</p>
@@ -19692,7 +19692,7 @@ export default function LandingPage() {
                   {lang.whyLearn.map((w, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
                       <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:8}}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
                         <h3 style={{fontSize:14,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0}}>{w.h}</h3>
                       </div>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
@@ -19707,7 +19707,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>{lang.name} pricing</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Transparent pricing for <em style={{color:V.cr,fontStyle:'italic'}}>{lang.name} coaching</em>
                   </h2>
                 </div>
@@ -19717,7 +19717,7 @@ export default function LandingPage() {
                   {lang.pricing.hourly.map((h, i) => (
                     <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'18px 20px'}}>
                       <div style={{fontSize:12,fontWeight:700,color:V.sl2,marginBottom:6}}>{h.level}</div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:4}}>{h.rate}</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:4}}>{h.rate}</div>
                       <div style={{fontSize:11.5,color:V.sl}}>Session length: {h.sessionLength}</div>
                     </div>
                   ))}
@@ -19733,7 +19733,7 @@ export default function LandingPage() {
                         <div style={{fontSize:11.5,color:V.sl}}>{pkg.timeline}</div>
                       </div>
                       <div style={{textAlign:'right'}}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.cr,fontWeight:400,whiteSpace:'nowrap'}}>{pkg.price}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.cr,fontWeight:400,whiteSpace:'nowrap'}}>{pkg.price}</div>
                       </div>
                     </div>
                   ))}
@@ -19746,7 +19746,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Levels we teach</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     From <em style={{color:V.cr,fontStyle:'italic'}}>beginner to mastery</em>
                   </h2>
                 </div>
@@ -19766,7 +19766,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Examination preparation</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Certifications we <em style={{color:V.cr,fontStyle:'italic'}}>prepare students for</em>
                   </h2>
                 </div>
@@ -19787,7 +19787,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     {lang.name} questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                   </h2>
                 </div>
@@ -19807,7 +19807,7 @@ export default function LandingPage() {
             {/* CTA */}
             <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                   Start learning <em style={{color:V.gold3,fontStyle:'italic'}}>{lang.name}</em> today
                 </h2>
                 <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -19846,7 +19846,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Homeschool global</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Premium <em style={{color:V.gold3,fontStyle:'italic'}}>homeschooling</em> worldwide
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
@@ -19864,7 +19864,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>What we teach</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Five curricula. <em style={{color:V.cr,fontStyle:'italic'}}>One trusted partner.</em>
                 </h2>
               </div>
@@ -19883,7 +19883,7 @@ export default function LandingPage() {
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
                     <div style={{fontSize:'1.4rem',marginBottom:6}}>{c.flag}</div>
                     <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,letterSpacing:'.14em',marginBottom:4}}>{c.code}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{c.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{c.name}</h3>
                     <div style={{fontSize:11.5,color:V.sl,lineHeight:1.55}}>{c.desc}</div>
                   </a>
                 ))}
@@ -19896,7 +19896,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>How we deliver</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Three ways to <em style={{color:V.cr,fontStyle:'italic'}}>learn with us</em>
                 </h2>
               </div>
@@ -19920,7 +19920,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Countries we serve</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Dedicated homeschool guides for <em style={{color:V.cr,fontStyle:'italic'}}>16 destinations</em>
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
@@ -19973,7 +19973,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Go deeper</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   City-level &amp; <em style={{color:V.cr,fontStyle:'italic'}}>all-countries</em> entry points
                 </h2>
               </div>
@@ -19983,7 +19983,7 @@ export default function LandingPage() {
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>Kenya cities (6)</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>Kenya cities (6)</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>City-specific homeschool pages: Mombasa, Kisumu, Nakuru, Eldoret, Thika, Kiambu — each with KCSE alignment and Cambridge curriculum pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View Kenya cities homeschool →</div>
                 </a>
@@ -19992,7 +19992,7 @@ export default function LandingPage() {
                   style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>All countries overview</h3>
                   <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>Comprehensive global view across all 16 destination guides — useful for diaspora families wanting to compare contexts and pathways.</p>
                   <div style={{fontSize:12,fontWeight:700,color:V.cr}}>View all countries →</div>
                 </a>
@@ -20005,7 +20005,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Who we help</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Built for families with <em style={{color:V.cr,fontStyle:'italic'}}>specific needs</em>
                 </h2>
               </div>
@@ -20034,7 +20034,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Homeschool questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                 </h2>
               </div>
@@ -20070,7 +20070,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Start your child's <em style={{color:V.gold3,fontStyle:'italic'}}>Smartious</em> journey
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -20118,7 +20118,7 @@ export default function LandingPage() {
             <div className="wrap">
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Private tuition across the United Kingdom</div>
               <h1 style={{
-                fontFamily:"'DM Serif Display',Georgia,serif",
+                fontFamily:"'Source Serif 4',Georgia,serif",
                 fontSize:'clamp(2rem,4.5vw,3rem)',
                 fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
               }}>Tuition <em style={{color:V.gold3,fontStyle:'italic'}}>UK</em></h1>
@@ -20154,7 +20154,7 @@ export default function LandingPage() {
                 {h:'EHE-compatible curriculum',p:'Meets Section 7 Education Act 1996 "suitable education" standard. Documented curriculum suitable for local authority enquiry response.'},
               ].map((v, i) => (
                 <div key={i} style={{background:'#fff',border:'1px solid '+V.line,borderRadius:12,padding:'20px 22px'}}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10}}>{v.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:10}}>{v.h}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6}}>{v.p}</p>
                 </div>
               ))}
@@ -20165,14 +20165,14 @@ export default function LandingPage() {
           <section className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Cities and areas we serve</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:V.ink,marginTop:8}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:V.ink,marginTop:8}}>
                 Find your area
               </h2>
             </div>
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               {Object.entries(UK_AREAS_BY_CITY).map(([city, areas]) => (
                 <div key={city} style={{marginBottom:32}}>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.cr,marginBottom:16,paddingBottom:8,borderBottom:'2px solid '+V.line}}>{city}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.cr,marginBottom:16,paddingBottom:8,borderBottom:'2px solid '+V.line}}>{city}</h3>
                   <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:12}}>
                     {areas.map(area => (
                       <a key={area.slug}
@@ -20200,7 +20200,7 @@ export default function LandingPage() {
 
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',padding:'60px 0'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child</h2>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child</h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days. If accepted, the assessment fee is invoiced before the diagnostic is scheduled.</p>
             <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
               <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
@@ -20291,7 +20291,7 @@ export default function LandingPage() {
                 </a>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{area.region}</div>
                 <h1 style={{
-                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontFamily:"'Source Serif 4',Georgia,serif",
                   fontSize:'clamp(2rem,4.5vw,3rem)',
                   fontWeight:700,color:'#fff',lineHeight:1.1,marginBottom:16,
                 }}>Tuition in <em style={{color:V.gold3,fontStyle:'italic'}}>{area.name}</em>, {area.city}</h1>
@@ -20331,12 +20331,12 @@ export default function LandingPage() {
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,maxWidth:1000,margin:'0 auto'}} className="tuition-area-grid">
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>The {area.name} parent</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>What we hear from families here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7}}>{area.parentProfile}</p>
                 </div>
                 <div style={{background:V.bone,border:'1px solid '+V.line,borderRadius:14,padding:'24px 22px'}}>
                   <div className="eyebrow" style={{marginBottom:8}}>Local schools we work with</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',fontWeight:700,color:V.ink,marginBottom:12}}>Schools nearby</h3>
                   <ul style={{listStyle:'none',padding:0,margin:0}}>
                     {area.localSchools.map((s,i) => (
                       <li key={i} style={{padding:'6px 0',fontSize:13.5,color:V.sl,borderTop: i===0?'none':'1px dashed '+V.line}}>
@@ -20354,12 +20354,12 @@ export default function LandingPage() {
               <div style={{maxWidth:880,margin:'0 auto',display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}} className="tuition-area-grid">
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.cr,marginBottom:8}}>Commute & timing</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>Reaching {area.name}</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.commuteNote}</p>
                 </div>
                 <div style={{background:'#fff',border:'1px solid '+V.line,borderRadius:14,padding:'22px 22px'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:V.gold2,marginBottom:8}}>Pricing for {area.name}</div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:V.ink,marginBottom:12}}>How fees work here</h3>
                   <p style={{fontSize:13.5,color:V.sl,lineHeight:1.65}}>{area.pricingNote}</p>
                 </div>
               </div>
@@ -20371,7 +20371,7 @@ export default function LandingPage() {
                 <div style={{maxWidth:880,margin:'0 auto'}}>
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>What we tutor in {area.name}</div>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginTop:8}}>
                       Most-requested subjects
                     </h2>
                     <p style={{fontSize:13.5,color:V.sl3,marginTop:10,lineHeight:1.6,maxWidth:560,margin:'10px auto 0'}}>
@@ -20400,7 +20400,7 @@ export default function LandingPage() {
               <div style={{maxWidth:780,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:24}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Quick answers for {area.name}</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginTop:8}}>
                     Frequently asked
                   </h2>
                 </div>
@@ -20423,7 +20423,7 @@ export default function LandingPage() {
 
             {/* CTA */}
             <section className="sec" style={{background:V.ink,color:'#fff',padding:'60px 0'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child in {area.name}</h2>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.6rem,3vw,2rem)',fontWeight:700,color:'#fff',marginBottom:16}}>Book an assessment for your child in {area.name}</h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:24,lineHeight:1.65}}>Two-gate admissions process. Submit the assessment request form — our Head of Admissions reviews every request within three business days.</p>
               <div style={{display:'inline-flex',gap:14,flexWrap:'wrap',justifyContent:'center'}}>
                 <a className="lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
@@ -20470,7 +20470,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Tuition global</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5.2vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Premium <em style={{color:V.gold3,fontStyle:'italic'}}>1-on-1 tuition</em> worldwide
               </h1>
               <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
@@ -20488,7 +20488,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Subjects we tutor</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Specialist tuition across <em style={{color:V.cr,fontStyle:'italic'}}>every major subject</em>
                 </h2>
               </div>
@@ -20515,7 +20515,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>How we deliver</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Three ways to <em style={{color:V.cr,fontStyle:'italic'}}>receive tuition</em>
                 </h2>
               </div>
@@ -20526,7 +20526,7 @@ export default function LandingPage() {
                   { h:'Home Tutoring', p:'Qualified teachers visit your home — 21 Nairobi areas, 27 UAE areas, 6 Kenya cities. Personal attention in familiar setting.', best:'Best for younger learners and families seeking in-person' },
                 ].map(m => (
                   <div key={m.h} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px'}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:10,fontWeight:400}}>{m.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:10,fontWeight:400}}>{m.h}</h3>
                     <p style={{fontSize:13,color:V.sl,lineHeight:1.65,marginBottom:12}}>{m.p}</p>
                     <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.04em'}}>{m.best}</div>
                   </div>
@@ -20540,7 +20540,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Where we tutor</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   In-person &amp; online — <em style={{color:V.cr,fontStyle:'italic'}}>anywhere</em>
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
@@ -20558,7 +20558,7 @@ export default function LandingPage() {
                     style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',cursor:'pointer',transition:'all .2s'}}
                     onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
                     onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,marginBottom:14}}>{r.d}</p>
                     <div style={{fontSize:12,fontWeight:700,color:V.cr}}>{r.cta}</div>
                   </a>
@@ -20572,7 +20572,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Tuition questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                 </h2>
               </div>
@@ -20608,7 +20608,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Find the right <em style={{color:V.gold3,fontStyle:'italic'}}>tutor</em> for your child
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -20642,7 +20642,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>International University Foundation Programme</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> — your bridge to international universities
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
@@ -20659,7 +20659,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:860,margin:'0 auto'}}>
               <div className="eyebrow">About IUFP</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                 What is the International University Foundation Programme?
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:14}}>
@@ -20676,7 +20676,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Programme streams</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Choose your <em style={{color:V.cr,fontStyle:'italic'}}>foundation stream</em>
                 </h2>
               </div>
@@ -20702,7 +20702,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Who IUFP is for</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Is IUFP <em style={{color:V.cr,fontStyle:'italic'}}>right for you?</em>
                 </h2>
               </div>
@@ -20729,7 +20729,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   IUFP questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                 </h2>
               </div>
@@ -20765,7 +20765,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Start your <em style={{color:V.gold3,fontStyle:'italic'}}>IUFP</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -20798,7 +20798,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Pre-University programme</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Bridge the gap from <em style={{color:V.gold3,fontStyle:'italic'}}>school to university</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:760}}>
@@ -20815,7 +20815,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:860,margin:'0 auto'}}>
               <div className="eyebrow">About Pre-University</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                 What is the Pre-University Programme?
               </h2>
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8,marginBottom:14}}>
@@ -20832,7 +20832,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Pre-University pathways</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Choose your <em style={{color:V.cr,fontStyle:'italic'}}>pre-university path</em>
                 </h2>
               </div>
@@ -20857,7 +20857,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Who Pre-University is for</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Is a gap year with <em style={{color:V.cr,fontStyle:'italic'}}>Smartious</em> right for you?
                 </h2>
               </div>
@@ -20884,7 +20884,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Pre-University questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                 </h2>
               </div>
@@ -20919,7 +20919,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Build your <em style={{color:V.gold3,fontStyle:'italic'}}>pre-university</em> pathway
               </h2>
               <div style={{display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center',marginTop:22}}>
@@ -20955,7 +20955,7 @@ export default function LandingPage() {
             <div className="wrap" style={{position:'relative',zIndex:2}}>
               <div style={{maxWidth:920,margin:'0 auto'}}>
                 <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>Study abroad with Smartious</div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Your free path to <em style={{color:V.gold3,fontStyle:'italic'}}>top universities</em> worldwide
                 </h1>
                 <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>
@@ -20984,7 +20984,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:40}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>How it works</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Five steps. <em style={{color:V.cr,fontStyle:'italic'}}>Zero cost</em> to you.
                 </h2>
               </div>
@@ -20997,7 +20997,7 @@ export default function LandingPage() {
                   { n:'05', h:'Visa & departure', p:'Visa documentation, financial proof, interview preparation, pre-departure briefing on accommodation, banking, weather, culture.' },
                 ].map(s => (
                   <div key={s.n} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 20px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,marginBottom:8}}>{s.n}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.gold3,lineHeight:1,marginBottom:8}}>{s.n}</div>
                     <h3 style={{fontSize:14,fontWeight:700,color:V.ink,marginBottom:8}}>{s.h}</h3>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{s.p}</p>
                   </div>
@@ -21011,7 +21011,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1200,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>10 destinations</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Where will <em style={{color:V.cr,fontStyle:'italic'}}>your studies</em> take you?
                 </h2>
                 <p style={{fontSize:14,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.6}}>
@@ -21029,7 +21029,7 @@ export default function LandingPage() {
                       <div style={{fontSize:'2rem',lineHeight:1}}>{dest.flag}</div>
                       <div style={{fontSize:10.5,fontWeight:700,color:V.gold3,background:'rgba(201,151,58,.12)',padding:'3px 10px',borderRadius:99,letterSpacing:'.06em',textTransform:'uppercase'}}>FREE</div>
                     </div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:6,lineHeight:1.1,fontWeight:400}}>Study in {dest.name}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:V.ink,marginBottom:6,lineHeight:1.1,fontWeight:400}}>Study in {dest.name}</h3>
                     <div style={{fontSize:11.5,color:V.sl2,marginBottom:14,letterSpacing:'.02em'}}>{dest.fullName}</div>
                     <div style={{fontSize:12,color:V.sl,lineHeight:1.6,marginBottom:14}}>
                       <div style={{marginBottom:4}}><strong style={{color:V.ink}}>{dest.quickFacts.universities}</strong></div>
@@ -21050,7 +21050,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Major scholarships we support</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Fully funded pathways for <em style={{color:V.cr,fontStyle:'italic'}}>Kenyan and African</em> students
                 </h2>
               </div>
@@ -21086,7 +21086,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:36}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Why Smartious</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   The team that <em style={{color:V.cr,fontStyle:'italic'}}>actually answers</em>
                 </h2>
               </div>
@@ -21113,7 +21113,7 @@ export default function LandingPage() {
             <div style={{maxWidth:820,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:28}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Common questions</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Study abroad questions, <em style={{color:V.cr,fontStyle:'italic'}}>answered</em>
                 </h2>
               </div>
@@ -21152,7 +21152,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
             <div style={{maxWidth:740,margin:'0 auto',textAlign:'center'}}>
               <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready to start</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
                 Your <em style={{color:V.gold3,fontStyle:'italic'}}>free</em> study abroad journey starts with one conversation
               </h2>
               <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:580,margin:'0 auto 24px'}}>
@@ -21210,7 +21210,7 @@ export default function LandingPage() {
                   <div style={{fontSize:'3.2rem',lineHeight:1}}>{dest.flag}</div>
                   <div className="eyebrow" style={{color:V.gold3,margin:0}}>Study in {dest.fullName}</div>
                 </div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 5.4vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 5.4vw, 3.6rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                   Study in <em style={{color:V.gold3,fontStyle:'italic'}}>{dest.name}</em>
                 </h1>
                 <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:24,maxWidth:780}}>{dest.heroTagline}</p>
@@ -21248,7 +21248,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:32}}><div className="wrap">
               <div style={{maxWidth:860,margin:'0 auto'}}>
                 <div className="eyebrow">Overview</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                   Why students choose {dest.name}
                 </h2>
                 <p style={{fontSize:14.5,color:V.sl,lineHeight:1.8}}>{dest.intro}</p>
@@ -21262,7 +21262,7 @@ export default function LandingPage() {
                   {dest.whyStudy.map((w, i) => (
                     <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
                       <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:8}}>
-                        <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
+                        <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.gold3,lineHeight:1}}>{String(i + 1).padStart(2, '0')}</div>
                         <h3 style={{fontSize:14,fontWeight:700,color:V.ink,lineHeight:1.3,margin:0}}>{w.h}</h3>
                       </div>
                       <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{w.p}</p>
@@ -21277,7 +21277,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1100,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Top universities</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.8rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Universities we help <em style={{color:V.cr,fontStyle:'italic'}}>Kenyan students</em> apply to
                   </h2>
                 </div>
@@ -21303,7 +21303,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>What you'll need</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Requirements for <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> applications
                   </h2>
                 </div>
@@ -21330,7 +21330,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Funding pathways</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Scholarships for studying in <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em>
                   </h2>
                 </div>
@@ -21357,14 +21357,14 @@ export default function LandingPage() {
               <div style={{maxWidth:900,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>Application journey</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Your typical <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> application timeline
                   </h2>
                 </div>
                 <div style={{position:'relative'}}>
                   {dest.timeline.map((t, i) => (
                     <div key={i} style={{display:'flex',gap:14,marginBottom:14,alignItems:'flex-start'}}>
-                      <div style={{flexShrink:0,width:36,height:36,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,fontFamily:"'DM Serif Display',Georgia,serif"}}>{i + 1}</div>
+                      <div style={{flexShrink:0,width:36,height:36,borderRadius:'50%',background:V.cr,color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,fontFamily:"'Source Serif 4',Georgia,serif"}}>{i + 1}</div>
                       <div style={{flex:1,background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'12px 18px'}}>
                         <div style={{fontSize:11,fontWeight:700,color:V.gold3,letterSpacing:'.08em',textTransform:'uppercase',marginBottom:5}}>{t.month}</div>
                         <div style={{fontSize:13,color:V.sl,lineHeight:1.6}}>{t.task}</div>
@@ -21379,7 +21379,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.bone,paddingTop:48,paddingBottom:48}}><div className="wrap">
               <div style={{maxWidth:880,margin:'0 auto'}}>
                 <div className="eyebrow">After graduation</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:18,lineHeight:1.25}}>
                   Life after your <em style={{color:V.cr,fontStyle:'italic'}}>{dest.name}</em> degree
                 </h2>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.8}}>{dest.postStudy}</p>
@@ -21391,7 +21391,7 @@ export default function LandingPage() {
               <div style={{maxWidth:1000,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:32}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>What we do for you</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Your free <em style={{color:V.cr,fontStyle:'italic'}}>Smartious {dest.name}</em> support package
                   </h2>
                 </div>
@@ -21411,7 +21411,7 @@ export default function LandingPage() {
               <div style={{maxWidth:820,margin:'0 auto'}}>
                 <div style={{textAlign:'center',marginBottom:28}}>
                   <div className="eyebrow" style={{justifyContent:'center'}}>FAQs</div>
-                  <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                  <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                     Study in {dest.name} — <em style={{color:V.cr,fontStyle:'italic'}}>common questions</em>
                   </h2>
                 </div>
@@ -21432,7 +21432,7 @@ export default function LandingPage() {
             <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:56,paddingBottom:56}}><div className="wrap">
               <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
                 <div className="eyebrow" style={{color:V.gold3,justifyContent:'center'}}>Ready for {dest.name}?</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:'#fff',marginTop:8,marginBottom:14,lineHeight:1.2}}>
                   Start your <em style={{color:V.gold3,fontStyle:'italic'}}>{dest.name}</em> journey — free
                 </h2>
                 <p style={{fontSize:15,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:24,maxWidth:560,margin:'0 auto 24px'}}>
@@ -21464,7 +21464,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Events</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Events &amp; <em style={{color:V.gold3,fontStyle:'italic'}}>highlights</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
@@ -21478,7 +21478,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1100,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Annual calendar</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Recurring <em style={{color:V.cr,fontStyle:'italic'}}>school events</em>
                 </h2>
               </div>
@@ -21495,7 +21495,7 @@ export default function LandingPage() {
                 ].map(e => (
                   <div key={e.season} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'18px 20px'}}>
                     <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:8}}>{e.season}</div>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{e.h}</h3>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{e.h}</h3>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.6,margin:0}}>{e.p}</p>
                   </div>
                 ))}
@@ -21508,7 +21508,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Recent highlights</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Moments from <em style={{color:V.cr,fontStyle:'italic'}}>this academic year</em>
                 </h2>
               </div>
@@ -21534,7 +21534,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Stay <em style={{color:V.gold3,fontStyle:'italic'}}>up to date</em>
               </h2>
               <p style={{fontSize:14,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:18}}>
@@ -21564,7 +21564,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Calendar</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 School <em style={{color:V.gold3,fontStyle:'italic'}}>calendar</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
@@ -21578,7 +21578,7 @@ export default function LandingPage() {
             <div style={{maxWidth:1000,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>2026–27 academic year</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Three <em style={{color:V.cr,fontStyle:'italic'}}>terms</em>, three breaks
                 </h2>
               </div>
@@ -21589,7 +21589,7 @@ export default function LandingPage() {
                   { term:'Term 3', dates:'From 13 April 2027 — ends July 2027', halfTerm:'Half-term: May 2027', focus:'Cambridge & Edexcel examinations (May-June), revision, year-end celebrations, prize-giving.' },
                 ].map(t => (
                   <div key={t.term} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'20px 22px'}}>
-                    <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
+                    <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',color:V.cr,marginBottom:6,fontWeight:400}}>{t.term}</div>
                     <div style={{fontSize:13.5,color:V.ink,fontWeight:700,marginBottom:6}}>{t.dates}</div>
                     <div style={{fontSize:11.5,color:V.sl2,fontWeight:600,marginBottom:10,padding:'4px 8px',background:'rgba(201,151,58,.08)',borderRadius:6,display:'inline-block'}}>{t.halfTerm}</div>
                     <p style={{fontSize:12.5,color:V.sl,lineHeight:1.65,margin:0}}>{t.focus}</p>
@@ -21604,7 +21604,7 @@ export default function LandingPage() {
             <div style={{maxWidth:900,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Holiday breaks</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   Term <em style={{color:V.cr,fontStyle:'italic'}}>breaks</em>
                 </h2>
               </div>
@@ -21641,7 +21641,7 @@ export default function LandingPage() {
             <div style={{maxWidth:900,margin:'0 auto'}}>
               <div style={{textAlign:'center',marginBottom:32}}>
                 <div className="eyebrow" style={{justifyContent:'center'}}>Key examination dates</div>
-                <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
+                <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:400,color:V.ink,marginTop:8,lineHeight:1.2}}>
                   External <em style={{color:V.cr,fontStyle:'italic'}}>examination</em> series
                 </h2>
                 <p style={{fontSize:13,color:V.sl,maxWidth:680,margin:'14px auto 0',lineHeight:1.7}}>
@@ -21682,7 +21682,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="sec" style={{background:V.ink,color:'#fff',paddingTop:48,paddingBottom:48}}><div className="wrap">
             <div style={{maxWidth:720,margin:'0 auto',textAlign:'center'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:400,color:'#fff',marginBottom:14,lineHeight:1.2}}>
                 Need a <em style={{color:V.gold3,fontStyle:'italic'}}>printable copy?</em>
               </h2>
               <p style={{fontSize:14,color:'rgba(255,255,255,.85)',lineHeight:1.7,marginBottom:18}}>
@@ -21707,7 +21707,7 @@ export default function LandingPage() {
           }}>
             <div className="wrap" style={{maxWidth:920,margin:'0 auto'}}>
               <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>School life · Gallery</div>
-              <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+              <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem,5vw,3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
                 Photo <em style={{color:V.gold3,fontStyle:'italic'}}>gallery</em>
               </h1>
               <p style={{fontSize:16,color:'rgba(255,255,255,.92)',lineHeight:1.7,maxWidth:720}}>
@@ -21895,7 +21895,7 @@ export default function LandingPage() {
             <div style={{textAlign:'center',marginBottom:44,maxWidth:760,margin:'0 auto 44px'}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Day by day</div>
               <h2 style={{
-                fontFamily:"'DM Serif Display',Georgia,serif",
+                fontFamily:"'Source Serif 4',Georgia,serif",
                 fontSize:'2rem',
                 fontWeight:700,
                 color:V.ink,
@@ -22134,7 +22134,7 @@ export default function LandingPage() {
                   {/* day content */}
                   <div style={{padding:'22px 22px 24px'}}>
                     <h3 style={{
-                      fontFamily:"'DM Serif Display',Georgia,serif",
+                      fontFamily:"'Source Serif 4',Georgia,serif",
                       fontSize:'1.15rem',
                       fontWeight:700,
                       color:V.ink,
@@ -22176,7 +22176,7 @@ export default function LandingPage() {
               <div>
                 <div className="eyebrow" style={{marginBottom:10}}>Trip Highlights</div>
                 <h3 style={{
-                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontFamily:"'Source Serif 4',Georgia,serif",
                   fontSize:'1.5rem',
                   fontWeight:700,
                   color:V.ink,
@@ -22232,7 +22232,7 @@ export default function LandingPage() {
               <div>
                 <div className="eyebrow" style={{marginBottom:10}}>Package Includes</div>
                 <h3 style={{
-                  fontFamily:"'DM Serif Display',Georgia,serif",
+                  fontFamily:"'Source Serif 4',Georgia,serif",
                   fontSize:'1.5rem',
                   fontWeight:700,
                   color:V.ink,
@@ -22299,7 +22299,7 @@ export default function LandingPage() {
                 <div>
                   <div className="eyebrow" style={{color:V.gold3,marginBottom:6}}>Investment</div>
                   <h3 style={{
-                    fontFamily:"'DM Serif Display',Georgia,serif",
+                    fontFamily:"'Source Serif 4',Georgia,serif",
                     fontSize:'1.6rem',
                     fontWeight:700,
                     color:'#fff',
@@ -22310,7 +22310,7 @@ export default function LandingPage() {
                 <div style={{textAlign:'right'}}>
                   <div style={{fontSize:11,fontWeight:700,letterSpacing:'.12em',textTransform:'uppercase',color:V.gold3,marginBottom:4}}>Per Student</div>
                   <div style={{
-                    fontFamily:"'DM Serif Display',Georgia,serif",
+                    fontFamily:"'Source Serif 4',Georgia,serif",
                     fontSize:'2.2rem',
                     fontWeight:800,
                     color:'#fff',
@@ -22371,10 +22371,10 @@ export default function LandingPage() {
                         fontSize:10,
                         letterSpacing:'.04em',
                       }}>M-PESA</div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay via M-Pesa</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay via M-Pesa</div>
                     </div>
                     <div style={{fontSize:12,color:V.sl3,marginBottom:6,letterSpacing:'.04em'}}>Paybill Number</div>
-                    <div style={{fontSize:20,fontWeight:800,color:V.cr,letterSpacing:'.02em',marginBottom:14,fontFamily:"'DM Serif Display',Georgia,serif"}}>247 247</div>
+                    <div style={{fontSize:20,fontWeight:800,color:V.cr,letterSpacing:'.02em',marginBottom:14,fontFamily:"'Source Serif 4',Georgia,serif"}}>247 247</div>
                     <div style={{fontSize:12,color:V.sl3,marginBottom:4,letterSpacing:'.04em'}}>Account Number</div>
                     <div style={{fontSize:16,fontWeight:700,color:V.ink,marginBottom:10}}>745021</div>
                     <div style={{fontSize:11,color:V.sl,lineHeight:1.5}}>
@@ -22403,7 +22403,7 @@ export default function LandingPage() {
                         fontSize:10,
                         letterSpacing:'.04em',
                       }}>PAY</div>
-                      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
+                      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',fontWeight:700,color:V.ink}}>Pay online</div>
                     </div>
                     <div style={{fontSize:12,color:V.sl,lineHeight:1.55,marginBottom:14}}>
                       Pay by card, bank transfer, Apple Pay or M-Pesa STK push via secure Paystack. Choose which instalment to pay below.
@@ -22606,7 +22606,7 @@ export default function LandingPage() {
                   <div style={{textAlign:'center',marginBottom:28}}>
                     <div className="eyebrow" style={{justifyContent:'center'}}>Apply now · Limited spaces</div>
                     <h3 style={{
-                      fontFamily:"'DM Serif Display',Georgia,serif",
+                      fontFamily:"'Source Serif 4',Georgia,serif",
                       fontSize:'1.7rem',
                       fontWeight:700,
                       color:V.ink,
@@ -22889,7 +22889,7 @@ export default function LandingPage() {
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7"/></svg>
                   </div>
                   <h3 style={{
-                    fontFamily:"'DM Serif Display',Georgia,serif",
+                    fontFamily:"'Source Serif 4',Georgia,serif",
                     fontSize:'1.5rem',
                     fontWeight:700,
                     color:V.ink,
@@ -22922,7 +22922,7 @@ export default function LandingPage() {
           <section className="sec" style={{background:V.bone}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Weekly Enrichment Programme</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Every Wednesday <em style={{color:V.cr}}>2:00 PM – 4:00 PM</em></h2>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Every Wednesday <em style={{color:V.cr}}>2:00 PM – 4:00 PM</em></h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>A protected two-hour window every week reserved for activities. No homework, no exams — just discovery, skill-building and friendship.</p>
             </div>
 
@@ -23144,7 +23144,7 @@ export default function LandingPage() {
           <section id="student-life" className="sec" style={{background:'#fff'}}><div className="wrap">
             <div style={{textAlign:'center',marginBottom:36}}>
               <div className="eyebrow" style={{justifyContent:'center'}}>Parent Trust</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:700,color:V.ink,marginTop:8,marginBottom:8}}>Holistic Growth in a <em style={{color:V.cr}}>Safe, Supervised Environment</em></h2>
               <p style={{fontSize:14,color:V.sl,maxWidth:640,margin:'0 auto',lineHeight:1.7}}>Every activity is designed with safety, age-appropriateness, and meaningful development at its core.</p>
             </div>
 
@@ -23179,7 +23179,7 @@ export default function LandingPage() {
 
           {/* CALL TO ACTION */}
           <section className="sec" style={{background:`linear-gradient(135deg, ${V.ink} 0%, ${V.cr} 100%)`, color:'#fff'}}><div className="wrap" style={{textAlign:'center',maxWidth:720,margin:'0 auto'}}>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',fontWeight:700,marginBottom:14,lineHeight:1.2}}>
               Give Your Child More Than <em style={{color:V.gold2}}>Just Academics</em>
             </h2>
             <p style={{fontSize:15,color:'rgba(255,255,255,.85)',marginBottom:28,lineHeight:1.7}}>
@@ -23269,7 +23269,7 @@ export default function LandingPage() {
                       marginBottom:10,
                     }}>Wednesday Enrichment</div>
                     <h3 id="activity-modal-title" style={{
-                      fontFamily:"'DM Serif Display',Georgia,serif",
+                      fontFamily:"'Source Serif 4',Georgia,serif",
                       fontSize:'1.9rem',fontWeight:700,
                       color:'#fff',margin:0,lineHeight:1.15,
                       textShadow:'0 2px 8px rgba(0,0,0,.4)',
@@ -23299,7 +23299,7 @@ export default function LandingPage() {
                     </div>
                     <div style={{textAlign:'right'}}>
                       <div style={{
-                        fontFamily:"'DM Serif Display',Georgia,serif",
+                        fontFamily:"'Source Serif 4',Georgia,serif",
                         fontSize:'1.7rem',fontWeight:800,color:V.ink,lineHeight:1,
                       }}>KSh 25,000</div>
                       <div style={{fontSize:11,color:V.sl3,marginTop:4,letterSpacing:'.04em'}}>per student · per term</div>
@@ -23502,7 +23502,7 @@ export default function LandingPage() {
 
             {/* Country filter — second row, lighter visual weight */}
             <div style={{display:'flex',gap:7,flexWrap:'wrap',justifyContent:'center',marginTop:14,marginBottom:28}}>
-              <div style={{fontSize:11,color:V.sl2,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:700,marginRight:6,padding:'8px 0',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>Country:</div>
+              <div style={{fontSize:11,color:V.sl2,letterSpacing:'.1em',textTransform:'uppercase',fontWeight:700,marginRight:6,padding:'8px 0',fontFamily:"'DM Sans',system-ui,sans-serif"}}>Country:</div>
               {[
                 ['all','🌍 All'],
                 ['kenya','🇰🇪 Kenya'],
@@ -23516,7 +23516,7 @@ export default function LandingPage() {
                 const on = blogCountry === id
                 return (
                   <button key={id} onClick={() => setBlogCountry(id)}
-                    style={{padding:'6px 13px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:`1px solid ${on?V.cr:V.bone3}`,background:on?V.cr:V.white,color:on?V.white:V.sl,transition:'all .2s',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+                    style={{padding:'6px 13px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:`1px solid ${on?V.cr:V.bone3}`,background:on?V.cr:V.white,color:on?V.white:V.sl,transition:'all .2s',fontFamily:"'DM Sans',system-ui,sans-serif"}}>
                     {l}
                   </button>
                 )
@@ -23553,7 +23553,7 @@ export default function LandingPage() {
             {/* Teacher-published articles appear here automatically */}
             {store.articles.filter(a => a.status === 'Published').length > 0 && (
               <div style={{marginBottom:28}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:'#fff',opacity:.6,marginBottom:14,letterSpacing:'.05em',textTransform:'uppercase'}}>From Our Teachers</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.15rem',fontWeight:700,color:'#fff',opacity:.6,marginBottom:14,letterSpacing:'.05em',textTransform:'uppercase'}}>From Our Teachers</h3>
                 <div className="blog-grid">
                   {store.articles.filter(a => a.status === 'Published').map((a) => (
                     <div key={a.id} className="bc reveal" onClick={() => showToast('Article: ' + a.title)}>
@@ -23598,10 +23598,10 @@ export default function LandingPage() {
             </div>
             <div className="nl-strip">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={V.cr} strokeWidth="1.5" strokeLinecap="round" style={{margin:'0 auto 12px',display:'block'}}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:8}}>Get New Articles in Your Inbox</h3>
+              <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:700,color:V.ink,marginBottom:8}}>Get New Articles in Your Inbox</h3>
               <p style={{fontSize:14,color:V.sl,marginBottom:20}}>Join 4,000+ parents and students who receive our weekly education insights.</p>
               <div style={{display:'flex',gap:10,maxWidth:440,margin:'0 auto',flexWrap:'wrap'}}>
-                <input style={{flex:1,minWidth:200,padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:6,fontSize:14,color:V.ink,background:V.white,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",outline:'none'}} placeholder="your@email.com" type="email"/>
+                <input style={{flex:1,minWidth:200,padding:'11px 14px',border:`1.5px solid ${V.bone3}`,borderRadius:6,fontSize:14,color:V.ink,background:V.white,fontFamily:"'DM Sans',system-ui,sans-serif",outline:'none'}} placeholder="your@email.com" type="email"/>
                 <button className="btn-p" onClick={() => showToast('Subscribed! Check your inbox.')}>Subscribe <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
               </div>
             </div>
@@ -23647,7 +23647,7 @@ export default function LandingPage() {
               {/* Gold accent bar at the very top */}
               <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,transparent 0%,${V.gold3} 50%,transparent 100%)`,zIndex:3}}/>
               <div style={{maxWidth:860,margin:'0 auto',position:'relative',zIndex:2}}>
-                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
+                <a className="lp-btnlink" href={pageToPath('blog')} onClick={linkClick(() => P('blog'))} style={{background:'rgba(255,255,255,.08)',border:'1px solid rgba(255,255,255,.15)',color:'rgba(255,255,255,.85)',padding:'7px 14px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',fontFamily:"'DM Sans',system-ui,sans-serif",marginBottom:22,display:'inline-flex',alignItems:'center',gap:6,transition:'all .2s',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}
                   onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.14)';e.currentTarget.style.borderColor='rgba(255,255,255,.28)'}}
                   onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.08)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)'}}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
@@ -23656,9 +23656,9 @@ export default function LandingPage() {
                 <div style={{display:'inline-block',padding:'4px 12px',background:'rgba(201,151,58,.15)',border:'1px solid rgba(201,151,58,.3)',color:V.gold3,fontSize:10.5,fontWeight:700,letterSpacing:'.1em',borderRadius:20,marginBottom:18,textTransform:'uppercase',backdropFilter:'blur(8px)',WebkitBackdropFilter:'blur(8px)'}}>
                   {a.cat === 'study-abroad' ? 'Study Abroad' : a.cat}
                 </div>
-                <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2rem,4.2vw,3.2rem)',fontWeight:800,color:V.white,lineHeight:1.15,letterSpacing:'-.02em',marginBottom:20,textShadow:'0 2px 24px rgba(8,12,20,.7)'}}>{a.t}</h1>
+                <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2rem,4.2vw,3.2rem)',fontWeight:800,color:V.white,lineHeight:1.15,letterSpacing:'-.02em',marginBottom:20,textShadow:'0 2px 24px rgba(8,12,20,.7)'}}>{a.t}</h1>
                 <div style={{display:'flex',alignItems:'center',gap:14,flexWrap:'wrap'}}>
-                  <div style={{width:44,height:44,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:14,fontFamily:"'DM Serif Display',Georgia,serif",boxShadow:'0 4px 12px rgba(8,12,20,.4)'}}>
+                  <div style={{width:44,height:44,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:14,fontFamily:"'Source Serif 4',Georgia,serif",boxShadow:'0 4px 12px rgba(8,12,20,.4)'}}>
                     {(a.author||'SM').split(' ').map(n=>n[0]).join('').slice(0,2)}
                   </div>
                   <div>
@@ -23674,7 +23674,7 @@ export default function LandingPage() {
             <article style={{background:V.bone,padding:'72px 20px'}}>
               <div style={{maxWidth:760,margin:'0 auto'}}>
                 {/* Intro */}
-                <p style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
+                <p style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.35rem',fontStyle:'italic',color:V.ink2,lineHeight:1.7,marginBottom:48,paddingLeft:20,borderLeft:`3px solid ${V.cr}`,fontWeight:400}}>
                   {a.intro}
                 </p>
 
@@ -23698,7 +23698,7 @@ export default function LandingPage() {
                 {/* Sections */}
                 {a.sections.map((s, i) => (
                   <section key={i} style={{marginBottom:44}}>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:16,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:16,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {s.h}
                     </h2>
@@ -23712,7 +23712,7 @@ export default function LandingPage() {
                     )}
                     {/* s.p may be one paragraph or an array of paragraphs */}
                     {(Array.isArray(s.p) ? s.p : [s.p]).map((para, j) => (
-                      <p key={j} style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",margin:j ? '16px 0 0' : 0}}>{para}</p>
+                      <p key={j} style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,fontFamily:"'DM Sans',system-ui,sans-serif",margin:j ? '16px 0 0' : 0}}>{para}</p>
                     ))}
                   </section>
                 ))}
@@ -23720,12 +23720,12 @@ export default function LandingPage() {
                 {/* Country links — pillar articles only. Real <a href> so crawlers follow them. */}
                 {a.countryLinks && a.countryLinks.length > 0 && (
                   <section style={{marginBottom:44}}>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {a.countryLinksHeading || 'Every country we teach in this region'}
                     </h2>
                     {a.countryLinksIntro && (
-                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.countryLinksIntro}</p>
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'DM Sans',system-ui,sans-serif"}}>{a.countryLinksIntro}</p>
                     )}
                     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
                       {a.countryLinks.map(cl => (
@@ -23733,7 +23733,7 @@ export default function LandingPage() {
                           style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
-                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{cl.name}</div>
+                          <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{cl.name}</div>
                           <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{cl.note}</p>
                         </a>
                       ))}
@@ -23748,11 +23748,11 @@ export default function LandingPage() {
                   if (!rows.length) return null
                   return (
                     <section style={{marginBottom:44}}>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                         <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                         {a.guideCountriesHeading || 'Online school and virtual school guides, country by country'}
                       </h2>
-                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:18,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:18,fontFamily:"'DM Sans',system-ui,sans-serif"}}>
                         {a.guideCountriesIntro || 'For each country: the online school guide (what studying online alongside or instead of a local school involves there) and the virtual school guide (families outside the capital, remote regions and the decisions at each stage).'}
                       </p>
                       <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(250px,1fr))',gap:'6px 18px'}}>
@@ -23773,12 +23773,12 @@ export default function LandingPage() {
                 {/* Article links — pillar/flagship cross-linking. Real <a href> to /blog/. */}
                 {a.articleLinks && a.articleLinks.length > 0 && (
                   <section style={{marginBottom:44}}>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {a.articleLinksHeading || 'Read next'}
                     </h2>
                     {a.articleLinksIntro && (
-                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.articleLinksIntro}</p>
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'DM Sans',system-ui,sans-serif"}}>{a.articleLinksIntro}</p>
                     )}
                     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
                       {a.articleLinks.map(al => (
@@ -23786,7 +23786,7 @@ export default function LandingPage() {
                           style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
-                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{al.name}</div>
+                          <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{al.name}</div>
                           <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{al.note}</p>
                         </a>
                       ))}
@@ -23797,12 +23797,12 @@ export default function LandingPage() {
                 {/* Page links — raw hrefs for state/province/city pages. Real <a> tags. */}
                 {a.pageLinks && a.pageLinks.length > 0 && (
                   <section style={{marginBottom:44}}>
-                    <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:8,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
                       <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
                       {a.pageLinksHeading || 'Explore every page in this region'}
                     </h2>
                     {a.pageLinksIntro && (
-                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.pageLinksIntro}</p>
+                      <p style={{fontSize:16.5,color:V.ink2,lineHeight:1.85,marginBottom:22,fontFamily:"'DM Sans',system-ui,sans-serif"}}>{a.pageLinksIntro}</p>
                     )}
                     <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:12}}>
                       {a.pageLinks.map(pl => (
@@ -23810,7 +23810,7 @@ export default function LandingPage() {
                           style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'14px 16px',textDecoration:'none',color:'inherit',transition:'all .2s'}}
                           onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)' }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)' }}>
-                          <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:4,lineHeight:1.3}}>{pl.name}</div>
+                          <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:4,lineHeight:1.3}}>{pl.name}</div>
                           {pl.note && <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:0}}>{pl.note}</p>}
                         </a>
                       ))}
@@ -23823,7 +23823,7 @@ export default function LandingPage() {
                   const about = aboutGuideText(a, currentArticle)
                   return (
                     <section style={{marginBottom:20}}>
-                      <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginBottom:12}}>The Continental Guides</h2>
+                      <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',fontWeight:700,color:V.ink,marginBottom:12}}>The Continental Guides</h2>
                       <div style={{display:'flex',flexWrap:'wrap',gap:8,marginBottom:22}}>
                         {CONTINENTAL_SERIES.map(c => c.slug === currentArticle
                           ? <span key={c.slug} style={{padding:'7px 14px',borderRadius:99,background:V.cr,color:'#fff',fontSize:13,fontWeight:700}}>{c.name}</span>
@@ -23842,23 +23842,23 @@ export default function LandingPage() {
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'28px 32px',marginTop:48,position:'relative',overflow:'hidden'}}>
                   <div style={{position:'absolute',top:0,left:0,width:6,height:'100%',background:`linear-gradient(180deg,${V.cr},${V.gold2})`}}/>
                   <div style={{fontSize:11,fontWeight:700,color:V.cr,letterSpacing:'.14em',textTransform:'uppercase',marginBottom:10}}>Conclusion</div>
-                  <p style={{fontSize:16,color:V.ink2,lineHeight:1.8,margin:0,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{a.conclusion}</p>
+                  <p style={{fontSize:16,color:V.ink2,lineHeight:1.8,margin:0,fontFamily:"'DM Sans',system-ui,sans-serif"}}>{a.conclusion}</p>
                 </div>
 
                 {/* FAQs — only rendered if the article has them */}
                 {a.faqs && a.faqs.length > 0 && (
                   <div style={{marginTop:48}}>
-                    <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginBottom:18,letterSpacing:'-.01em'}}>
+                    <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.6rem',fontWeight:700,color:V.ink,marginBottom:18,letterSpacing:'-.01em'}}>
                       Frequently Asked <em style={{color:V.cr,fontStyle:'italic'}}>Questions</em>
                     </h3>
                     <div style={{display:'flex',flexDirection:'column',gap:12}}>
                       {a.faqs.map((f, i) => (
                         <details key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,padding:'16px 20px',cursor:'pointer',transition:'border-color .2s'}}>
-                          <summary style={{fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",fontWeight:700,fontSize:15,color:V.ink,listStyle:'none',position:'relative',paddingRight:28,cursor:'pointer'}}>
+                          <summary style={{fontFamily:"'DM Sans',system-ui,sans-serif",fontWeight:700,fontSize:15,color:V.ink,listStyle:'none',position:'relative',paddingRight:28,cursor:'pointer'}}>
                             {f.q}
                             <span style={{position:'absolute',right:0,top:2,color:V.cr,fontSize:18,fontWeight:400,transition:'transform .2s'}}>+</span>
                           </summary>
-                          <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.75,marginTop:12,marginBottom:0,fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif"}}>{f.a}</p>
+                          <p style={{fontSize:14.5,color:V.ink2,lineHeight:1.75,marginTop:12,marginBottom:0,fontFamily:"'DM Sans',system-ui,sans-serif"}}>{f.a}</p>
                         </details>
                       ))}
                     </div>
@@ -23868,7 +23868,7 @@ export default function LandingPage() {
                 {/* CTA strip */}
                 <div style={{background:V.ink,borderRadius:16,padding:'36px 32px',marginTop:48,textAlign:'center',position:'relative',overflow:'hidden'}}>
                   <div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,${V.gold3},transparent)`}}/>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.55rem',color:V.white,marginBottom:10,fontWeight:700}}>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.55rem',color:V.white,marginBottom:10,fontWeight:700}}>
                     Ready to put this into practice?
                   </h3>
                   <p style={{fontSize:14,color:'rgba(247,243,237,.55)',marginBottom:22,maxWidth:440,margin:'0 auto 22px',lineHeight:1.6}}>
@@ -23885,12 +23885,12 @@ export default function LandingPage() {
 
                 {/* Author card */}
                 <div style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:14,padding:'24px',marginTop:32,display:'flex',alignItems:'center',gap:18,flexWrap:'wrap'}}>
-                  <div style={{width:64,height:64,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:20,fontFamily:"'DM Serif Display',Georgia,serif",flexShrink:0}}>
+                  <div style={{width:64,height:64,borderRadius:'50%',background:`linear-gradient(135deg,${V.cr},${V.gold2})`,display:'flex',alignItems:'center',justifyContent:'center',color:V.white,fontWeight:700,fontSize:20,fontFamily:"'Source Serif 4',Georgia,serif",flexShrink:0}}>
                     {(a.author||'SM').split(' ').map(n=>n[0]).join('').slice(0,2)}
                   </div>
                   <div style={{flex:1,minWidth:200}}>
                     <div style={{fontSize:11,letterSpacing:'.1em',textTransform:'uppercase',color:V.sl2,fontWeight:700,marginBottom:4}}>Written by</div>
-                    <div style={{fontSize:17,fontWeight:700,color:V.ink,fontFamily:"'DM Serif Display',Georgia,serif"}}>{a.author}</div>
+                    <div style={{fontSize:17,fontWeight:700,color:V.ink,fontFamily:"'Source Serif 4',Georgia,serif"}}>{a.author}</div>
                     <div style={{fontSize:13,color:V.sl,marginTop:2}}>{a.role} · Smartious Homeschool</div>
                   </div>
                 </div>
@@ -23973,7 +23973,7 @@ export default function LandingPage() {
             <div className="contact-grid">
               {/* Left — contact info */}
               <div className="contact-info-card">
-                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
+                <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',color:'#FFFFFF',marginBottom:8}}>Our <em style={{color:'#C9973A',fontStyle:'italic'}}>Details</em></div>
                 {[
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Admissions', value:'+254 745 021 212', sub:'hello@smartioushomeschool.com · Call or WhatsApp', href:'tel:+254745021212'},
                   {icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="#C9973A" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.42C1.6 2.34 2.33 1.4 3.41 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.18 6.18l.81-.81a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>, label:'Academics', value:'+254 182 071 920', sub:'hello@smartioushomeschool.com · Head of Academics', href:'tel:+254182071920'},
@@ -23997,7 +23997,7 @@ export default function LandingPage() {
               </div>
               {/* Right — email form */}
               <div className="contact-email-card">
-                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:6}}>Send us a <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Message</em></div>
+                <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:6}}>Send us a <em style={{color:'#8B1A2E',fontStyle:'italic'}}>Message</em></div>
                 <p style={{fontSize:13.5,color:'#2E3D55',marginBottom:28,lineHeight:1.7}}>Fill in the form below and we will respond within 2 working hours.</p>
                 <ContactForm />
               </div>
@@ -24016,7 +24016,7 @@ export default function LandingPage() {
               <div style={{width:52,height:52,borderRadius:14,background:V.cr,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 12px'}}>
                 <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#fff" strokeWidth="2" strokeLinecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               </div>
-              <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:22,fontWeight:700,color:V.white}}>Smart<em style={{color:V.gold3,fontStyle:'italic'}}>ious</em></div>
+              <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:22,fontWeight:700,color:V.white}}>Smart<em style={{color:V.gold3,fontStyle:'italic'}}>ious</em></div>
               <div style={{fontSize:'8.5px',fontWeight:600,letterSpacing:'.12em',textTransform:'uppercase',color:'rgba(247,243,237,.2)',marginTop:2}}>HOMESCHOOL · GLOBAL</div>
             </div>
 
@@ -24036,7 +24036,7 @@ export default function LandingPage() {
               <span style={{fontSize:12,color:'rgba(247,243,237,.2)',whiteSpace:'nowrap'}}>or</span>
               <div style={{flex:1,height:1,background:'rgba(255,255,255,.07)'}}/>
             </div>
-            <a className="lp-btnlink" style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} href={'/login'} onClick={linkClick(goPortal)}>
+            <a className="lp-btnlink" style={{width:'100%',padding:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.1)',borderRadius:8,color:V.white,fontWeight:700,fontSize:13.5,cursor:'pointer',fontFamily:"'DM Sans',system-ui,sans-serif",display:'flex',alignItems:'center',justifyContent:'center',gap:8}} href={'/login'} onClick={linkClick(goPortal)}>
               <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
               Go to Full Login Page
             </a>
@@ -24169,7 +24169,7 @@ export default function LandingPage() {
         <div className="wrap">
           <div style={{textAlign:'center',marginBottom:30}}>
             <div style={{fontSize:11,fontWeight:800,letterSpacing:'.16em',color:V.gold3,textTransform:'uppercase',marginBottom:8}}>Visit Us</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2rem)',fontWeight:400,color:V.ink,margin:0}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.5rem, 3vw, 2rem)',fontWeight:400,color:V.ink,margin:0}}>
               Two learning centres in <em style={{color:V.cr,fontStyle:'italic'}}>Nairobi</em>
             </h2>
           </div>
@@ -24213,7 +24213,7 @@ export default function LandingPage() {
         return (
           <section className="sec" style={{background:V.white,paddingTop:40,paddingBottom:40}}><div className="wrap">
             <nav aria-label="Guides" style={{maxWidth:880,margin:'0 auto'}}>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>Guides for families in this country</h2>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.5rem',fontWeight:400,color:V.ink,margin:'0 0 14px',lineHeight:1.25}}>Guides for families in this country</h2>
               <p style={{fontSize:14.5,lineHeight:1.9,color:V.sl,margin:0}}>
                 {g.map((x, i) => (<span key={x.slug}>{i > 0 ? ' · ' : ''}<a href={'/blog/' + x.slug} onClick={linkClick(() => { nav('/blog/' + x.slug); window.scrollTo(0, 0) })} style={{color:V.cr,textDecoration:'none'}}>{x.title}</a></span>))}
               </p>
@@ -24304,7 +24304,7 @@ function ContactForm() {
       <div style={{width:56,height:56,borderRadius:'50%',background:'rgba(139,26,46,.08)',border:'2px solid rgba(139,26,46,.2)',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
         <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#8B1A2E" strokeWidth="2" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:8}}>Message Sent!</div>
+      <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.4rem',color:'#080C14',marginBottom:8}}>Message Sent!</div>
       <p style={{fontSize:14,color:'#2E3D55',lineHeight:1.7}}>We will reply to <strong>{form.email}</strong> within 2 working hours.</p>
     </div>
   )

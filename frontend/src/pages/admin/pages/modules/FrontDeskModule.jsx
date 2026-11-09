@@ -166,7 +166,7 @@ function FrontDeskLeads({ refreshKey, toast }) {
             border: '1px solid ' + (TOKENS.line || '#E8E2D6'),
             borderRadius: 10, padding: '12px 16px',
           }}>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 26, color: col, lineHeight: 1 }}>{val}</div>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 26, color: col, lineHeight: 1 }}>{val}</div>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.s500, marginTop: 4 }}>{label}</div>
           </div>
         ))}
@@ -720,7 +720,7 @@ function FrontDeskInsights({ refreshKey, toast }) {
             flex: '1 1 130px', background: '#fff',
             border: '1px solid ' + (TOKENS.line || '#E8E2D6'), borderRadius: 10, padding: '12px 16px',
           }}>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 26, color: TOKENS.crimson, lineHeight: 1 }}>{val}</div>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 26, color: TOKENS.crimson, lineHeight: 1 }}>{val}</div>
             <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: TOKENS.s500, marginTop: 4 }}>{label}</div>
           </div>
         ))}

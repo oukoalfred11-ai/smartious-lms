@@ -90,7 +90,7 @@ export function AnalyticsStrip({ scope = 'school', days = 30, title = 'Last 30 d
   const printStrip = () => {
     const s = snap.summary || {}
     const w = window.open('', '_blank'); if (!w) return
-    w.document.write(`<html><head><title>Smartious trend report</title><style>body{font-family:Georgia,serif;margin:36px}h1{color:#7D1025;font-size:20px}table{border-collapse:collapse;font-size:11.5px;width:100%}th,td{border:1px solid #ddd;padding:5px 8px;text-align:left}th{background:#F7F2EA}</style></head><body>
+    w.document.write(`<html><head><title>Smartious trend report</title><style>body{font-family:'Source Serif 4',Georgia,serif;margin:36px}h1{color:#7D1025;font-size:20px}table{border-collapse:collapse;font-size:11.5px;width:100%}th,td{border:1px solid #ddd;padding:5px 8px;text-align:left}th{background:#F7F2EA}</style></head><body>
       <h1>Smartious trend report: ${scope}</h1>
       <p style="color:#666;font-size:12px">${title} \u00b7 generated ${new Date().toDateString()} \u00b7 Attendance ${s.attendancePct ?? '\u2013'}% (${s.attended}/${s.scheduled}) \u00b7 Exam avg ${s.examAvg ?? '\u2013'}% (${s.examN}) \u00b7 Lessons ${s.sessionsHeld}</p>
       <table><thead><tr>${Object.keys(rows[0] || { day: 1 }).map(h => '<th>' + h + '</th>').join('')}</tr></thead>

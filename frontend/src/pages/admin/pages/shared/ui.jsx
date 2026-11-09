@@ -248,7 +248,7 @@ export function PSection({ tag, title, em, sub, action }) {
           }}>{tag}</div>
         )}
         <h2 style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
+          fontFamily: "'Source Serif 4',Georgia,serif",
           fontSize: 32, fontWeight: 400, color: TOKENS.s900,
           margin: 0, lineHeight: 1.1,
           letterSpacing: '-.01em',
@@ -300,7 +300,7 @@ export function PTile({ kind, title, sub, accent, onClick, badge }) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
             <h3 style={{
-              fontFamily: "'Playfair Display', Georgia, serif",
+              fontFamily: "'Source Serif 4',Georgia,serif",
               fontSize: 19, fontWeight: 600,
               color: TOKENS.s900, margin: 0, lineHeight: 1.2,
             }}>{title}</h3>
@@ -332,7 +332,7 @@ export function PKpi({ label, value, delta, accent = TOKENS.crimson, deltaColor 
     }}>
       <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: TOKENS.s500, marginBottom: 8 }}>{label}</div>
       <div style={{
-        fontFamily: "'Playfair Display', Georgia, serif",
+        fontFamily: "'Source Serif 4',Georgia,serif",
         fontSize: 30, fontWeight: 500,
         color: TOKENS.s900, lineHeight: 1, marginBottom: 4,
         letterSpacing: '-.01em',

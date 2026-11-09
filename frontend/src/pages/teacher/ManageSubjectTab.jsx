@@ -182,7 +182,7 @@ export default function ManageSubjectTab({ user, toast }) {
                 Teaching Library
               </div>
               <h1 style={{
-                fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400,
+                fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, fontWeight: 400,
                 margin: 0, lineHeight: 1.15,
               }}>
                 Manage My Subjects
@@ -231,7 +231,7 @@ export default function ManageSubjectTab({ user, toast }) {
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
               </svg>
             </div>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, color: BRAND.ink, marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, color: BRAND.ink, marginBottom: 6 }}>
               No subjects yet
             </div>
             <div style={{ fontSize: 13.5, color: BRAND.inkMute, maxWidth: 420, margin: '0 auto 24px', lineHeight: 1.55 }}>
@@ -318,7 +318,7 @@ export default function ManageSubjectTab({ user, toast }) {
               {selectedSubject.curriculum}
             </div>
             <h1 style={{
-              fontFamily: "'Instrument Serif',serif", fontSize: 28, fontWeight: 400,
+              fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400,
               margin: 0, lineHeight: 1.15, color: BRAND.ink,
             }}>
               {selectedSubject.subjectName}
@@ -392,7 +392,7 @@ export default function ManageSubjectTab({ user, toast }) {
         </div>
       ) : lessons.length === 0 ? (
         <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
             No lessons yet
           </div>
           <div style={{ fontSize: 13, color: BRAND.inkMute, marginBottom: 18 }}>
@@ -536,7 +536,7 @@ function SubjectCard({ subject, onOpen }) {
 
       <div style={{ padding: '14px 18px 16px' }}>
         <div style={{
-          fontFamily: "'Instrument Serif',serif", fontSize: 20, fontWeight: 400,
+          fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, fontWeight: 400,
           color: BRAND.ink, lineHeight: 1.15, marginBottom: 4,
         }}>
           {subject.subjectName}
@@ -818,7 +818,7 @@ function LessonFormModal({ subject, editing, toast, onClose, onSaved }) {
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             {editing ? 'Edit Lesson' : 'New Lesson'}
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, marginTop: 2 }}>
             {subject.subjectName} &middot; Term {form.termIndex}
           </div>
         </div>
@@ -1078,7 +1078,7 @@ function BulkImportModal({ subject, toast, onClose, onSaved }) {
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             Bulk Import
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, marginTop: 2 }}>
             Add many sub-topics at once
           </div>
         </div>
@@ -1259,7 +1259,7 @@ function SpecialtiesModal({ initialSpecialties, initialCurricula, toast, onClose
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             Settings
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 22, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, marginTop: 2 }}>
             My Teaching Specialties
           </div>
           <div style={{ fontSize: 12.5, opacity: .85, marginTop: 4 }}>
@@ -1503,7 +1503,7 @@ function MasteryMatrix({ subject, toast }) {
   if (students.length === 0) {
     return (
       <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+        <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
           No students allocated
         </div>
         <div style={{ fontSize: 13, color: BRAND.inkMute }}>
@@ -1516,7 +1516,7 @@ function MasteryMatrix({ subject, toast }) {
   if (lessons.length === 0) {
     return (
       <div className="card" style={{ padding: 40, textAlign: 'center' }}>
-        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
+        <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: BRAND.ink, marginBottom: 6 }}>
           No lessons to track
         </div>
         <div style={{ fontSize: 13, color: BRAND.inkMute }}>

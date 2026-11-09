@@ -202,7 +202,7 @@ export default function StaffFile({ toast, onOpenLibrary, showTeaching = true })
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,10,8,.55)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => !busy && setUp(null)}>
           <div style={{ background: '#FFFFFF', borderRadius: 16, width: '100%', maxWidth: 480, maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 21 }}>Add to my staff file</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 21 }}>Add to my staff file</div>
             </div>
             <div style={{ padding: '20px 24px' }}>
               <div style={{ marginBottom: 14 }}>

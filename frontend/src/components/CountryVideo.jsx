@@ -12,7 +12,7 @@ export default function CountryVideo({ V, countryName, videoId = COUNTRY_VIDEO_I
     <section className="sec" style={{ background: V.white, paddingTop: 56, paddingBottom: 56 }}><div className="wrap">
       <div style={{ maxWidth: 880, margin: '0 auto', textAlign: 'center' }}>
         <div className="eyebrow" style={{ justifyContent: 'center' }}>See Smartious in action</div>
-        <h2 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: '1.8rem', fontWeight: 400, color: V.ink, margin: '8px 0 18px', lineHeight: 1.2 }}>
+        <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: '1.8rem', fontWeight: 400, color: V.ink, margin: '8px 0 18px', lineHeight: 1.2 }}>
           How online school with Smartious works{countryName ? ` for families in ${countryName}` : ''}
         </h2>
         <div style={{ position: 'relative', aspectRatio: '16 / 9', borderRadius: 14, overflow: 'hidden', background: '#000', boxShadow: '0 12px 32px rgba(0,0,0,.18)' }}>

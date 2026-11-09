@@ -41,7 +41,7 @@ export default function ReportCards({ toast }) {
   return (
     <section style={{ background: C.parchment, border: `1px solid ${C.line}`, borderRadius: 14, padding: '16px 18px', margin: '0 0 18px' }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: list.length ? 12 : 4 }}>
-        <h2 style={{ margin: 0, fontFamily: "Georgia, 'Times New Roman', serif", fontWeight: 700, fontSize: 18, color: C.crimson, letterSpacing: '.04em' }}>Report cards</h2>
+        <h2 style={{ margin: 0, fontFamily: "'Source Serif 4',Georgia,serif", fontWeight: 700, fontSize: 18, color: C.crimson, letterSpacing: '.04em' }}>Report cards</h2>
         <span style={{ fontSize: 12.5, color: C.sepia }}>Your official end-of-term reports</span>
       </div>
       {!list.length ? (
@@ -50,7 +50,7 @@ export default function ReportCards({ toast }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: 12 }}>
           {list.map(r => (
             <div key={r._id} style={{ background: '#FFFDF7', border: `1px solid ${C.line}`, borderRadius: 12, padding: '12px 14px', boxShadow: 'inset 0 0 0 3px #FFFDF7, inset 0 0 0 4px ' + C.line }}>
-              <div style={{ fontFamily: "Georgia, 'Times New Roman', serif", fontSize: 16, fontWeight: 700, color: C.ink }}>{r.termLabel || 'Term ' + r.term}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 16, fontWeight: 700, color: C.ink }}>{r.termLabel || 'Term ' + r.term}</div>
               <div style={{ fontSize: 12.5, color: C.sepia, marginBottom: 8 }}>Academic year {r.academicYear}{r.dateIssued ? ' · issued ' + fmt(r.dateIssued) : ''}</div>
               <div style={{ display: 'flex', gap: 16, marginBottom: 10 }}>
                 <div><div style={{ fontSize: 10.5, letterSpacing: '.08em', textTransform: 'uppercase', color: C.sepia }}>Average</div><div style={{ fontSize: 20, fontWeight: 800, color: C.crimson }}>{r.overallAverage != null ? r.overallAverage + '%' : '—'}</div></div>

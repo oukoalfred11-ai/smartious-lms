@@ -134,7 +134,7 @@ function CountryHub({
         <div style={{position:'absolute',inset:0,background:`linear-gradient(135deg, ${V.ink}80 0%, ${V.cr}66 100%)`,zIndex:1}}/>
         <div className="wrap" style={{maxWidth:920,margin:'0 auto',position:'relative',zIndex:2}}>
           <div className="eyebrow" style={{color:V.gold3,marginBottom:10}}>{country.heroEyebrow} · Virtual school</div>
-          <h1 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
+          <h1 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(2.2rem, 4.8vw, 3.4rem)',fontWeight:400,color:'#fff',lineHeight:1.05,marginBottom:18,letterSpacing:'-.01em'}}>
             Online School &amp; Homeschool in <em style={{color:V.gold3,fontStyle:'italic'}}>{country.heroH1Suffix}</em>
           </h1>
           <p style={{fontSize:17,color:'rgba(255,255,255,.92)',lineHeight:1.7,marginBottom:16,maxWidth:760}}>{country.heroSubhead}</p>
@@ -173,7 +173,7 @@ function CountryHub({
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:18,maxWidth:1100,margin:'0 auto',textAlign:'center'}}>
             {country.trustSignals.map((t,i) => (
               <div key={i}>
-                <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
+                <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',color:V.gold3,lineHeight:1,marginBottom:4,fontWeight:400}}>{t.value}</div>
                 <div style={{fontSize:11,fontWeight:700,letterSpacing:'.1em',textTransform:'uppercase',color:'#fff',marginBottom:3}}>{t.metric}</div>
                 <div style={{fontSize:11,color:'rgba(255,255,255,.65)',lineHeight:1.4}}>{t.sub}</div>
               </div>
@@ -186,7 +186,7 @@ function CountryHub({
       <section className="sec" style={{background:V.white,paddingTop:64,paddingBottom:64}}><div className="wrap">
         <div style={{textAlign:'center',marginBottom:44,maxWidth:720,margin:'0 auto 44px'}}>
           <div className="eyebrow" style={{justifyContent:'center'}}>Cities we serve</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
             {country.citiesSectionTitle}
           </h2>
           <p style={{fontSize:15,color:V.sl,lineHeight:1.7}}>{country.citiesSectionBody}</p>
@@ -199,7 +199,7 @@ function CountryHub({
               onMouseEnter={e => { e.currentTarget.style.borderColor = V.cr; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(8,12,20,.06)' }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = V.bone3; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none' }}>
               <div style={{fontSize:10.5,fontWeight:700,letterSpacing:'.14em',textTransform:'uppercase',color:V.gold3,marginBottom:6}}>{c.county}</div>
-              <div style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
+              <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.25rem',color:V.ink,marginBottom:6,lineHeight:1.3}}>{c.name}</div>
               <p style={{fontSize:13,color:V.sl,lineHeight:1.55,margin:'6px 0 12px'}}>{c.region}</p>
               <div style={{fontSize:12,color:V.cr,fontWeight:700,display:'inline-flex',alignItems:'center',gap:5}}>
                 View {c.name} details
@@ -215,7 +215,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,margin:'0 auto 36px'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Honest comparison</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               How Smartious compares to top {country.name} schools
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>{country.competitorsIntro}</p>
@@ -260,14 +260,14 @@ function CountryHub({
       <section className="sec" style={{background:V.white,paddingTop:56,paddingBottom:56}}><div className="wrap">
         <div style={{maxWidth:880,margin:'0 auto'}}>
           <div className="eyebrow">Regulatory framework</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:16,lineHeight:1.2}}>
             Homeschool laws &amp; regulatory framework in the {country.name}
           </h2>
           <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7,marginBottom:28}}>{country.legalFrameworkIntro}</p>
           <div style={{display:'flex',flexDirection:'column',gap:14}}>
             {country.legalFramework.map((item, i) => (
               <div key={i} style={{background:V.bone,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.cr}`,borderRadius:8,padding:'18px 22px'}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,marginBottom:8,lineHeight:1.3,fontWeight:400}}>{item.h}</h3>
                 <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:0}}>{item.p}</p>
               </div>
             ))}
@@ -280,7 +280,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:40,maxWidth:780,margin:'0 auto 40px'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Why families choose us</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
               Why {country.name} families choose Smartious
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>Reasons grounded in the realities of {country.name} education — local school capacity constraints, corporate transfer and diplomatic timing, commute and logistics, currency stability, and the curriculum portability that mobile expat and dual-nationality families need.</p>
@@ -289,7 +289,7 @@ function CountryHub({
             {country.whySmartious.map((r, i) => (
               <div key={i} style={{background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'22px 24px',display:'flex',flexDirection:'column',gap:10}}>
                 <div style={{width:32,height:32,borderRadius:'50%',background:`rgba(139,26,46,.08)`,color:V.cr,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:13,flexShrink:0}}>{i+1}</div>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.cr,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{r.h}</h3>
                 <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>{r.p}</p>
               </div>
             ))}
@@ -302,7 +302,7 @@ function CountryHub({
         <div style={{maxWidth:980,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:34,maxWidth:720,margin:'0 auto 34px'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Trust signals</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:12,lineHeight:1.2}}>
               What you can verify about Smartious
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>We publish only facts we can substantiate — operational history, curriculum coverage, teacher base, and infrastructure. No invented testimonials or pass-rate claims.</p>
@@ -326,7 +326,7 @@ function CountryHub({
               {h:'Live class transparency', p:'Every class is live with recorded sessions for review. Parents can audit class quality directly. This is materially different from pre-recorded video courses with light tutor support.'},
             ].map((t, i) => (
               <div key={i} style={{padding:'18px 20px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{t.h}</h3>
                 <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{t.p}</p>
               </div>
             ))}
@@ -349,7 +349,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Accreditation &amp; Recognition</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               Accreditation, Recognition &amp; University Pathways
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -367,7 +367,7 @@ function CountryHub({
               {h:'Ontario Secondary School Diploma (OSSD)',sub:'Through our Ontario partner school · Ontario Ministry of Education',p:'OSSD earned through Smartious\'s Ontario partner school, an Ontario-inspected private school. Smartious students enrol concurrently with our Ontario partner school to complete the OSSD curriculum and credit requirements alongside Cambridge or other pathways. OSSD is one of the most recognised secondary credentials worldwide — particularly strong for Canadian U15 admissions via OUAC, US universities via Common Application, and UK universities via UCAS.'},
             ].map((c,i) => (
               <div key={i} style={{padding:'22px 22px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,borderLeft:`3px solid ${V.cr}`}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
                 <p style={{fontSize:11.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 10px'}}>{c.sub}</p>
                 <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
               </div>
@@ -376,7 +376,7 @@ function CountryHub({
 
           {/* Examination centre arrangements */}
           <div style={{padding:'28px 30px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10,marginBottom:32}}>
-            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,margin:'0 0 12px',lineHeight:1.3,fontWeight:400}}>Examination centre arrangements in {country.name}</h3>
+            <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,margin:'0 0 12px',lineHeight:1.3,fontWeight:400}}>Examination centre arrangements in {country.name}</h3>
             <p style={{fontSize:14,color:V.sl,lineHeight:1.7,margin:'0 0 14px'}}>
               International examinations require attendance at authorised examination centres on specific dates. In {country.name}, established examination centres serve Cambridge International, Pearson Edexcel and other major international qualifications.
             </p>
@@ -395,7 +395,7 @@ function CountryHub({
           </div>
 
           {/* University recognition worldwide */}
-          <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginTop:24,marginBottom:14,lineHeight:1.3,fontWeight:400,textAlign:'center'}}>University recognition worldwide</h3>
+          <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.3rem',color:V.ink,marginTop:24,marginBottom:14,lineHeight:1.3,fontWeight:400,textAlign:'center'}}>University recognition worldwide</h3>
           <p style={{fontSize:14,color:V.sl,lineHeight:1.7,marginBottom:20,textAlign:'center',maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications are recognised across the major university systems globally.
           </p>
@@ -418,7 +418,7 @@ function CountryHub({
 
           {/* How universities verify */}
           <div style={{padding:'24px 28px',background:`linear-gradient(135deg, ${V.bone} 0%, ${V.white} 100%)`,border:`1px solid ${V.bone3}`,borderLeft:`3px solid ${V.gold3}`,borderRadius:10}}>
-            <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 10px',lineHeight:1.3,fontWeight:400}}>How universities verify qualifications</h3>
+            <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 10px',lineHeight:1.3,fontWeight:400}}>How universities verify qualifications</h3>
             <p style={{fontSize:13.5,color:V.sl,lineHeight:1.7,margin:0}}>
               Universities verify Cambridge International, Pearson Edexcel, IB Diploma and American AP qualifications directly with the issuing examination boards through standard verification services &mdash; Cambridge International Verification of Awards, Pearson's Verification of Results, the IB Organisation's verification service, and the College Board AP Score Reporting service. The qualification's credibility comes from the examination board itself, which is why these qualifications are equally valid whether earned at a physical school or through Smartious.
             </p>
@@ -431,7 +431,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Curriculum pathways</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               Curriculum approaches we offer {country.adjective} families
             </h2>
           </div>
@@ -468,7 +468,7 @@ function CountryHub({
             ].map((c,i) => (
               <div key={i} style={{padding:'24px 24px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,display:'flex',flexDirection:'column',gap:14}}>
                 <div>
-                  <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                  <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 4px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
                   <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:0}}>{c.sub}</p>
                 </div>
                 <div>
@@ -494,7 +494,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>School programmes</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               Primary, Secondary &amp; Sixth Form
             </h2>
           </div>
@@ -517,7 +517,7 @@ function CountryHub({
               },
             ].map((c,i) => (
               <div key={i} style={{padding:'24px 24px',background:V.bone,border:`1px solid ${V.bone3}`,borderRadius:10}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.2rem',color:V.ink,margin:'0 0 6px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
                 <p style={{fontSize:11,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 12px'}}>{c.age}</p>
                 <p style={{fontSize:13,color:V.sl,lineHeight:1.7,margin:0}}>{c.p}</p>
               </div>
@@ -531,7 +531,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:36,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Why families trust Smartious</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               Eight reasons {country.adjective} families choose Smartious
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -550,7 +550,7 @@ function CountryHub({
               {h:'University admissions guidance',p:'Progressive guidance from Year 10 onwards. UCAS, Common Application, OUAC, UAC and direct university application support. Personal statement coaching, interview preparation and offer-management guidance.'},
             ].map((c,i) => (
               <div key={i} style={{padding:'20px 22px',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:10,borderTop:`3px solid ${V.gold3}`}}>
-                <h3 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.05rem',color:V.ink,margin:'0 0 8px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
+                <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.05rem',color:V.ink,margin:'0 0 8px',lineHeight:1.3,fontWeight:400}}>{c.h}</h3>
                 <p style={{fontSize:13,color:V.sl,lineHeight:1.65,margin:0}}>{c.p}</p>
               </div>
             ))}
@@ -571,7 +571,7 @@ function CountryHub({
             </div>
             <div>
               <div className="eyebrow">About the founder</div>
-              <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.2}}>Alfred Ouko</h2>
+              <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.9rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:6,lineHeight:1.2}}>Alfred Ouko</h2>
               <p style={{fontSize:13.5,color:V.gold3,fontWeight:600,letterSpacing:'.04em',textTransform:'uppercase',margin:'0 0 18px'}}>Founder, Smartious Homeschool &amp; eSchool</p>
 
               <p style={{fontSize:14.5,color:V.sl,lineHeight:1.75,margin:'0 0 16px'}}>
@@ -611,7 +611,7 @@ function CountryHub({
       <section className="sec" style={{background:V.bone,paddingTop:56,paddingBottom:56}}><div className="wrap">
         <div style={{maxWidth:880,margin:'0 auto'}}>
           <div className="eyebrow">FAQs</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.95rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:24,lineHeight:1.2}}>
             Common questions from {country.name} families
           </h2>
           <div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -634,7 +634,7 @@ function CountryHub({
         <div style={{maxWidth:1100,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:40,maxWidth:780,marginLeft:'auto',marginRight:'auto'}}>
             <div className="eyebrow" style={{justifyContent:'center'}}>Smartious worldwide</div>
-            <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
+            <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2rem',fontWeight:400,color:V.ink,marginTop:8,marginBottom:14,lineHeight:1.2}}>
               {country.adjective} students join a 40+ country global cohort
             </h2>
             <p style={{fontSize:14.5,color:V.sl,lineHeight:1.7}}>
@@ -707,7 +707,7 @@ function CountryHub({
         <div style={{position:'absolute',top:'-50px',right:'-50px',width:300,height:300,borderRadius:'50%',background:`radial-gradient(circle, ${V.cr}40 0%, transparent 70%)`,filter:'blur(40px)'}}/>
         <div className="wrap" style={{maxWidth:820,textAlign:'center',position:'relative',zIndex:1}}>
           <div className="eyebrow" style={{justifyContent:'center',color:V.gold3,marginBottom:14}}>Start here</div>
-          <h2 style={{fontFamily:"'DM Serif Display',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
+          <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'clamp(1.9rem,4.5vw,2.6rem)',margin:'0 0 16px',color:'#fff',lineHeight:1.15}}>{country.ctaH}</h2>
           <p style={{color:'rgba(255,255,255,.78)',fontSize:16,lineHeight:1.7,margin:'0 0 30px',maxWidth:620,marginLeft:'auto',marginRight:'auto'}}>{country.ctaSubhead}</p>
           {/* SINGLE primary CTA: Book Assessment.
               Two-gate funnel: form submission → admissions review → fee invoice on

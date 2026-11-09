@@ -64,9 +64,8 @@ const TOKENS = {
   spacing: { xs: 4, sm: 8, md: 14, lg: 22, xl: 32, xxl: 48 },
 }
 
-// Shared serif font stack (matches admin's Playfair Display
-// when available, falls back gracefully).
-const SERIF = "'Playfair Display', Georgia, serif"
+// Shared heading font: Source Serif 4, the house heading face.
+const SERIF = "'Source Serif 4',Georgia,serif"
 
 // ──────────────────────────────────────────────────────
 // GoldenPie — branded gold percentage pie chart
@@ -414,7 +413,7 @@ function MobileTopBar({ title, eyebrow, onMenuToggle, menuOpen, user, initials }
       </button>
       <div style={{ flex:1, minWidth:0 }}>
         {eyebrow&&<div style={{ fontSize:9, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.12em' }}>{eyebrow}</div>}
-        <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
+        <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:18, color:'#1A0F0E', lineHeight:1.2, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{title}</div>
       </div>
       <div style={{ width:34, height:34, borderRadius:'50%', background:'linear-gradient(135deg,#7D1025,#5A0B1B)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, border:'2px solid #C9A03030' }}>
         <span style={{ color:'#F0CC5A', fontSize:11, fontWeight:700 }}>{initials}</span>
@@ -440,7 +439,7 @@ function MobileDrawer({ open, onClose, sections, page, setPage, portalLabel, use
         <style>{`@keyframes slideInLeft{from{transform:translateX(-100%)}to{transform:translateX(0)}}`}</style>
         {/* Logo */}
         <div style={{ padding:'20px 20px 16px', borderBottom:'1px solid #F4EFEB' }}>
-          <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>
             Smart<em style={{ fontStyle:'italic', color:'#7D1025' }}>ious</em>
           </div>
           <div style={{ fontSize:9.5, color:'#7D1025', fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', marginTop:3 }}>{portalLabel}</div>
@@ -769,7 +768,7 @@ export default function TeacherPortal() {
 
   if (isMobile) {
     return (
-      <div style={{ display:'flex', flexDirection:'column', height:'100dvh', background:TOKENS.cream, fontFamily:"Inter,-apple-system,sans-serif", color:TOKENS.ink, overflow:'hidden' }}>
+      <div style={{ display:'flex', flexDirection:'column', height:'100dvh', background:TOKENS.cream, fontFamily:"'DM Sans',system-ui,sans-serif", color:TOKENS.ink, overflow:'hidden' }}>
         <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.card{background:#fff;border:1px solid #E8E2D6;border-radius:12px;}.kpi{background:#fff;border:1px solid #E8E2D6;border-radius:12px;padding:14px 16px;}.tbl{width:100%;border-collapse:collapse;}.tbl thead th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;background:#FBFAF5;border-bottom:1.5px solid #E8E2D6;}.tbl tbody tr{border-top:1px solid #E8E2D6;}.tbl td{padding:9px 12px;font-size:13px;}.fi{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:14px;font-family:inherit;box-sizing:border-box;color:#1A0F0E;}.fsel{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:14px;font-family:inherit;background:#fff;color:#1A0F0E;}.fl{font-size:11px;font-weight:700;color:#7D1025;text-transform:uppercase;margin-bottom:5px;display:block;}input,select,textarea,option{color:#1A0F0E!important;}`}</style>
 
         <MobileTopBar title={pageTitles[page]||'Dashboard'} eyebrow="Teacher Portal"
@@ -852,7 +851,7 @@ export default function TeacherPortal() {
         .app{background:#FBFAF5}
         .sidebar{background:#FBFAF5!important;border-right:1px solid #F4EFEB!important;}
         .sb-logo{border-bottom:1px solid #F4EFEB!important;}
-        .sb-text{color:#1A0F0E!important;font-family:'Instrument Serif',Georgia,serif!important;font-size:22px!important;}
+        .sb-text{color:#1A0F0E!important;font-family:'Source Serif 4',Georgia,serif!important;font-size:22px!important;}
         .sb-text em{color:#7D1025!important;font-style:italic!important;}
         .sb-sub{color:#7D1025!important;font-weight:700!important;letter-spacing:.14em!important;}
         .sb-sec{color:#7D1025!important;font-weight:700!important;}
@@ -868,7 +867,7 @@ export default function TeacherPortal() {
         .sb-back:hover{color:#7D1025!important;}
         .main{background:#FBFAF5!important;}
         .topbar{background:rgba(251,250,245,.9)!important;backdrop-filter:saturate(180%) blur(20px)!important;border-bottom:1px solid #F4EFEB!important;height:60px!important;}
-        .tb-title{color:#1A0F0E!important;font-family:'Instrument Serif',Georgia,serif!important;font-size:22px!important;}
+        .tb-title{color:#1A0F0E!important;font-family:'Source Serif 4',Georgia,serif!important;font-size:22px!important;}
         .tb-chip{background:#FBFAF5!important;border-color:#E8E2D6!important;color:#564844!important;}
         .btn.btn-s{background:#FBFAF5!important;border-color:#E8E2D6!important;color:#564844!important;}
         .content{background:#FBFAF5!important;max-width:1400px;margin:0 auto;}
@@ -886,7 +885,7 @@ export default function TeacherPortal() {
         .tbl tbody tr{border-top:1px solid #E8E2D6;}
         .tbl td{padding:10px 14px;}
         .sec-tag{font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px;}
-        .serif{font-family:'Instrument Serif',Georgia,serif;font-weight:400;}
+        .serif{font-family:'Source Serif 4',Georgia,serif;font-weight:400;}
         .fi{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:13px;font-family:inherit;box-sizing:border-box;}
         .fi:focus{border-color:#7D1025;outline:none;}
         .fsel{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #E8DDD5;font-size:13px;font-family:inherit;background:#fff;}
@@ -2001,7 +2000,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
             </svg>
           </div>
-          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 4 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, color: 'var(--s900)', marginBottom: 4 }}>
             {hasActiveFilters ? 'No questions match your filters' : 'Your question bank is empty'}
           </div>
           <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 420, margin: '6px auto 0', lineHeight: 1.6 }}>
@@ -2070,7 +2069,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .85, color: '#F0CC5A', marginBottom: 4 }}>
                 Questions awaiting a diagram or illustration
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>Artwork Queue</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22 }}>Artwork Queue</div>
               {!artworkLoading && (
                 <div style={{ fontSize: 12.5, opacity: .9, marginTop: 6 }}>
                   {artworkList.length} question{artworkList.length === 1 ? '' : 's'} pending
@@ -2140,7 +2139,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .85, color: '#F0CC5A', marginBottom: 4 }}>
                 {artworkBrief.subject} &middot; {artworkBrief.grade} &middot; {artworkBrief.artwork?.kind || 'diagram'}
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 21 }}>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 21 }}>
                 {artworkBrief.artwork?.title || 'Artwork required'}
               </div>
             </div>
@@ -2215,7 +2214,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
                 {[detailQ.curriculum, detailQ.subject, detailQ.grade].filter(Boolean).join(' · ')}
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{detailQ.topic || qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22 }}>{detailQ.topic || qbTypeMeta[detailQ.type]?.label || 'Question'}</div>
             </div>
             <div style={{ padding: '22px 28px', background: '#FFFFFF' }}>
               <QuestionView q={detailQ} />
@@ -2278,7 +2277,7 @@ function QuestionBankTab({ user, store, setPage, toast }) {
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
            <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>{editingId ? 'Edit Question' : 'New Question'}</div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{editingId ? 'Update existing question' : 'Add to Question Bank'}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22 }}>{editingId ? 'Update existing question' : 'Add to Question Bank'}</div>
             </div>
  
             <div style={{ padding: '24px 28px' }}>
@@ -2829,7 +2828,7 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#7D1025',
               fontSize: 28, fontWeight: 700,
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "'Source Serif 4',Georgia,serif",
               flexShrink: 0,
             }}>
               {selectedStudent.initials}
@@ -2838,7 +2837,7 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
                 Student Profile
               </div>
-              <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+              <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
                 {selectedStudent.name}
               </h1>
               <div style={{ fontSize: 13, opacity: .9, marginTop: 6, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
@@ -3309,7 +3308,7 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
               My Students
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               Your Roster
             </h1>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
@@ -3404,7 +3403,7 @@ function MyStudentsTab({ user, store, setPage, toast, setMsgTo, setMsgSubject, s
                     background: msAvatarColor(s.name), color: '#FBFAF5',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontWeight: 700, fontSize: 14, flexShrink: 0,
-                    fontFamily: "'Instrument Serif', serif",
+                    fontFamily: "'Source Serif 4',Georgia,serif",
                   }}>{s.initials}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--s900)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.name}</div>
@@ -4339,7 +4338,7 @@ function ExamsTab({ user, store, setPage, toast }) {
                 {selectedExam.subject} | {selectedExam.curriculum} {selectedExam.grade || selectedExam.year}
               </span>
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 30, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               {selectedExam.title}
             </h1>
             <div style={{ fontSize: 13, opacity: .9, marginTop: 8 }}>
@@ -5050,7 +5049,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '.16em', textTransform: 'uppercase', color: '#F0CC5A', marginBottom: 4 }}>
               Submissions for
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               {selectedExam.title}
             </h1>
             <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
@@ -5079,7 +5078,7 @@ function ExamsTab({ user, store, setPage, toast }) {
           <div style={{ textAlign: 'center', padding: 40, color: 'var(--s400)' }}>Loading submissions...</div>
         ) : submissions.length === 0 ? (
           <div className="card" style={{ padding: 32, textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, color: '#1A1A1A', marginBottom: 6 }}>
+            <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: '#1A1A1A', marginBottom: 6 }}>
               No submissions yet
             </div>
             <div style={{ fontSize: 13, color: '#6B6B6B' }}>
@@ -5611,7 +5610,7 @@ function ExamsTab({ user, store, setPage, toast }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
               Exams
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               Schedule and Deploy Tests
             </h1>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
@@ -6282,7 +6281,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
         <div style={{ padding: '24px 30px', display: 'flex', alignItems: 'center', gap: 18, flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 240 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>Homework</div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>Create &amp; Manage</h1>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>Create &amp; Manage</h1>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>Build assignments. Auto-grade MCQ. Lock until release date. Review and grade student submissions.</div>
           </div>
           <button onClick={openCreate} style={{ background: '#C9A030', color: '#7D1025', border: 'none', padding: '12px 22px', borderRadius: 'var(--rmd)', cursor: 'pointer', fontSize: 14, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 4px 14px rgba(201,160,48,.35)' }}>
@@ -6310,7 +6309,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
 
       {!loading && !error && filteredHw.length === 0 && (
         <div className="card" style={{ padding: 50, textAlign: 'center' }}>
-          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>{homework.length === 0 ? 'No homework yet' : 'Nothing in this tab'}</div>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, color: 'var(--s900)', marginBottom: 6 }}>{homework.length === 0 ? 'No homework yet' : 'Nothing in this tab'}</div>
           <div style={{ fontSize: 13.5, color: 'var(--s500)', maxWidth: 380, margin: '0 auto 14px' }}>{homework.length === 0 ? 'Click "New Homework" to create your first assignment.' : 'Try a different tab.'}</div>
           {homework.length === 0 && <button onClick={openCreate} className="btn btn-p btn-sm">Create homework</button>}
         </div>
@@ -6359,7 +6358,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>
                 {detailHw.subject} · {detailHw.curriculum} · {detailHw.grade}
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24 }}>{detailHw.title}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24 }}>{detailHw.title}</div>
               <div style={{ fontSize: 13, opacity: .9, marginTop: 6, display: 'flex', gap: 14, flexWrap: 'wrap' }}>
                 <span>Released {hwTimeAgo(detailHw.releaseAt)}</span>
                 {detailHw.dueAt && <span>{hwTimeUntil(detailHw.dueAt)}</span>}
@@ -6468,7 +6467,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 880, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,.4)', marginTop: 30, marginBottom: 30 }}>
             <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>Grading Submission</div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22 }}>
                 {gradeSub.student?.firstName} {gradeSub.student?.lastName}
               </div>
               <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>{detailHw.title}</div>
@@ -6779,7 +6778,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
                   <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#F0CC5A' }}>
                     Annotate Student's Work
                   </div>
-                  <div style={{ fontFamily:"'Instrument Serif', serif", fontSize:18, marginTop:2 }}>
+                  <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:18, marginTop:2 }}>
                     Q{a.questionIndex + 1} &middot; Mark with red, green, or blue pen
                   </div>
                 </div>
@@ -6815,7 +6814,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 800, width: '100%', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.3)' }}>
             <div style={{ padding: '20px 28px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A', marginBottom: 4 }}>{editingId ? 'Edit Assignment' : 'New Assignment'}</div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22 }}>{editingId ? 'Update Homework' : 'Create Homework'}</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22 }}>{editingId ? 'Update Homework' : 'Create Homework'}</div>
             </div>
 
             <div style={{ padding: '24px 28px' }}>
@@ -6982,7 +6981,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
         <div onClick={() => setBankOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 760, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
             <div style={{ padding: '16px 24px', background: '#7D1025', color: '#FBFAF5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18 }}>Pick Question from Bank</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18 }}>Pick Question from Bank</div>
               <button onClick={() => setBankOpen(false)} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
             </div>
             <div style={{ padding: '16px 24px' }}>
@@ -7044,7 +7043,7 @@ function HomeworkTab({ user, store, setPage, toast }) {
         <div onClick={closeCustom} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.7)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#FFF', borderRadius: 12, maxWidth: 680, width: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,.4)' }}>
             <div style={{ padding: '16px 24px', background: '#7D1025', color: '#FBFAF5', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 18 }}>Write Custom Question</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 18 }}>Write Custom Question</div>
               <button onClick={closeCustom} style={{ background: 'transparent', border: 'none', color: '#FBFAF5', cursor: 'pointer', fontSize: 22 }}>×</button>
             </div>
             <div style={{ padding: '20px 24px' }}>
@@ -7411,7 +7410,7 @@ function TeacherDocsLibrary({ user, toast, onBack }) {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,10,8,.55)', zIndex: 90, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={() => !upBusy && setUpOpen(false)}>
           <div style={{ background: '#FFFFFF', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '92vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <div style={{ padding: '18px 24px', background: 'linear-gradient(135deg, #7D1025 0%, #8B1A2E 100%)', color: '#FBFAF5' }}>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 21 }}>Add a Document</div>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 21 }}>Add a Document</div>
             </div>
             <div style={{ padding: '20px 24px' }}>
               <div style={{ marginBottom: 14 }}>
@@ -7618,7 +7617,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
           {onBack&&<button onClick={onBack} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#7D1025', fontSize:12.5, fontWeight:700, padding:0 }}>← Back</button>}
           <div>
             <div style={{ fontSize:10, fontWeight:700, color:'#7D1025', textTransform:'uppercase', letterSpacing:'.1em' }}>Teacher Reports</div>
-            <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:24, color:'#1A0F0E' }}>Weekly Reports</div>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:24, color:'#1A0F0E' }}>Weekly Reports</div>
           </div>
           <button onClick={()=>startForm()}
             style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>
@@ -7673,7 +7672,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
           <div style={{ textAlign:'center', color:'#9A9A9A', padding:'40px 0', fontSize:13 }}>Loading saved reports...</div>
         ) : savedReports.length===0 ? (
           <div style={{ ...card, textAlign:'center', padding:'40px 24px' }}>
-            <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#1A0F0E', marginBottom:8 }}>No reports yet</div>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:20, color:'#1A0F0E', marginBottom:8 }}>No reports yet</div>
             <div style={{ fontSize:13, color:'#7A6652', marginBottom:20 }}>Create your first weekly report — it auto-saves as you type and notifies parents when you publish.</div>
             <button onClick={()=>startForm()} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 24px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer' }}>Create first report</button>
           </div>
@@ -7731,7 +7730,7 @@ function WeeklyReportGenerator({ user, toast, onBack }) {
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
         <button onClick={()=>setView('list')} style={{ background:'transparent', border:'none', cursor:'pointer', color:'#7D1025', fontSize:12.5, fontWeight:700, padding:0 }}>← All reports</button>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
-          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:22, color:'#1A0F0E' }}>{f._id ? 'Weekly Report' : 'New Weekly Report'}</div>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:22, color:'#1A0F0E' }}>{f._id ? 'Weekly Report' : 'New Weekly Report'}</div>
           {lastSaved&&<div style={{ fontSize:11, color:'#065F46', marginTop:2 }}>✓ Auto-saved {new Date(lastSaved).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}</div>}
         </div>
         <div style={{ display:'flex', gap:8 }}>
@@ -7961,7 +7960,7 @@ function buildWeeklyReportHTML(f) {
 <style>
   :root{--crimson:#7D1025;--crimsonD:#5A0B1B;--gold:#C9A030;--ink:#1A1A1A;--mute:#6B6B6B;--line:#E8E2D6;--cream:#FBFAF5;}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e9e6df;color:var(--ink)}
+  body{font-family:'DM Sans',system-ui,sans-serif;background:#e9e6df;color:var(--ink)}
   .page{width:210mm;min-height:297mm;background:#fff;margin:18px auto;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,.13)}
   .page-body{padding:0 22mm 18mm;flex:1}
   .topbar{height:8mm;background:linear-gradient(90deg,var(--crimsonD),var(--crimson))}
@@ -8003,7 +8002,7 @@ function buildWeeklyReportHTML(f) {
   .verified .v{font-size:11px;font-weight:800;color:var(--crimson);letter-spacing:1.5px}
   .verified .vs{font-size:7.5px;color:var(--mute);margin-top:2px;letter-spacing:.5px}
   .ft{margin-top:auto;border-top:1px solid var(--line);padding:5mm 22mm;display:flex;justify-content:space-between;font-size:8px;color:var(--mute)}
-  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99;font-family:'Helvetica Neue',Arial,sans-serif}
+  .toolbar{position:fixed;top:0;left:0;right:0;background:#7D1025;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;z-index:99;font-family:'DM Sans',system-ui,sans-serif}
   .toolbar button{background:#fff;color:#7D1025;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer}
   .toolbar .hint{font-size:12px;opacity:.85}
   @media print{
@@ -8073,7 +8072,7 @@ function CommunicationTab({ user, store, setPage, toast }) {
   return (
     <div>
       <div style={{ marginBottom: 18 }}>
-        <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, color: 'var(--s900)', margin: 0 }}>
+        <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, color: 'var(--s900)', margin: 0 }}>
           Communication
         </h1>
         <div style={{ fontSize: 13, color: 'var(--s500)', marginTop: 2 }}>
@@ -8276,7 +8275,7 @@ function TeacherComposeView({ user, toast }) {
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, color: 'var(--s900)' }}>
+        <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, color: 'var(--s900)' }}>
           Emails sent
         </div>
         <div style={{ fontSize: 13.5, color: 'var(--s500)', marginTop: 6 }}>
@@ -8863,7 +8862,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
 
           <div style={{ flex: 1, minWidth: 220 }}>
             <h1 style={{
-              fontFamily: "'Instrument Serif', serif", fontSize: 26, fontWeight: 400,
+              fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 26, fontWeight: 400,
               color: '#FBFAF5', margin: 0, lineHeight: 1.2,
             }}>
               {dbGreeting()}, {teacherFirstName}
@@ -8999,7 +8998,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
               textTransform: 'uppercase', color: '#7D1025', marginBottom: 4,
             }}>Grading progress</div>
             <div style={{
-              fontFamily: "'Instrument Serif', serif", fontSize: 22, fontWeight: 400,
+              fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, fontWeight: 400,
               color: 'var(--s900)', lineHeight: 1.2, marginBottom: 4,
             }}>
               {ungradedCount === 0
@@ -9078,7 +9077,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
               {stat.label}
             </div>
             <div style={{
-              fontFamily: "'Instrument Serif', serif", fontSize: 32, fontWeight: 400,
+              fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 32, fontWeight: 400,
               lineHeight: 1,
               color: stat.alert ? '#B45309' : 'var(--s900)',
             }}>
@@ -9103,7 +9102,7 @@ function TeacherDashboardTab({ user, store, setPage, toast, setMsgModal, setUplo
           marginBottom: 14, flexWrap: 'wrap', gap: 8,
         }}>
           <h3 style={{
-            fontFamily: "'Instrument Serif', serif", fontSize: 20, fontWeight: 400,
+            fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, fontWeight: 400,
             color: 'var(--s900)', margin: 0,
           }}>
             Today's Schedule
@@ -9450,7 +9449,7 @@ function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               overflow: 'hidden',
               fontSize: 44, fontWeight: 400,
-              fontFamily: "'Instrument Serif', serif",
+              fontFamily: "'Source Serif 4',Georgia,serif",
               color: '#7D1025',
               boxShadow: '0 8px 24px rgba(0,0,0,.25)',
             }}>
@@ -9480,7 +9479,7 @@ function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 6, color: '#F0CC5A' }}>
               Teacher Profile
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 36, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
               {profile.title} {profile.firstName} {profile.lastName}
             </h1>
             <div style={{ fontSize: 14, opacity: .9, marginTop: 6, lineHeight: 1.5 }}>
@@ -10021,7 +10020,7 @@ function TeacherProfileTab({ user, setCurrentUser, store, setPage, toast }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   overflow: 'hidden',
                   fontSize: 40, fontWeight: 400,
-                  fontFamily: "'Instrument Serif', serif",
+                  fontFamily: "'Source Serif 4',Georgia,serif",
                   color: '#7D1025',
                 }}>
                   {photoUrlInput ? (
@@ -10317,7 +10316,7 @@ function TeacherLiveClassesTab({ user, toast }) {
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, color: '#F0CC5A' }}>
                 Start Live Class
               </div>
-              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, marginTop: 4 }}>
+              <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, marginTop: 4 }}>
                 {zoomModal.roomName}
               </div>
             </div>
@@ -10479,7 +10478,7 @@ function ScheduleClassesTab({ user, toast }) {
       <div style={{ display: 'grid', gap: 18 }}>
         <div>
           <div style={kicker}>Lesson plans</div>
-          <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, color: INK, margin: '2px 0 0' }}>What each class learns next</h2>
+          <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, color: INK, margin: '2px 0 0' }}>What each class learns next</h2>
           <div style={{ fontSize: 13, color: MUT, marginTop: 3, maxWidth: 640 }}>
             Pick a subject to see its lesson plan. Drag lessons into the order you want to teach them; your coming lessons follow that order automatically.
           </div>
@@ -10499,7 +10498,7 @@ function ScheduleClassesTab({ user, toast }) {
             return (
               <div key={lead._id} onClick={() => openSlot(lead)}
                 style={{ ...card, padding: 18, cursor: 'pointer' }}>
-                <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 20, color: INK }}>{lead.subject}</div>
+                <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, color: INK }}>{lead.subject}</div>
                 <div style={{ fontSize: 11.5, color: MUT, marginTop: 2 }}>
                   {lead.curriculum || ''}{lead.grade ? ' \u00b7 ' + lead.grade : ''} \u00b7 {(lead.assignedStudents || []).length} student(s)
                 </div>
@@ -10526,7 +10525,7 @@ function ScheduleClassesTab({ user, toast }) {
         <button onClick={() => { setSel(null); setPlan(undefined) }}
           style={{ padding: '8px 16px', borderRadius: 9, border: `1.5px solid ${TRACK}`, background: '#fff', color: CRIM, fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>{'\u2190'} Subjects</button>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 23, color: INK, lineHeight: 1.15 }}>{sel.subject}</div>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 23, color: INK, lineHeight: 1.15 }}>{sel.subject}</div>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginTop: 5 }}>
             {(plan?.slots || [{ _id: sel._id, dayOfWeek: sel.dayOfWeek, startTime: sel.startTime }]).map(sl => (
               <span key={sl._id} style={{ fontSize: 10, fontWeight: 800, color: CRIM, background: '#FBF3F5', borderRadius: 999, padding: '3px 10px' }}>{sl.dayOfWeek} {sl.startTime}</span>
@@ -11249,7 +11248,7 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
               Live Class · Pre-flight
             </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
+            <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0 }}>
               Ready to teach?
             </h1>
             <div style={{ fontSize: 13, opacity: .85, marginTop: 4 }}>
@@ -11297,7 +11296,7 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: '#7D1025',
                       fontSize: 30, fontWeight: 400,
-                      fontFamily: "'Instrument Serif', serif",
+                      fontFamily: "'Source Serif 4',Georgia,serif",
                     }}>{teacherInitials.toUpperCase()}</div>
                     <div style={{ fontSize: 13, lineHeight: 1.5, maxWidth: 240 }}>
                       No camera detected. Students will see your initials avatar.
@@ -11439,7 +11438,7 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
       color: '#7D1025',
       fontSize: size * 0.4,
       fontWeight: 400,
-      fontFamily: "'Instrument Serif', serif",
+      fontFamily: "'Source Serif 4',Georgia,serif",
       border: '3px solid #F0CC5A',
     }}>{teacherInitials.toUpperCase()}</div>
   )
@@ -11827,7 +11826,7 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
                   color: '#FBFAF5',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 22, fontWeight: 700,
-                  fontFamily: "'Instrument Serif', serif",
+                  fontFamily: "'Source Serif 4',Georgia,serif",
                 }}>{name.split(' ').map(w => w[0]).join('')}</div>
                 <div style={{
                   position: 'absolute', bottom: 8, left: 8, right: 8,
@@ -11873,7 +11872,7 @@ function TeacherLiveStudio({ user, onLeave, toast }) {
             padding: 32, maxWidth: 420,
             boxShadow: '0 20px 60px rgba(0,0,0,.3)',
           }}>
-            <h3 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: '#7D1025', marginBottom: 8 }}>End class?</h3>
+            <h3 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, color: '#7D1025', marginBottom: 8 }}>End class?</h3>
             <p style={{ fontSize: 14, color: 'var(--s600)', lineHeight: 1.6, marginBottom: 20 }}>
               This will end the live session. Whiteboard contents will be saved.
             </p>
@@ -12641,7 +12640,7 @@ function MshauriAITab({ user, store, setPage, toast }) {
                   <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: 4, color: '#F0CC5A' }}>
                     Mshauri AI
                   </div>
-                  <h1 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
+                  <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 28, fontWeight: 400, margin: 0, lineHeight: 1.15 }}>
                     Your teaching assistant
                   </h1>
                   <div style={{ fontSize: 13, opacity: .9, marginTop: 4 }}>
@@ -12741,7 +12740,7 @@ function MshauriAITab({ user, store, setPage, toast }) {
                 <Ico d={activeSkill.icon} w={22} col={activeSkill.color} sw={2}/>
               </div>
               <div>
-                <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 24, color: 'var(--s900)', margin: 0 }}>
+                <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, color: 'var(--s900)', margin: 0 }}>
                   {activeSkill.label}
                 </h2>
                 <div style={{ fontSize: 13, color: 'var(--s500)' }}>{activeSkill.description}</div>
@@ -12854,7 +12853,7 @@ function MshauriAITab({ user, store, setPage, toast }) {
                     fontSize: 11, cursor: 'pointer', marginLeft: 'auto',
                   }}>Delete</button>
               </div>
-              <h2 style={{ fontFamily: "'Instrument Serif', serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
+              <h2 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 22, color: 'var(--s900)', margin: 0 }}>
                 {activeChat.title}
               </h2>
             </div>
@@ -12867,7 +12866,7 @@ function MshauriAITab({ user, store, setPage, toast }) {
               fontSize: 14, lineHeight: 1.75,
               color: 'var(--s800)',
               whiteSpace: 'pre-wrap',
-              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+              fontFamily: "'DM Sans',system-ui,sans-serif",
               marginBottom: 18,
             }}>{activeChat.response}</div>
 
@@ -13273,7 +13272,7 @@ function TeacherMyRatingsTab({ user, toast }) {
     <div>
       <div style={{ marginBottom:20 }}>
         <div style={{ fontSize:10, fontWeight:700, color:'#8B1A2E', textTransform:'uppercase', letterSpacing:'.12em', marginBottom:4 }}>Performance</div>
-        <h2 style={{ fontFamily:"'Instrument Serif',serif", fontSize:26, color:'#231715', margin:'4px 0 6px' }}>My Ratings</h2>
+        <h2 style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:26, color:'#231715', margin:'4px 0 6px' }}>My Ratings</h2>
         <div style={{ fontSize:13, color:'#7A6652' }}>Ratings submitted by your students and their parents. Show-cause deductions reduce your adjusted rating.</div>
       </div>
 
@@ -13417,7 +13416,7 @@ function EarningsTab({ user, toast }) {
       <div style={{ marginBottom:20, display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
         <div>
           <div style={{ fontSize:10, fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#8B1A2E', marginBottom:4 }}>Finance</div>
-          <h2 style={{ fontFamily:"'Instrument Serif',serif", fontSize:26, color:'#231715', margin:'0 0 4px' }}>My Earnings</h2>
+          <h2 style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:26, color:'#231715', margin:'0 0 4px' }}>My Earnings</h2>
           <div style={{ fontSize:13, color:'#7A6652' }}>Payslips, salary history, and tuition extra claims.</div>
         </div>
         <button onClick={()=>setClaimForm(true)} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'10px 20px', borderRadius:8, fontSize:13, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap' }}>
@@ -13437,7 +13436,7 @@ function EarningsTab({ user, toast }) {
       {loading ? <div style={{ padding:'40px 0', textAlign:'center', color:'#9A9A9A', fontSize:13 }}>Loading...</div>
       : records.length===0 ? (
         <div style={{ padding:'40px 0', textAlign:'center', background:'#fff', border:'1px solid #E8DDD5', borderRadius:12 }}>
-          <div style={{ fontFamily:"'Instrument Serif',serif", fontSize:20, color:'#231715', marginBottom:6 }}>No payroll records yet</div>
+          <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:20, color:'#231715', marginBottom:6 }}>No payroll records yet</div>
           <div style={{ fontSize:13, color:'#7A6652' }}>Your payslips will appear here once processed by the finance team.</div>
         </div>
       ) : (
@@ -13774,7 +13773,7 @@ function AttendanceTab({ user, toast }) {
     <div>
       {/* ── My attendance: marked by the Dean ── */}
       <div style={{marginBottom:24}}>
-        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 4px'}}>My Attendance</h3>
+        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:'#231715',margin:'0 0 4px'}}>My Attendance</h3>
         <div style={{fontSize:12.5,color:'#7A6652',marginBottom:12}}>Kept by the Dean of Studies. There is no daily check-in: speak to the Dean if a mark looks wrong.</div>
         <div style={{background:'#fff',border:'1px solid #E8DDD5',borderRadius:12,padding:'14px 18px'}}>
           {mine===null?<div style={{color:'#9A9A9A',fontSize:13}}>Loading...</div>
@@ -13801,13 +13800,13 @@ function AttendanceTab({ user, toast }) {
 
       {/* ── Class registers: per-lesson student attendance ── */}
       <div style={{marginBottom:24}}>
-        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Class Registers</h3>
+        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Class Registers</h3>
         <RecentClassRegisters toast={toast}/>
       </div>
 
       {/* ── Student attendance (read only, per lesson) ── */}
       <div>
-        <h3 style={{fontFamily:"'Instrument Serif',serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Student Attendance</h3>
+        <h3 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:20,color:'#231715',margin:'0 0 12px'}}>Student Attendance</h3>
         {selectedStudent ? (
           <StudentAttendanceDetail student={selectedStudent} onBack={()=>setSelectedStudent(null)} toast={toast}/>
         ) : (
@@ -14437,7 +14436,7 @@ function TeacherLibraryTab({ user, toast }) {
           onClick={() => setEditBook(null)}>
           <div style={{ background:'#fff', borderRadius:14, padding:'24px 26px', width:440, maxWidth:'94vw', maxHeight:'88vh', overflowY:'auto' }}
             onClick={e => e.stopPropagation()}>
-            <div style={{ fontFamily:'Georgia, serif', fontSize:18, fontWeight:700, color:'#7D1025', marginBottom:14 }}>Edit book</div>
+            <div style={{ fontFamily:'"Source Serif 4",Georgia,serif', fontSize:18, fontWeight:700, color:'#7D1025', marginBottom:14 }}>Edit book</div>
             {[['Title','title'],['Author','author'],['Grades (comma-separated)','gradesText']].map(([lab, key]) => (
               <div key={key} style={{ marginBottom:12 }}>
                 <div style={{ fontSize:11, fontWeight:700, color:'#7D1025', marginBottom:4 }}>{lab.toUpperCase()}</div>

@@ -65,7 +65,7 @@ html.sm-desktop ::-webkit-scrollbar-track { background: transparent; }
   transform: translate(-50%, -160%);
   padding: 8px 16px; border-radius: 999px;
   background: #1A0F0E; color: #FBFAF5;
-  font: 600 12.5px/1.2 Inter, -apple-system, sans-serif;
+  font: 600 12.5px/1.2 'DM Sans',system-ui,sans-serif;
   box-shadow: 0 8px 24px rgba(0,0,0,.25);
   transition: transform .35s cubic-bezier(.2,.8,.2,1);
   pointer-events: none;
@@ -88,7 +88,7 @@ html.sm-desktop ::-webkit-scrollbar-track { background: transparent; }
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 3px; padding: 4px 2px; min-height: 50px;
   background: none; border: 0; cursor: pointer;
-  color: #8A7F79; font: 500 10.5px/1 Inter, -apple-system, sans-serif;
+  color: #8A7F79; font: 500 10.5px/1 'DM Sans',system-ui,sans-serif;
   letter-spacing: .01em;
   -webkit-tap-highlight-color: transparent;
 }
@@ -106,7 +106,7 @@ html.sm-desktop ::-webkit-scrollbar-track { background: transparent; }
   position: absolute; top: 2px; left: calc(50% + 8px);
   min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px;
   background: #B91C1C; color: #fff; border: 2px solid #FBFAF5;
-  font: 800 9px/12px Inter, sans-serif; text-align: center; box-sizing: content-box;
+  font: 800 9px/12px 'DM Sans',system-ui,sans-serif; text-align: center; box-sizing: content-box;
 }
 .sm-tab-dot {
   position: absolute; top: 6px; left: calc(50% + 10px);

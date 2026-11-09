@@ -125,7 +125,7 @@ export default function AchievementTab({ user }) {
             <div style={{ fontSize:11, fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'rgba(255,255,255,.6)', marginBottom:4 }}>
               {getLevelName(level)} · Level {level}
             </div>
-            <div style={{ fontFamily:"'Instrument Serif',Georgia,serif", fontSize:26, marginBottom:8 }}>
+            <div style={{ fontFamily:"'Source Serif 4',Georgia,serif", fontSize:26, marginBottom:8 }}>
               {user?.firstName}'s Achievement Hub
             </div>
             <XPBar current={xpThisLevel} needed={200}/>

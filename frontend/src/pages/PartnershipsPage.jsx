@@ -144,7 +144,7 @@ export default function PartnershipsPage({ typeKey = '' }) {
     } finally { setBusy(false) }
   }
 
-  const h2 = { fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.8rem,3vw,2.5rem)', fontWeight: 400, color: C.ink, margin: '0 0 12px', lineHeight: 1.15 }
+  const h2 = { fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.8rem,3vw,2.5rem)', fontWeight: 400, color: C.ink, margin: '0 0 12px', lineHeight: 1.15 }
   const card = { background: '#fff', border: `1px solid ${C.line}`, borderRadius: 14, padding: 20 }
   const grid = (min) => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}px, 100%), 1fr))`, gap: 14 })
 
@@ -153,7 +153,7 @@ export default function PartnershipsPage({ typeKey = '' }) {
       <section style={{ background: `linear-gradient(135deg, ${C.ink} 0%, #1A2238 55%, ${C.cr} 140%)`, color: '#fff', padding: '72px 0 60px' }}>
         <div className="wrap" style={{ maxWidth: 980 }}>
           <div className="eyebrow" style={{ color: C.gold }}>{page ? <><a href="/partnerships" style={{ color: C.gold, textDecoration: 'none' }}>Partnerships</a> {'\u203A'} {TYPE_LABEL(typeKey)}</> : 'Partnerships'}</div>
-          <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 400, lineHeight: 1.08, margin: '8px 0 16px' }}>
+          <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 400, lineHeight: 1.08, margin: '8px 0 16px' }}>
             {page ? page.h1 : <>Partner with Smartious <em style={{ color: C.gold }}>to reach learners in more than forty countries</em></>}
           </h1>
           <p style={{ fontSize: 18, lineHeight: 1.7, color: 'rgba(255,255,255,.82)', maxWidth: 760, margin: '0 0 26px' }}>

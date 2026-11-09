@@ -56,37 +56,37 @@ export default function LibraryViewer({ book, api, onClose, readOnly = false, in
   return (
     <div style={rootStyle}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', background: '#7D1025' }}>
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 14, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: 'Arial, sans-serif' }}>
+        <div style={{ color: '#fff', fontWeight: 700, fontSize: 14, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontFamily: '"DM Sans",system-ui,sans-serif' }}>
           {book.title || book.fileName}
         </div>
         {url && !readOnly && (
           <a href={url} target="_blank" rel="noopener noreferrer"
-            style={{ color: '#F0CC5A', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', border: '1.5px solid #C9A030', borderRadius: 7, padding: '6px 12px', fontFamily: 'Arial, sans-serif' }}>
+            style={{ color: '#F0CC5A', fontSize: 12.5, fontWeight: 700, textDecoration: 'none', border: '1.5px solid #C9A030', borderRadius: 7, padding: '6px 12px', fontFamily: '"DM Sans",system-ui,sans-serif' }}>
             Open in new tab
           </a>
         )}
         <button onClick={onClose}
-          style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: 'Arial, sans-serif', whiteSpace: 'nowrap' }}>
+          style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '7px 14px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer', fontFamily: '"DM Sans",system-ui,sans-serif', whiteSpace: 'nowrap' }}>
           {inline ? '\u2190 Back to Library' : 'Close'}
         </button>
       </div>
       {err ? (
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontFamily: 'Arial, sans-serif' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14, alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 14, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
           {err}
           <button onClick={() => { setErr(''); setUrl(''); api.get('/library/' + book._id + '/view').then(r => setUrl(r.data?.data?.url || r.data?.data?.publicUrl || '')).catch(() => setErr('Still unavailable. Contact your teacher or support.')) }}
             style={{ background: '#C9A030', color: '#7D1025', border: 'none', borderRadius: 7, padding: '8px 18px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer' }}>Retry</button>
         </div>
       ) : (!url && !(book._id && apiBase && token)) ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F0CC5A', fontSize: 14, fontFamily: 'Arial, sans-serif' }}>Loading document...</div>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#F0CC5A', fontSize: 14, fontFamily: '"DM Sans",system-ui,sans-serif' }}>Loading document...</div>
       ) : (
         <div style={{ flex: 1, position: 'relative' }}>
           {!frameLoaded && (
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(150deg, #7D1025, #3E0712)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 1, fontFamily: 'Arial, sans-serif' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(150deg, #7D1025, #3E0712)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 1, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
               {(book.coverUrl || book.cover || book.coverImage) && (
                 <img src={book.coverUrl || book.cover || book.coverImage} alt=""
                   style={{ width: 120, borderRadius: 8, boxShadow: '0 10px 30px rgba(0,0,0,.45)', border: '2px solid #C9A030' }} />
               )}
-              <div style={{ color: '#fff', fontFamily: 'Georgia, serif', fontSize: 17, fontWeight: 700, textAlign: 'center', padding: '0 24px' }}>
+              <div style={{ color: '#fff', fontFamily: '"Source Serif 4",Georgia,serif', fontSize: 17, fontWeight: 700, textAlign: 'center', padding: '0 24px' }}>
                 {book.title || 'Your book'}
               </div>
               <div style={{ color: '#F0CC5A', fontSize: 13.5, fontWeight: 700 }}>

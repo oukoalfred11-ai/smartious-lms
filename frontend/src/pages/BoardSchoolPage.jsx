@@ -8,7 +8,7 @@ import { useState } from 'react'
 import { BOARD_SCHOOLS, FEE_LINE } from '../data/boardSchools.js'
 
 const C = { cr: '#8B1A2E', gold: '#C9973A', ink: '#080C14', sl: '#2E3D55', mut: '#6B7280', bone: '#FDFAF4', bone2: '#F8F2E6', line: '#E8DFCC' }
-const serif = "'DM Serif Display',Georgia,serif"
+const serif = "'Source Serif 4',Georgia,serif"
 const wrap = { maxWidth: 1080, margin: '0 auto', padding: '0 20px' }
 const h2 = { fontFamily: serif, fontWeight: 400, fontSize: 'clamp(1.5rem, 3vw, 2rem)', color: C.ink, margin: '0 0 14px', lineHeight: 1.25 }
 const card = { background: '#fff', border: `1px solid ${C.line}`, borderRadius: 12, padding: '20px 22px' }

@@ -354,7 +354,7 @@ function StudentDetailModal({ student, allocations: initialAllocs, onClose, onCh
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             Manage Student
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 24, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 24, marginTop: 2 }}>
             {student.firstName} {student.lastName}
           </div>
           <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
@@ -632,7 +632,7 @@ function SubjectPickerModal({ curriculum, catalog, initial, onClose, onSave }) {
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             Subjects
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, marginTop: 2 }}>
             Edit Enrolled Subjects · {curriculum}
           </div>
           <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>
@@ -807,7 +807,7 @@ function AllocateTeacherModal({ studentId, studentName, curriculum, subjectId, s
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: '#F0CC5A' }}>
             {currentAlloc ? 'Reassign Teacher' : 'Allocate Teacher'}
           </div>
-          <div style={{ fontFamily: "'Instrument Serif',serif", fontSize: 20, marginTop: 2 }}>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 20, marginTop: 2 }}>
             {subjectName} · {curriculum}
           </div>
           <div style={{ fontSize: 12, opacity: .85, marginTop: 4 }}>

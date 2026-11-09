@@ -161,7 +161,7 @@ export default function CareersPage() {
   }
 
   const sec = (bg) => ({ background: bg, padding: '64px 0' })
-  const h2 = { fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(1.8rem,3vw,2.5rem)', fontWeight: 400, color: C.ink, margin: '0 0 12px', lineHeight: 1.15 }
+  const h2 = { fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.8rem,3vw,2.5rem)', fontWeight: 400, color: C.ink, margin: '0 0 12px', lineHeight: 1.15 }
   const card = { background: '#fff', border: `1px solid ${C.line}`, borderRadius: 14, padding: 20 }
   const grid = (min) => ({ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(min(${min}px, 100%), 1fr))`, gap: 16 })
   const btn = (primary) => ({ padding: '13px 24px', borderRadius: 10, fontSize: 15, fontWeight: 800, cursor: busy ? 'wait' : 'pointer', fontFamily: 'inherit', border: primary ? 'none' : `1.5px solid ${C.line}`, background: primary ? C.cr : '#fff', color: primary ? '#fff' : C.ink })
@@ -171,7 +171,7 @@ export default function CareersPage() {
       <section style={{ background: `linear-gradient(135deg, ${C.ink} 0%, #1A2238 55%, ${C.cr} 140%)`, color: '#fff', padding: '72px 0 60px' }}>
         <div className="wrap" style={{ maxWidth: 980 }}>
           <div className="eyebrow" style={{ color: C.gold }}>Careers at Smartious</div>
-          <h1 style={{ fontFamily: "'DM Serif Display',Georgia,serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 400, lineHeight: 1.08, margin: '8px 0 16px' }}>
+          <h1 style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(2.2rem,5vw,3.6rem)', fontWeight: 400, lineHeight: 1.08, margin: '8px 0 16px' }}>
             Teach live, small classes of motivated students, <em style={{ color: C.gold }}>from wherever you are</em>
           </h1>
           <p style={{ fontSize: 18, lineHeight: 1.7, color: 'rgba(255,255,255,.82)', maxWidth: 760, margin: '0 0 26px' }}>
