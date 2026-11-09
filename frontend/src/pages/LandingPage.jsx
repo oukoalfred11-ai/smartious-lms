@@ -53,6 +53,7 @@ import { CURRICULA } from '../data/curricula.js'
 import { SERVICES } from '../data/services.js'
 import CountryCityPage from '../components/CountryCityPage.jsx'
 import CountryHub from '../components/CountryHub.jsx'
+import CountriesSection from '../components/CountriesSection.jsx'
 import GoogleReviews, { GoogleRatingBadge } from '../components/GoogleReviews.jsx'
 import CountryVideo from '../components/CountryVideo.jsx'
 import { GOOGLE_RATING, GOOGLE_REVIEWS, GOOGLE_PROFILE_URL as GOOGLE_REVIEWS_URL, LEAVE_REVIEW_URL } from '../data/googleReviews.js'
@@ -6203,96 +6204,9 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* ═══════════════════════════════════════════
-              COUNTRY ROUTER — links to the 10 country pages
-              Big SEO win: surfaces all country pages from
-              homepage so they get internal-link authority.
-          ═══════════════════════════════════════════ */}
-          <section id="countries" className="sec" style={{background:V.white}}><div className="wrap">
-            <div className="sec-hd reveal" style={{textAlign:'center'}}>
-              <div className="eyebrow" style={{justifyContent:'center'}}>Built for global families</div>
-              <h2 className="display">An Online School That <em>Travels With You</em></h2>
-              <p className="lead" style={{marginTop:14,maxWidth:680,margin:'14px auto 0'}}>Wherever your family goes, your child's education goes with you. The same teachers, the same classmates and the same timetable in every time zone. Choose your country for exam centres, fees and local guidance.</p>
-            </div>
-            <div style={{
-              display:'grid',
-              gridTemplateColumns:'repeat(auto-fill, minmax(180px, 1fr))',
-              gap:12,
-              marginTop:36,
-            }}>
-              {[
-                {country:'UAE', slug:'uae', href:'/online-school/uae', sub:'Dubai · Abu Dhabi'},
-                {country:'Qatar', slug:'qatar', href:'/online-school/qatar', sub:'Doha'},
-                {country:'Saudi Arabia', slug:'saudi-arabia', href:'/online-school/saudi-arabia', sub:'Riyadh · Jeddah · Dhahran · NEOM'},
-                {country:'Bahrain', slug:'bahrain', href:'/online-school/bahrain', sub:'Manama · Riffa'},
-                {country:'Kuwait', slug:'kuwait', href:'/online-school/kuwait', sub:'Kuwait City · Salmiya · Hawally'},
-                {country:'Oman', slug:'oman', href:'/online-school/oman', sub:'Muscat · Seeb · Sohar · Salalah'},
-                {country:'Pakistan', slug:'pakistan', href:'/online-school/pakistan', sub:'Karachi · Lahore · Islamabad'},
-                {country:'South Korea', slug:'south-korea', href:'/online-school/south-korea', sub:'Seoul · Songdo · Busan · Pyeongtaek · Daejeon · Jeju'},
-                {country:'Japan', slug:'japan', href:'/online-school/japan', sub:'Tokyo · Yokohama · Osaka · Kobe · Nagoya · Okinawa'},
-                {country:'Vietnam', slug:'vietnam', href:'/online-school/vietnam', sub:'Ho Chi Minh City · Hanoi · Da Nang · Bac Ninh · Binh Duong · Vung Tau'},
-                {country:'Thailand', slug:'thailand', href:'/online-school/thailand', sub:'Bangkok · Chiang Mai · Phuket · Pattaya · Hua Hin · Khon Kaen'},
-                {country:'Indonesia', slug:'indonesia', href:'/online-school/indonesia', sub:'Jakarta · Bali · Surabaya · Bandung · Batam · Yogyakarta'},
-                {country:'United Kingdom', slug:'uk', href:'/online-school/united-kingdom', sub:'London · Manchester'},
-                {country:'United States', slug:'usa', href:'/online-school/usa', sub:'Coast to coast · Live · IGCSE/A-Level'},
-                {country:'Canada', slug:'canada', href:'/online-school/canada', sub:'Toronto · Vancouver'},
-                {country:'Australia', slug:'australia', href:'/online-school/australia', sub:'Sydney · Melbourne'},
-                {country:'Nigeria', slug:'nigeria', href:'/online-school/nigeria', sub:'Lagos · Abuja · Port Harcourt'},
-                {country:'South Africa', slug:'south-africa', href:'/online-school/south-africa', sub:'Johannesburg · Cape Town'},
-                {country:'Egypt', slug:'egypt', href:'/online-school/egypt', sub:'Cairo · New Cairo · Sheikh Zayed · Alexandria · NAC · Sharm El Sheikh'},
-                {country:'Morocco', slug:'morocco', href:'/online-school/morocco', sub:'Casablanca · Rabat · Marrakech · Tangier · Fes · Agadir'},
-                {country:'Ethiopia', slug:'ethiopia', href:'/online-school/ethiopia', sub:'Addis Ababa · Mekelle · Hawassa'},
-                {country:'Rwanda', slug:'rwanda', href:'/online-school/rwanda', sub:'Kigali · Huye · Musanze · Rubavu'},
-                {country:'Kenya', slug:'kenya', href:'/online-school/kenya', sub:'Nairobi HQ · Mombasa · Kisumu'},
-                {country:'Uganda', slug:'uganda', href:'/online-school/uganda', sub:'Kampala · Entebbe · Wakiso'},
-                {country:'Somalia', slug:'somalia', href:'/online-school/somalia', sub:'Mogadishu · Hargeisa · Garowe'},
-                {country:'Tanzania', slug:'tanzania', href:'/online-school/tanzania', sub:'Dar es Salaam · Arusha · Zanzibar'},
-              ].map(c => (
-                <a key={c.country}
-                  href={c.href}
-                  onClick={e => {
-                    e.preventDefault()
-                    // USA, Canada, Kenya, Ethiopia, Rwanda have rich dedicated
-                    // landing pages — route to them directly. All other slugs
-                    // use the standard country-detail page.
-                    if (c.slug === 'usa') P('us-families')
-                    else if (c.slug === 'canada') P('ca-families')
-                    else if (c.slug === 'kenya') P('homeschooling-kenya')
-                    else if (c.slug === 'ethiopia') P('homeschooling-ethiopia')
-                    else if (c.slug === 'rwanda') P('homeschooling-rwanda')
-                    else if (c.slug === 'south-africa') P('homeschooling-south-africa')
-                    else if (c.slug === 'qatar') P('homeschooling-qatar')
-                    else if (c.slug === 'saudi-arabia') P('homeschooling-saudi-arabia')
-                    else if (c.slug === 'uae') P('homeschooling-uae')
-                    else if (c.slug) openCountry(c.slug)
-                    else P('home')
-                  }}
-                  style={{
-                    display:'block',
-                    padding:'14px 16px',
-                    background:V.bone,
-                    border:'1px solid '+V.line,
-                    borderRadius:8,
-                    cursor:'pointer',
-                    textDecoration:'none',
-                    color:'inherit',
-                    transition:'transform .15s, border-color .15s, box-shadow .15s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform='translateY(-2px)'; e.currentTarget.style.borderColor=V.cr+'60'; e.currentTarget.style.boxShadow='0 6px 18px rgba(139,26,46,.10)' }}
-                  onMouseLeave={e => { e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.borderColor=V.line; e.currentTarget.style.boxShadow='none' }}>
-                  <div style={{fontSize:13.5,fontWeight:700,color:V.ink,marginBottom:2}}>{c.country}</div>
-                  <div style={{fontSize:11,color:V.sl}}>{c.sub}</div>
-                </a>
-              ))}
-            </div>
-            <p style={{marginTop:28,textAlign:'center',fontSize:13.5,lineHeight:2,color:V.sl}}>
-              <strong style={{color:V.ink}}>Online school &amp; homeschool by city:</strong>{' '}
-              {PRIORITY_CITY_LINKS.map(([href, label], i) => (
-                <span key={href}>{i ? ' · ' : ''}<a href={href} onClick={linkClick(() => { nav(href); window.scrollTo(0, 0) })}
-                  style={{color:V.cr,fontWeight:600,textDecoration:'none'}}>{label}</a></span>
-              ))}
-            </p>
-          </div></section>
+          {/* COUNTRIES — photo plates for the priority markets and a searchable
+              list of every country hub (components/CountriesSection.jsx). */}
+          <CountriesSection nav={nav} cityLinks={PRIORITY_CITY_LINKS}/>
 
           {/* ═══════════════════════════════════════════
               HOW IT WORKS — 4 steps

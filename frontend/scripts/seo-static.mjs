@@ -69,6 +69,7 @@ import { US_CITIES, US_CITIES_BY_STATE } from '../src/data/usCities.js'
 import { CA_PROVINCES } from '../src/data/caProvinces.js'
 import { CA_CITIES, CA_CITIES_BY_PROVINCE } from '../src/data/caCities.js'
 import { PRIORITY_HUB_LINKS, PRIORITY_CITY_LINKS } from '../src/data/priorityLinks.js'
+import { COUNTRY_PLATES, ALL_COUNTRIES } from '../src/data/countriesListing.js'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../src/data/seoTitles.js'
 import { ARTICLES_INDEX } from '../src/data/generated/articlesIndex.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText, fmtMonthYear } from '../src/data/continentalGuides.js'
@@ -333,13 +334,13 @@ const guideLinks = (hub, place, heading) => {
   const m = PAGE_META.home
   add({ path: '/', file: 'home.html', title: m.title, desc: m.desc, h1: 'Online School & Homeschool for IGCSE, A-Level, IB, American & CBC Students', body: [
     p(m.desc),
-    h2('Online school in the Gulf, Nigeria and Kenya'),
-    links(PRIORITY_HUB_LINKS.map(([href, label]) => ({ href, label: 'Online school and homeschool in ' + label }))),
+    h2('Online school in your country'),
+    links(COUNTRY_PLATES.map(c => ({ href: '/online-school/' + c.slug, label: 'Online school in ' + c.name + ': ' + c.cities }))),
     h2('Online school and homeschool by city'),
     links(PRIORITY_CITY_LINKS.map(([href, label]) => ({ href, label: 'Online school in ' + label }))),
     h2('Programmes and services'), links([...SERVICE_LINKS, ...MAIN_LINKS.slice(0, 6)]),
     h2('Curricula'), links(CURRICULA_LINKS),
-    h2('Online school by country'), links(hubLinks()),
+    h2('Online school by country'), links([...ALL_COUNTRIES.map(c => ({ href: '/online-school/' + c.slug, label: 'Online school in ' + c.name })), ...hubLinks()].filter((l, i, arr) => arr.findIndex(x => x.href === l.href) === i)),
     h2('Latest guides'), links(Object.entries(FULL_ARTICLES).slice(-24).reverse().map(([slug, a]) => ({ href: '/blog/' + slug, label: a.t }))),
   ], crumbs: [], src: ['src/pages/LandingPage.jsx', 'src/data/priorityLinks.js'] })
 }
