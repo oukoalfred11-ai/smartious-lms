@@ -102,6 +102,9 @@
 /homeschooling-kenya     /online-school/kenya        301
 /online-school/uk        /online-school/united-kingdom 301
 
+# ─── Removed blog posts (301 to the closest live page) ───────────
+/blog/homeschooling-ethiopia-families-2026  /online-school/ethiopia  301!
+
 # ─── Kenya city URL consolidation ────────────────────────────────
 # Legacy /homeschooling/<slug> city URLs 301 to the canonical
 # /homeschool-<slug> form (matches every other country pattern and
