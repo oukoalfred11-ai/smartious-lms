@@ -7,5 +7,6 @@ Disallow: /parent/
 Disallow: /portal
 Disallow: /reset-password
 Disallow: /verify-email
+Disallow: /api/
 
 Sitemap: https://smartioushomeschool.com/sitemap.xml
