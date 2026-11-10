@@ -30,6 +30,7 @@ export const COUNTRY_PLATES = [
   { slug: 'angola', name: 'Angola', region: 'Southern Africa', cities: 'Luanda, Lobito, Benguela', code: 'AO' },
   { slug: 'argentina', name: 'Argentina', region: 'South America', cities: 'Buenos Aires, Córdoba, Rosario', code: 'AR' },
   { slug: 'austria', name: 'Austria', region: 'Europe', cities: 'Vienna, Salzburg, Graz', code: 'AT' },
+  { slug: 'bangladesh', name: 'Bangladesh', region: 'South Asia', cities: 'Dhaka, Chattogram, Sylhet', code: 'BD' },
   { slug: 'oman', name: 'Oman', region: 'Gulf', cities: 'Muscat', code: 'OM' },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
