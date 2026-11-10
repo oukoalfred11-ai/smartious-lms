@@ -5,7 +5,8 @@
  * Each state powers a dedicated landing page at /homeschool-{slug}.
  * Designed to convert (book consultation, begin enrolment) rather than
  * educate — the full educational content lives in fullArticles.js as
- * /blog/homeschooling-{state}-families-2026.
+ * /blog/legally-homeschool-usa (the old per-state family guides 301 to
+ * the state pages, see public/_redirects).
  *
  * heroPhoto powers the splash background in the state landing hero
  * (Unsplash student photos with state-color gradient overlay).

@@ -104,6 +104,72 @@
 
 # ─── Removed blog posts (301 to the closest live page) ───────────
 /blog/homeschooling-ethiopia-families-2026  /online-school/ethiopia  301!
+# The 2026 state and province family guides were retired; each goes to
+# its /homeschool-<state|province> page (all 50 US states, 13 provinces).
+/blog/homeschooling-texas-families-2026                         /homeschool-texas                       301!
+/blog/homeschooling-california-families-2026                    /homeschool-california                  301!
+/blog/homeschooling-florida-families-2026                       /homeschool-florida                     301!
+/blog/homeschooling-north-carolina-families-2026                /homeschool-north-carolina              301!
+/blog/homeschooling-georgia-families-2026                       /homeschool-georgia                     301!
+/blog/homeschooling-arizona-families-2026                       /homeschool-arizona                     301!
+/blog/homeschooling-tennessee-families-2026                     /homeschool-tennessee                   301!
+/blog/homeschooling-virginia-families-2026                      /homeschool-virginia                    301!
+/blog/homeschooling-pennsylvania-families-2026                  /homeschool-pennsylvania                301!
+/blog/homeschooling-ohio-families-2026                          /homeschool-ohio                        301!
+/blog/homeschooling-new-york-families-2026                      /homeschool-new-york                    301!
+/blog/homeschooling-illinois-families-2026                      /homeschool-illinois                    301!
+/blog/homeschooling-new-jersey-families-2026                    /homeschool-new-jersey                  301!
+/blog/homeschooling-washington-families-2026                    /homeschool-washington                  301!
+/blog/homeschooling-massachusetts-families-2026                 /homeschool-massachusetts               301!
+/blog/homeschooling-maryland-families-2026                      /homeschool-maryland                    301!
+/blog/homeschooling-colorado-families-2026                      /homeschool-colorado                    301!
+/blog/homeschooling-michigan-families-2026                      /homeschool-michigan                    301!
+/blog/homeschooling-minnesota-families-2026                     /homeschool-minnesota                   301!
+/blog/homeschooling-utah-families-2026                          /homeschool-utah                        301!
+/blog/homeschooling-indiana-families-2026                       /homeschool-indiana                     301!
+/blog/homeschooling-missouri-families-2026                      /homeschool-missouri                    301!
+/blog/homeschooling-oklahoma-families-2026                      /homeschool-oklahoma                    301!
+/blog/homeschooling-connecticut-families-2026                   /homeschool-connecticut                 301!
+/blog/homeschooling-alabama-families-2026                       /homeschool-alabama                     301!
+/blog/homeschooling-alaska-families-2026                        /homeschool-alaska                      301!
+/blog/homeschooling-arkansas-families-2026                      /homeschool-arkansas                    301!
+/blog/homeschooling-delaware-families-2026                      /homeschool-delaware                    301!
+/blog/homeschooling-hawaii-families-2026                        /homeschool-hawaii                      301!
+/blog/homeschooling-idaho-families-2026                         /homeschool-idaho                       301!
+/blog/homeschooling-iowa-families-2026                          /homeschool-iowa                        301!
+/blog/homeschooling-kansas-families-2026                        /homeschool-kansas                      301!
+/blog/homeschooling-kentucky-families-2026                      /homeschool-kentucky                    301!
+/blog/homeschooling-louisiana-families-2026                     /homeschool-louisiana                   301!
+/blog/homeschooling-maine-families-2026                         /homeschool-maine                       301!
+/blog/homeschooling-mississippi-families-2026                   /homeschool-mississippi                 301!
+/blog/homeschooling-montana-families-2026                       /homeschool-montana                     301!
+/blog/homeschooling-nebraska-families-2026                      /homeschool-nebraska                    301!
+/blog/homeschooling-nevada-families-2026                        /homeschool-nevada                      301!
+/blog/homeschooling-new-hampshire-families-2026                 /homeschool-new-hampshire               301!
+/blog/homeschooling-new-mexico-families-2026                    /homeschool-new-mexico                  301!
+/blog/homeschooling-north-dakota-families-2026                  /homeschool-north-dakota                301!
+/blog/homeschooling-oregon-families-2026                        /homeschool-oregon                      301!
+/blog/homeschooling-rhode-island-families-2026                  /homeschool-rhode-island                301!
+/blog/homeschooling-south-carolina-families-2026                /homeschool-south-carolina              301!
+/blog/homeschooling-south-dakota-families-2026                  /homeschool-south-dakota                301!
+/blog/homeschooling-vermont-families-2026                       /homeschool-vermont                     301!
+/blog/homeschooling-west-virginia-families-2026                 /homeschool-west-virginia               301!
+/blog/homeschooling-wisconsin-families-2026                     /homeschool-wisconsin                   301!
+/blog/homeschooling-wyoming-families-2026                       /homeschool-wyoming                     301!
+/blog/homeschooling-ontario-families-2026                       /homeschool-ontario                     301!
+/blog/homeschooling-quebec-families-2026                        /homeschool-quebec                      301!
+/blog/homeschooling-british-columbia-families-2026              /homeschool-british-columbia            301!
+/blog/homeschooling-alberta-families-2026                       /homeschool-alberta                     301!
+/blog/homeschooling-manitoba-families-2026                      /homeschool-manitoba                    301!
+/blog/homeschooling-saskatchewan-families-2026                  /homeschool-saskatchewan                301!
+/blog/homeschooling-nova-scotia-families-2026                   /homeschool-nova-scotia                 301!
+/blog/homeschooling-new-brunswick-families-2026                 /homeschool-new-brunswick               301!
+/blog/homeschooling-newfoundland-and-labrador-families-2026     /homeschool-newfoundland-and-labrador   301!
+/blog/homeschooling-prince-edward-island-families-2026          /homeschool-prince-edward-island        301!
+/blog/homeschooling-yukon-families-2026                         /homeschool-yukon                       301!
+/blog/homeschooling-northwest-territories-families-2026         /homeschool-northwest-territories       301!
+/blog/homeschooling-nunavut-families-2026                       /homeschool-nunavut                     301!
+/blog/homeschooling-rwanda-families-2026                        /online-school/rwanda                   301!
 
 # ─── Kenya city URL consolidation ────────────────────────────────
 # Legacy /homeschooling/<slug> city URLs 301 to the canonical
