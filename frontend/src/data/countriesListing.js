@@ -26,6 +26,7 @@ export const COUNTRY_PLATES = [
   { slug: 'morocco', name: 'Morocco', region: 'North Africa', cities: 'Casablanca, Rabat, Marrakech', code: 'MA' },
   { slug: 'tanzania', name: 'Tanzania', region: 'East Africa', cities: 'Dar es Salaam, Arusha, Dodoma', code: 'TZ' },
   { slug: 'albania', name: 'Albania', region: 'Europe', cities: 'Tirana, Durrës, Vlorë', code: 'AL' },
+  { slug: 'algeria', name: 'Algeria', region: 'North Africa', cities: 'Algiers, Oran, Hassi Messaoud', code: 'DZ' },
   { slug: 'oman', name: 'Oman', region: 'Gulf', cities: 'Muscat', code: 'OM' },
   { slug: 'qatar', name: 'Qatar', region: 'Gulf', cities: 'Doha', code: 'QA' },
   { slug: 'kuwait', name: 'Kuwait', region: 'Gulf', cities: 'Kuwait City', code: 'KW' },
