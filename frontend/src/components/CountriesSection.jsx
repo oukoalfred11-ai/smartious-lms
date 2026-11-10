@@ -41,7 +41,9 @@ const CSS = `
 .sm-title{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:clamp(34px,4.4vw,56px);line-height:1.05;letter-spacing:-.01em;color:var(--crimson);margin:0}
 .sm-sub{font-size:18px;line-height:1.6;color:var(--muted);max-width:520px;margin:14px 0 0}
 .sm-link{font-weight:700;font-size:15px;color:var(--crimson);text-decoration:none;border-bottom:2px solid var(--gold);padding-bottom:4px;white-space:nowrap}
-.sm-grid{display:grid;grid-template-columns:repeat(var(--cols,4),1fr);gap:22px}
+/* Flex, not grid, so a part-filled last row sits centred under the full rows. */
+.sm-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:22px}
+.sm-grid > .sm-plate{width:calc((100% - (var(--cols,4) - 1) * 22px) / var(--cols,4))}
 .sm-plate{position:relative;display:block;aspect-ratio:4/5;border-radius:22px;overflow:hidden;text-decoration:none;
   background:var(--deep);box-shadow:0 18px 40px rgba(74,8,22,.16);transform:translateZ(0);
   transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s}
@@ -76,12 +78,13 @@ const CSS = `
 .sm-list a:hover:after{opacity:1;transform:none}
 .sm-cityline{margin-top:36px;font-size:14px;line-height:2;color:var(--muted)}
 .sm-cityline a{color:var(--crimson);font-weight:600;text-decoration:none}
-@media (max-width:1024px){.sm-grid{grid-template-columns:repeat(var(--cols-md,3),1fr)}}
+@media (max-width:1024px){.sm-grid > .sm-plate{width:calc((100% - (var(--cols-md,3) - 1) * 22px) / var(--cols-md,3))}}
 @media (max-width:760px){
   .sm-countries{padding:64px 18px}
-  .sm-grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;
+  .sm-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:72%;overflow-x:auto;scroll-snap-type:x mandatory;
     padding-bottom:12px;margin:0 -18px;padding-left:18px;padding-right:18px;scrollbar-width:none}
   .sm-plate{scroll-snap-align:start}
+  .sm-grid > .sm-plate{width:auto}
   .sm-list{grid-template-columns:repeat(2,1fr)}
 }
 @media (prefers-reduced-motion:reduce){.sm-plate,.sm-plate img,.sm-go{transition:none}}
