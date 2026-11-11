@@ -22,46 +22,52 @@ const CSS = `
 .sd{font-family:'DM Sans',system-ui,sans-serif;color:#1E1418;animation:sdIn .35s ease}
 .sd *{box-sizing:border-box}
 @keyframes sdIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.sd-hero{position:relative;overflow:hidden;border-radius:24px;background:#FBF6EE;border:1px solid #EFE6D8;margin-bottom:18px;isolation:isolate}
-.sd-hero::before{content:'';position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgba(125,16,37,.05) 1px,transparent 1px);background-size:100% 30px}
-.sd-hero::after{content:'';position:absolute;top:0;bottom:0;left:30px;width:1.5px;z-index:-1;background:rgba(196,70,90,.2)}
-.sd-hero-in{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:30px;align-items:center;padding:36px 36px 36px 60px;min-height:260px}
-.sd-hero.has-video .sd-hero-in{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);align-items:center}
-.sd-eb{font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#7D1025;margin:0 0 10px}
-.sd-h1{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:clamp(2.3rem,3.6vw,3.4rem);line-height:1.05;letter-spacing:-.02em;color:#1E1418;margin:0 0 14px}
-.sd-h1 em{font-style:italic;font-weight:600;color:#7D1025}
-.sd-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}
-.sd-chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#3B2A2F;background:#fff;border:1px solid #EAE0CF;border-radius:999px;padding:7px 14px}
-.sd-chip.break{color:#6B21A8;background:#F5F0FF;border-color:#E4D7FB}
-.sd-sum{font-size:17px;line-height:1.6;color:#6B5A5E;margin:0}
-.sd-sum b{color:#1E1418}
-.sd-next{position:relative;border-radius:20px;padding:22px 22px 20px;color:#FBF6EE;background:radial-gradient(120% 120% at 100% 0%,#A3192F 0%,#7D1025 50%,#5A0B1B 100%);box-shadow:0 18px 40px rgba(125,16,37,.25);overflow:hidden}
-.sd-next::after{content:'';position:absolute;right:-40px;bottom:-60px;width:180px;height:180px;border-radius:50%;border:1px solid rgba(232,186,96,.35)}
-.sd-next-eb{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#E8BA60;margin:0 0 10px}
-.sd-live{width:8px;height:8px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:sdPulse 1.6s infinite}
-@keyframes sdPulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
-.sd-next h3{font-family:'Source Serif 4',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1.1;margin:0 0 6px;color:#fff}
-.sd-next p{margin:0;font-size:15.5px;color:rgba(251,246,238,.8)}
-.sd-next .sd-count{margin-top:14px;font-size:14.5px;font-weight:700;color:#FBF6EE;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:8px 12px;display:inline-block}
-.sd-join{margin-top:14px;display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;background:#E8BA60;color:#3D0712;font:800 15.5px 'DM Sans',system-ui,sans-serif;padding:11px 18px;cursor:pointer}
-.sd-join:hover{background:#F0C979}
+.sd-hero{position:relative;overflow:hidden;border-radius:26px;margin-bottom:18px;isolation:isolate;color:#fff;min-height:330px;background:#1A0A12}
+.sd-aurora{position:absolute;inset:-20%;z-index:-3;background:
+  radial-gradient(38% 46% at 18% 30%,rgba(163,25,47,.85),transparent 70%),
+  radial-gradient(34% 40% at 78% 22%,rgba(232,186,96,.55),transparent 70%),
+  radial-gradient(40% 50% at 70% 85%,rgba(123,45,110,.75),transparent 70%),
+  radial-gradient(30% 36% at 35% 90%,rgba(224,102,58,.45),transparent 70%),#1A0A12;
+  filter:blur(30px);animation:sdAur 18s ease-in-out infinite alternate}
+@keyframes sdAur{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-3%,2%) scale(1.06)}100%{transform:translate(3%,-2%) scale(1.03)}}
+.sd-grain{position:absolute;inset:0;z-index:-2;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.2px);background-size:18px 18px}
+.sd-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3}
+.sd-veil{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(20,6,12,.86) 0%,rgba(20,6,12,.62) 38%,rgba(20,6,12,.12) 70%,rgba(20,6,12,0) 100%),linear-gradient(0deg,rgba(20,6,12,.5),rgba(20,6,12,0) 40%)}
+.sd-hstar{position:absolute;z-index:-1;color:#F0CC5A;animation:sdTw 3.6s ease-in-out infinite}
+.sd-hstar svg{display:block;width:100%;height:auto}
+.sd-hero-in{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:30px;align-items:center;padding:40px 40px 52px 44px;min-height:330px}
 .sd-left{display:flex;flex-direction:column;justify-content:center;min-width:0}
-.sd-hero.has-video .sd-next{margin-top:20px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 18px;padding:18px 20px}
-.sd-hero.has-video .sd-next .sd-next-eb,.sd-hero.has-video .sd-next h3,.sd-hero.has-video .sd-next p{grid-column:1}
-.sd-hero.has-video .sd-next h3{font-size:1.7rem;margin:0}
-.sd-hero.has-video .sd-next .sd-act{grid-column:2;grid-row:1 / span 3}
-.sd-hero.has-video .sd-next .sd-join,.sd-hero.has-video .sd-next .sd-count{margin-top:0}
-.sd-video{position:relative;border-radius:20px;overflow:hidden;background:#1a0a0e;aspect-ratio:16/9;box-shadow:0 22px 44px rgba(60,10,20,.22);outline:1.5px solid rgba(210,162,76,.7);outline-offset:6px}
-.sd-video video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.sd-vtag{position:absolute;left:14px;top:14px;display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.92);color:#7D1025;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-.sd-vtag i{width:7px;height:7px;border-radius:50%;background:#EF4444}
-.sd-sound{position:absolute;right:14px;bottom:14px;display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:10px 16px;background:rgba(20,8,12,.62);color:#fff;font:800 14px 'DM Sans',system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.sd-sound:hover{background:rgba(125,16,37,.85)}
+.sd-eb{font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#F0CC5A;margin:0 0 12px}
+.sd-h1{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:clamp(2.3rem,3.6vw,3.4rem);line-height:1.05;letter-spacing:-.02em;color:#fff;margin:0 0 16px;text-shadow:0 2px 24px rgba(0,0,0,.25)}
+.sd-h1 em{font-style:italic;font-weight:600;background:linear-gradient(90deg,#F7D98B,#E8A33D);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sd-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.sd-chip{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:7px 14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.sd-chip.break{background:rgba(192,132,252,.22);border-color:rgba(192,132,252,.4)}
+.sd-sum{font-size:17px;line-height:1.6;color:rgba(255,255,255,.8);margin:0}
+.sd-sum b{color:#fff}
+.sd-next{position:relative;border-radius:22px;padding:22px 22px 20px;color:#fff;background:linear-gradient(150deg,rgba(255,255,255,.22),rgba(255,255,255,.07));border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 24px 50px rgba(10,2,6,.35),inset 0 1px 0 rgba(255,255,255,.35);overflow:hidden}
+.sd-next::before{content:'';position:absolute;inset:0;border-radius:22px;padding:1.5px;background:linear-gradient(130deg,rgba(247,217,139,.9),rgba(255,255,255,0) 35%,rgba(255,255,255,0) 65%,rgba(232,163,61,.8));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.sd-next-eb{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#F0CC5A;margin:0 0 10px}
+.sd-live{width:9px;height:9px;border-radius:50%;background:#4ADE80;box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:sdPulse 1.6s infinite}
+@keyframes sdPulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.6)}70%{box-shadow:0 0 0 10px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+.sd-next h3{font-family:'Source Serif 4',Georgia,serif;font-size:2.2rem;font-weight:700;line-height:1.08;margin:0 0 6px;color:#fff}
+.sd-next p{margin:0;font-size:15.5px;color:rgba(255,255,255,.82)}
+.sd-prog{margin:16px 0 4px;height:6px;border-radius:6px;background:rgba(255,255,255,.18);overflow:hidden}
+.sd-prog i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#4ADE80,#F7D98B)}
+.sd-progl{display:flex;justify-content:space-between;font-size:12.5px;color:rgba(255,255,255,.7)}
+.sd-count{display:inline-flex;align-items:baseline;gap:6px;margin-top:14px;font-size:14.5px;color:rgba(255,255,255,.8)}
+.sd-count b{font-family:'Source Serif 4',Georgia,serif;font-size:1.6rem;color:#fff}
+.sd-join{margin-top:16px;display:inline-flex;align-items:center;gap:8px;border:none;border-radius:12px;background:linear-gradient(135deg,#F7D98B,#E8A33D);color:#3D0712;font:800 15.5px 'DM Sans',system-ui,sans-serif;padding:12px 20px;cursor:pointer;box-shadow:0 10px 24px rgba(232,163,61,.35);transition:transform .18s}
+.sd-join:hover{transform:translateY(-1px)}
+.sd-sound{position:absolute;left:44px;bottom:18px;z-index:2;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:9px 15px;background:rgba(255,255,255,.14);color:#fff;font:800 14px 'DM Sans',system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.sd-sound:hover{background:rgba(255,255,255,.24)}
 .sd-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
 .sd-stat{background:#fff;border:1px solid #EFE6D8;border-radius:18px;padding:18px 20px;display:flex;gap:14px;align-items:center;transition:transform .2s,box-shadow .2s}
 .sd-stat:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(70,20,30,.08)}
-.sd-ic{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:#7D1025;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(125,16,37,.2)}
+.sd-ic{flex-shrink:0;width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--a,#C0283F),var(--b,#7D1025));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px -6px var(--b,#7D1025),inset 0 1px 0 rgba(255,255,255,.35)}
 .sd-ic.soft{background:#F6EEE2;color:#7D1025;box-shadow:none}
+.t-amber{--a:#F2C46D;--b:#C98A1B}.t-ember{--a:#F59E5B;--b:#D9480F}.t-crimson{--a:#D23B57;--b:#8E1430}
+.t-plum{--a:#B45AA6;--b:#6B2463}.t-indigo{--a:#6C73D8;--b:#343A8F}.t-teal{--a:#38B2A3;--b:#16685F}
 .sd-val{font-family:'Source Serif 4',Georgia,serif;font-size:2.15rem;font-weight:700;line-height:1;color:#1E1418}
 .sd-lbl{font-size:14.5px;font-weight:700;color:#6B5A5E;margin-top:4px}
 .sd-dots{display:flex;gap:4px;margin-top:7px}
@@ -119,23 +125,24 @@ const CSS = `
 .sd-jump button{display:flex;flex-direction:column;align-items:center;gap:9px;border:1px solid #F0E8DA;background:#FBF6EE;border-radius:16px;padding:16px 6px 14px;font:700 14.5px 'DM Sans',system-ui,sans-serif;color:#3B2A2F;cursor:pointer;transition:transform .18s,border-color .18s,background .18s}
 .sd-jump button:hover{transform:translateY(-2px);border-color:#7D1025;background:#fff}
 .sd-jump .sd-ic{width:46px;height:46px;border-radius:12px}
-.sd-quote{position:relative;border-radius:20px;padding:22px 22px 20px;background:linear-gradient(135deg,#7D1025,#4E0A17);color:#FBF6EE;overflow:hidden}
+.sd-quote{position:relative;border-radius:22px;padding:24px 24px 22px;color:#FBF6EE;overflow:hidden;isolation:isolate;background:#1A0A12}
+.sd-quote .sd-aurora{inset:-30%}
 .sd-quote small{font-size:12.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#E8BA60}
 .sd-quote .mk{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:60px;line-height:.6;height:26px;margin-top:12px;color:#E8BA60}
 .sd-quote p{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-size:1.35rem;line-height:1.45;margin:0 0 10px;color:#fff}
 .sd-quote span{font-size:14px;color:rgba(251,246,238,.65)}
 .sd-star{position:absolute;right:20px;top:18px;width:18px;color:#E8BA60;animation:sdTw 3.6s ease-in-out infinite}
 @keyframes sdTw{0%,100%{opacity:.4;transform:scale(.65) rotate(0)}45%{opacity:1;transform:scale(1.12) rotate(18deg)}}
-@media (prefers-reduced-motion: reduce){.sd,.sd-live,.sd-star{animation:none}}
+@media (prefers-reduced-motion: reduce){.sd,.sd-live,.sd-star,.sd-hstar,.sd-aurora{animation:none}}
 @media (max-width: 1180px){
   .sd-grid{grid-template-columns:minmax(0,1fr) 320px}
   .sd-rings{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width: 900px){
-  .sd-hero-in,.sd-hero.has-video .sd-hero-in{grid-template-columns:1fr;padding:26px 20px 22px 40px;gap:20px}
-  .sd-hero.has-video .sd-next{grid-template-columns:1fr}
-  .sd-hero.has-video .sd-next .sd-act{grid-column:1;grid-row:auto}
-  .sd-hero::after{left:22px}
+  .sd-hero-in{grid-template-columns:1fr;padding:26px 20px 24px;gap:22px;min-height:0}
+  .sd-hero:has(.sd-sound) .sd-hero-in{padding-top:68px}
+  .sd-veil{background:linear-gradient(180deg,rgba(20,6,12,.78) 0%,rgba(20,6,12,.45) 45%,rgba(20,6,12,.82) 100%)}
+  .sd-sound{top:14px;right:14px;bottom:auto;left:auto}
   .sd-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .sd-stat{padding:14px;gap:10px}
   .sd-ic{width:40px;height:40px;border-radius:12px}
@@ -275,32 +282,55 @@ export default function StudentDashboard({ user, setPage }) {
   const q = QUOTES[now.getDate() % QUOTES.length]
 
   // Called as a function (not <NextCard/>), so a re-render never swaps the button mid-click.
-  const nextCard = () => (
-    <div className="sd-next">
-      {liveNow ? <>
-        <p className="sd-next-eb"><span className="sd-live"/> Live now</p>
-        <h3>{liveNow.subject}</h3>
-        <p>{fmt(liveNow.startTime)} – {fmt(liveNow.endTime)}{teacherOf(liveNow) ? ' · ' + teacherOf(liveNow) : ''}</p>
-        <div className="sd-act"><button className="sd-join" onClick={() => setPage('live')}><Icon name="live" size={19}/> Join class</button></div>
-      </> : nextClass ? <>
-        <p className="sd-next-eb">Up next</p>
-        <h3>{nextClass.subject}</h3>
-        <p>{fmt(nextClass.startTime)} – {fmt(nextClass.endTime)}{teacherOf(nextClass) ? ' · ' + teacherOf(nextClass) : ''}</p>
-        <div className="sd-act"><span className="sd-count">Starts in {until(toMins(nextClass.startTime) - nowMins)}</span></div>
-      </> : <>
+  const nextCard = () => {
+    if (liveNow) {
+      const st = toMins(liveNow.startTime), en = toMins(liveNow.endTime)
+      const pct = Math.max(0, Math.min(100, Math.round((nowMins - st) / Math.max(1, en - st) * 100)))
+      return (
+        <div className="sd-next">
+          <p className="sd-next-eb"><span className="sd-live"/> Live now</p>
+          <h3>{liveNow.subject}</h3>
+          <p>{teacherOf(liveNow) || 'Your teacher'} · {fmt(liveNow.startTime)} – {fmt(liveNow.endTime)}</p>
+          <div className="sd-prog" aria-label={pct + '% of the lesson done'}><i style={{ width: pct + '%' }}/></div>
+          <div className="sd-progl"><span>Started {until(nowMins - st)} ago</span><span>{until(Math.max(0, en - nowMins))} left</span></div>
+          <button className="sd-join" onClick={() => setPage('live')}><Icon name="live" size={19}/> Join class</button>
+        </div>
+      )
+    }
+    if (nextClass) {
+      return (
+        <div className="sd-next">
+          <p className="sd-next-eb">Up next</p>
+          <h3>{nextClass.subject}</h3>
+          <p>{teacherOf(nextClass) || 'Your teacher'} · {fmt(nextClass.startTime)} – {fmt(nextClass.endTime)}</p>
+          <div className="sd-count">Starts in <b>{until(toMins(nextClass.startTime) - nowMins)}</b></div>
+        </div>
+      )
+    }
+    return (
+      <div className="sd-next">
         <p className="sd-next-eb">Today</p>
         <h3>{todays.length ? 'All classes done' : 'No classes today'}</h3>
         <p>{todays.length ? 'Great work. Take a break, then practise a topic.' : 'A good day to practise or read ahead.'}</p>
-        <div className="sd-act"><button className="sd-join" onClick={() => setPage('practice')}><Icon name="practice" size={19}/> Practise now</button></div>
-      </>}
-    </div>
-  )
+        <button className="sd-join" onClick={() => setPage('practice')}><Icon name="practice" size={19}/> Practise now</button>
+      </div>
+    )
+  }
 
   return (
     <div className="sd">
       <style>{CSS}</style>
 
-      <section className={'sd-hero' + (heroVideo ? ' has-video' : '')}>
+      <section className="sd-hero">
+        {heroVideo
+          ? <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="auto" onError={() => setHeroVideo('')}/>
+          : <><div className="sd-aurora" aria-hidden="true"/><div className="sd-grain" aria-hidden="true"/></>}
+        {heroVideo && <div className="sd-veil" aria-hidden="true"/>}
+        {!heroVideo && <>
+          <span className="sd-hstar" style={{ right: '42%', top: '14%', width: 18 }} aria-hidden="true">{STAR}</span>
+          <span className="sd-hstar" style={{ right: '8%', top: '10%', width: 12, animationDelay: '-1.4s' }} aria-hidden="true">{STAR}</span>
+          <span className="sd-hstar" style={{ left: '46%', bottom: '14%', width: 10, animationDelay: '-2.5s' }} aria-hidden="true">{STAR}</span>
+        </>}
         <div className="sd-hero-in">
           <div className="sd-left">
             <p className="sd-eb">{dayLabel}</p>
@@ -315,23 +345,19 @@ export default function StudentDashboard({ user, setPage }) {
               {loading ? 'Getting your day ready…'
                 : <>Today you have <b>{plural(todays.length, 'class', 'classes')}</b> and <b>{plural(dueList.length, 'homework task', 'homework tasks')}</b> to finish.</>}
             </p>
-            {heroVideo && nextCard()}
           </div>
-          {heroVideo ? (
-            <div className="sd-video">
-              <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="auto" onError={() => setHeroVideo('')}/>
-              <span className="sd-vtag"><i/> From Smartious</span>
-              <button type="button" className="sd-sound" onClick={toggleSound} aria-label={muted ? 'Turn the sound on' : 'Turn the sound off'}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  {muted
-                    ? <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-                    : <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>}
-                </svg>
-                {muted ? 'Sound on' : 'Mute'}
-              </button>
-            </div>
-          ) : nextCard()}
+          {nextCard()}
         </div>
+        {heroVideo && (
+          <button type="button" className="sd-sound" onClick={toggleSound} aria-label={muted ? 'Turn the sound on' : 'Turn the sound off'}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              {muted
+                ? <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                : <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>}
+            </svg>
+            {muted ? 'Sound on' : 'Mute'}
+          </button>
+        )}
       </section>
 
       <AnnouncementsStrip onNavigate={(mod) => {
@@ -340,11 +366,11 @@ export default function StudentDashboard({ user, setPage }) {
       }}/>
 
       <div className="sd-stats">
-        <div className="sd-stat"><span className="sd-ic"><Icon name="star"/></span><div><div className="sd-val">{xp.toLocaleString()}</div><div className="sd-lbl">XP earned</div></div></div>
-        <div className="sd-stat"><span className="sd-ic"><Icon name="flame"/></span><div><div className="sd-val">{plural(streak, 'day', 'days')}</div><div className="sd-lbl">Study streak</div>
+        <div className="sd-stat"><span className="sd-ic t-amber"><Icon name="star"/></span><div><div className="sd-val">{xp.toLocaleString()}</div><div className="sd-lbl">XP earned</div></div></div>
+        <div className="sd-stat"><span className="sd-ic t-ember"><Icon name="flame"/></span><div><div className="sd-val">{plural(streak, 'day', 'days')}</div><div className="sd-lbl">Study streak</div>
           <div className="sd-dots" aria-label="Practice this week">{week.map((on, i) => <i key={i} className={on ? 'on' : ''}/>)}</div></div></div>
-        <div className="sd-stat"><span className="sd-ic"><Icon name="chart"/></span><div><div className="sd-val">{avg !== null ? avg + '%' : '—'}</div><div className="sd-lbl">{avg !== null ? 'Average exam score' : 'No marked exams yet'}</div></div></div>
-        <div className="sd-stat"><span className="sd-ic"><Icon name="homework"/></span><div><div className="sd-val">{dueList.length}</div><div className="sd-lbl">Homework to do</div></div></div>
+        <div className="sd-stat"><span className="sd-ic t-plum"><Icon name="chart"/></span><div><div className="sd-val">{avg !== null ? avg + '%' : '—'}</div><div className="sd-lbl">{avg !== null ? 'Average exam score' : 'No marked exams yet'}</div></div></div>
+        <div className="sd-stat"><span className="sd-ic t-crimson"><Icon name="homework"/></span><div><div className="sd-val">{dueList.length}</div><div className="sd-lbl">Homework to do</div></div></div>
       </div>
 
       <div className="sd-grid">
@@ -441,13 +467,14 @@ export default function StudentDashboard({ user, setPage }) {
           <div className="sd-card">
             <div className="sd-ch"><div><small>Shortcuts</small><h4>Jump to</h4></div></div>
             <div className="sd-jump">
-              {[['practice', 'Practice'], ['homework', 'Homework'], ['live', 'Live class'], ['timetable', 'Timetable'], ['exams', 'Exams'], ['library', 'Library']].map(([k, label]) => (
-                <button key={k} onClick={() => setPage(k)}><span className="sd-ic"><Icon name={k} size={20}/></span>{label}</button>
+              {[['practice', 'Practice', 't-amber'], ['homework', 'Homework', 't-crimson'], ['live', 'Live class', 't-ember'], ['timetable', 'Timetable', 't-plum'], ['exams', 'Exams', 't-indigo'], ['library', 'Library', 't-teal']].map(([k, label, tone]) => (
+                <button key={k} onClick={() => setPage(k)}><span className={'sd-ic ' + tone}><Icon name={k} size={20}/></span>{label}</button>
               ))}
             </div>
           </div>
 
           <div className="sd-quote">
+            <div className="sd-aurora" aria-hidden="true"/>
             <span className="sd-star" aria-hidden="true">{STAR}</span>
             <small>Daily affirmation</small>
             <span className="mk" aria-hidden="true">“</span>
