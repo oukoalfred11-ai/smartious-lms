@@ -237,6 +237,11 @@ router.post('/reset-password', authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
 
     user.password = newPassword;
+    // Signing in with the temporary password already proved who they
+    // are: choosing their own clears the forced change (no email code).
+    user.mustChangePassword = false;
+    user.otpCode = undefined; user.otpExpires = undefined; user.otpVerified = false;
+    user.passwordResetToken = undefined; user.passwordResetExpires = undefined;
     await user.save();
 
     return res.json({ success: true, message: 'Password updated.' });

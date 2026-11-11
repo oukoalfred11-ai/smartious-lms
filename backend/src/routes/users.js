@@ -6,7 +6,7 @@ const Teacher = require('../models/Teacher');
 const { auth, requireRole } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { sendVerificationEmail, sendTeacherMemoEmail } = require('../services/emailService');
-const { sendWelcomeEmail } = require('../lib/email');
+const { sendWelcomeEmail, sendPasswordResetByAdminEmail } = require('../lib/email');
 const { sendAdmissionPack } = require('../lib/admissionPack');
 
 // ── Avatar upload setup ───────────────────────────────────
@@ -1414,6 +1414,53 @@ router.get('/:id', auth, requireRole('admin', 'ops_manager', 'dos'), async (req,
   } catch (e) {
     console.error('[users get by id]', e.message);
     res.status(e.status || 500).json({ success: false, message: e.message });
+  }
+});
+
+// POST /api/users/:id/reset-password — admin resets a parent's or
+// student's password (the Users list "Reset password" button).
+// Sets a readable temporary password, flags it to be changed at next
+// sign-in, emails it, and returns it so the admin can pass it on
+// directly (WhatsApp, phone) when the family's email is unreliable.
+// Staff passwords are not reset here.
+const TEMP_PW_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+function readableTempPassword(len = 10) {
+  const crypto = require('crypto');
+  let out = '';
+  for (let i = 0; i < len; i++) out += TEMP_PW_CHARS[crypto.randomInt(TEMP_PW_CHARS.length)];
+  return out;
+}
+router.post('/:id/reset-password', auth, requireRole('admin', 'ops_manager'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+    if (!['parent', 'student'].includes(user.role))
+      return res.status(403).json({ success: false, message: 'Only parent and student passwords can be reset here.' });
+    if (user.archived) return res.status(400).json({ success: false, message: 'This account is archived. Reinstate it first.' });
+
+    const tempPassword = readableTempPassword();
+    user.password = tempPassword;            // hashed by the pre-save hook
+    user.mustChangePassword = true;
+    user.otpCode = undefined; user.otpExpires = undefined; user.otpVerified = false;
+    user.passwordResetToken = undefined; user.passwordResetExpires = undefined;
+    await user.save();
+
+    const name = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    let emailed = false;
+    if (user.email) {
+      const r = await sendPasswordResetByAdminEmail({ to: user.email, name, tempPassword }).catch(() => ({ success: false }));
+      emailed = !!r.success;
+    }
+    console.log(`[users] password reset for ${user.email} (${user.role}) by ${req.user.email}; emailed: ${emailed}`);
+    return res.json({
+      success: true,
+      tempPassword,
+      emailed,
+      message: emailed ? `Temporary password set and emailed to ${user.email}.` : 'Temporary password set. The email could not be sent, so pass it on directly.',
+    });
+  } catch (err) {
+    console.error('[users/reset-password]', err.message);
+    return res.status(500).json({ success: false, message: 'Could not reset the password.' });
   }
 });
 

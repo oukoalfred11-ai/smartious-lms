@@ -39,6 +39,22 @@ const Logo = () => (
   </div>
 )
 
+// Defined outside the page: a component declared inside it is a new type on
+// every render, so the button was replaced whenever an input lost focus, and
+// the click that caused the blur never landed.
+const Btn = ({ label, disabled, onClick, type='button' }) => (
+  <button type={type} disabled={disabled} onClick={onClick} style={{
+    width:'100%', padding:'14px', background:'#fff', color:CR, border:'none',
+    borderRadius:30, fontWeight:800, fontSize:13, letterSpacing:'.16em',
+    textTransform:'uppercase', cursor:disabled?'not-allowed':'pointer',
+    opacity:disabled?.65:1, transition:'transform .15s', fontFamily:'inherit',
+  }}
+    onMouseEnter={e=>!disabled&&(e.currentTarget.style.transform='translateY(-1px)')}
+    onMouseLeave={e=>(e.currentTarget.style.transform='translateY(0)')}>
+    {label}
+  </button>
+)
+
 export default function ResetPasswordPage() {
   const nav   = useNavigate()
   const toast = useToast()
@@ -48,8 +64,15 @@ export default function ResetPasswordPage() {
   const urlToken = params.get('token') || ''
   const urlEmail = params.get('email') || ''
 
+  // Signed in with a temporary password (mustChangePassword): that
+  // already proves who they are, so they go straight to choosing their
+  // own password, with no email code (POST /auth/reset-password).
+  const forced = !urlToken && (() => {
+    try { return !!localStorage.getItem('sm_token') && !!JSON.parse(localStorage.getItem('sm_user') || 'null')?.mustChangePassword } catch { return false }
+  })()
+
   // step: 'email' | 'otp' | 'password' | 'token_reset' | 'done'
-  const [step,    setStep]    = useState(urlToken ? 'token_reset' : 'email')
+  const [step,    setStep]    = useState(urlToken ? 'token_reset' : forced ? 'password' : 'email')
   const [email,   setEmail]   = useState(urlEmail || user?.email || '')
   const [otp,     setOtp]     = useState('')
   const [pw,      setPw]      = useState('')
@@ -79,18 +102,6 @@ export default function ResetPasswordPage() {
     </div>
   ) : null
 
-  const Btn = ({ label, disabled, onClick, type='button' }) => (
-    <button type={type} disabled={disabled} onClick={onClick} style={{
-      width:'100%', padding:'14px', background:'#fff', color:CR, border:'none',
-      borderRadius:30, fontWeight:800, fontSize:13, letterSpacing:'.16em',
-      textTransform:'uppercase', cursor:disabled?'not-allowed':'pointer',
-      opacity:disabled?.65:1, transition:'transform .15s', fontFamily:'inherit',
-    }}
-      onMouseEnter={e=>!disabled&&(e.currentTarget.style.transform='translateY(-1px)')}
-      onMouseLeave={e=>(e.currentTarget.style.transform='translateY(0)')}>
-      {label}
-    </button>
-  )
 
   // ── Step 1: Send OTP ───────────────────────────────────────
   const sendOtp = async () => {
@@ -137,6 +148,16 @@ export default function ResetPasswordPage() {
     if (pw !== cpw) { setError('Passwords do not match.'); return }
     setLoading(true)
     try {
+      if (forced) {
+        const { data } = await api.post('/auth/reset-password', { newPassword: pw })
+        if (!data.success) { setError(data.message || 'Could not change password.'); return }
+        // Sign in again with the new password, so the session carries the cleared flag.
+        try { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user') } catch {}
+        setStep('done')
+        toast.ok('Password set. Sign in with your new password.')
+        setTimeout(() => { window.location.href = '/login' }, 2000)
+        return
+      }
       const { data } = await api.post('/auth/change-password', { email: email.trim(), newPassword: pw })
       if (data.success) {
         setStep('done')
@@ -254,10 +275,10 @@ export default function ResetPasswordPage() {
     if (step === 'password' || step === 'token_reset') return (
       <>
         <h1 style={{ fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'2.2rem',color:'#fff',margin:'0 0 10px',lineHeight:1.1 }}>
-          {step === 'token_reset' ? 'Set a new password' : 'New password'}
+          {step === 'token_reset' ? 'Set a new password' : forced ? 'Choose your password' : 'New password'}
         </h1>
         <p style={{ fontSize:14,color:'rgba(247,243,237,.6)',lineHeight:1.6,marginBottom:32 }}>
-          {step === 'token_reset' ? `Setting new password for ${urlEmail}.` : 'Identity verified. Choose a strong new password.'}
+          {step === 'token_reset' ? `Setting new password for ${urlEmail}.` : forced ? 'You signed in with a temporary password. Choose your own to continue.' : 'Identity verified. Choose a strong new password.'}
         </p>
         <ErrBox/>
         <div style={{ position:'relative',marginBottom:22 }}>
