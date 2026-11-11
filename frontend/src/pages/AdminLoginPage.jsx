@@ -28,8 +28,8 @@ const CSS = `
 .sl *{box-sizing:border-box}
 .sl-photo{position:relative;margin:16px;border-radius:28px;overflow:hidden;min-height:calc(100vh - 32px);background:#3A0A14}
 .sl-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:45% 28%}
-.sl-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,4,12,.30) 0%,rgba(40,4,12,0) 26%,rgba(40,4,12,0) 46%,rgba(40,4,12,.55) 66%,rgba(36,3,10,.92) 100%)}
-.sl-tag{position:absolute;z-index:2;top:22px;left:22px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#FBF6EE;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.sl-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(125,16,37,0) 0%,rgba(125,16,37,0) 50%,rgba(110,14,33,.62) 68%,rgba(78,9,22,.94) 84%,#4A0915 100%)}
+.sl-tag{position:absolute;z-index:2;top:22px;left:22px;display:inline-flex;align-items:center;gap:8px;padding:8px 16px 8px 10px;border-radius:999px;background:#fff;box-shadow:0 10px 24px rgba(60,20,25,.16);color:#7D1025;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 .sl-quote{position:absolute;z-index:2;left:clamp(26px,4vw,52px);right:clamp(26px,4vw,52px);bottom:clamp(28px,5vh,52px)}
 .sl-mark{font-family:'Source Serif 4',Georgia,serif;font-size:76px;line-height:.6;color:#E8BA60;display:block;height:34px}
 .sl-line{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-weight:600;font-size:clamp(1.6rem,2.3vw,2.25rem);line-height:1.2;color:#FBF6EE;margin:0 0 18px;min-height:2.4em;transition:opacity .6s ease,transform .6s ease}
