@@ -83,6 +83,9 @@ html.sm-desktop ::-webkit-scrollbar-track { background: transparent; }
   border-top: 1px solid rgba(125,16,37,.08);
   box-shadow: 0 -8px 30px rgba(26,15,14,.06);
 }
+/* The floating Suggestion Box button sits above the tab bar, never on it
+   (it covered the Exams and More tabs on phones). */
+body:has(.sm-tabbar) .sm-glow-fab { bottom: calc(78px + env(safe-area-inset-bottom)) !important; right: 14px !important; }
 .sm-tab {
   flex: 1; min-width: 0; position: relative;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
