@@ -31,7 +31,7 @@ const CSS = `
   filter:blur(30px);animation:sdAur 18s ease-in-out infinite alternate}
 @keyframes sdAur{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-3%,2%) scale(1.06)}100%{transform:translate(3%,-2%) scale(1.03)}}
 .sd-grain{position:absolute;inset:0;z-index:-2;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.2px);background-size:18px 18px}
-.sd-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3}
+.sd-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;z-index:-3}
 .sd-veil{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(20,6,12,.86) 0%,rgba(20,6,12,.62) 38%,rgba(20,6,12,.12) 70%,rgba(20,6,12,0) 100%),linear-gradient(0deg,rgba(20,6,12,.5),rgba(20,6,12,0) 40%)}
 .sd-hero-in{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:30px;align-items:center;padding:40px 40px 52px 44px;min-height:330px}
 .sd-left{display:flex;flex-direction:column;justify-content:center;min-width:0}
