@@ -1,6 +1,7 @@
 import SmartiousCrest from '../components/SmartiousCrest.jsx'
 import { useStore } from '../context/ctx.jsx'
-import { useState, useEffect, useRef, lazy, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
+import { lazyPage } from '../lib/chunkReload.js'
 import { VL_META } from '../data/virtualLab.js'
 import { useNavigate, useLocation, useParams } from 'react-router-dom'
 
@@ -348,14 +349,14 @@ function useHeroPreload(active) {
 
 /* ── V tokens — Premium LMS palette (DM Serif + Plus Jakarta + warm gold) ── */
 // The Virtual Lab page and its demos load only on /virtual-lab.
-const VirtualLabPage = lazy(() => import('./VirtualLabPage.jsx'))
+const VirtualLabPage = lazyPage(() => import('./VirtualLabPage.jsx'))
 // Careers and Partnerships load only on /careers and /partnerships.
-const CareersPage = lazy(() => import('./CareersPage.jsx'))
-const PartnershipsPage = lazy(() => import('./PartnershipsPage.jsx'))
+const CareersPage = lazyPage(() => import('./CareersPage.jsx'))
+const PartnershipsPage = lazyPage(() => import('./PartnershipsPage.jsx'))
 // /cambridge-online-school and /pearson-edexcel-online-school (data/boardSchools.js).
-const BoardSchoolPage = lazy(() => import('./BoardSchoolPage.jsx'))
+const BoardSchoolPage = lazyPage(() => import('./BoardSchoolPage.jsx'))
 // /a-level-admissions-2027 and /igcse-admissions-2027 (data/*Admissions2027.js).
-const AdmissionsPage = lazy(() => import('./AdmissionsPage.jsx'))
+const AdmissionsPage = lazyPage(() => import('./AdmissionsPage.jsx'))
 
 const V = {
   // Crimson (kept — already aligned with LMS)

@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
+import { lazyPage } from './lib/chunkReload.js'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { AuthProvider, ToastProvider, StoreProvider, useAuth } from './context/ctx.jsx'
 import LoginPage         from './pages/LoginPage.jsx'
@@ -12,19 +13,19 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 // student portals, syllabus data, the video classroom): about 3 MB
 // compressed of code a parent reading the homepage never uses.
 // The marketing site is lazy too, so portal users never download it.
-const LandingPage    = lazy(() => import('./pages/LandingPage.jsx'))
-const ArabicPage     = lazy(() => import('./pages/ArabicPage.jsx'))
-const ClassroomPage  = lazy(() => import('./pages/ClassroomPage.jsx'))
-const AdminPortal    = lazy(() => import('./pages/admin/AdminPortal.jsx'))
-const OpsPortal      = lazy(() => import('./pages/admin/OpsPortal.jsx'))
-const DOSPortal      = lazy(() => import('./pages/admin/DOSPortal.jsx'))
-const QAPortal       = lazy(() => import('./pages/admin/QAPortal.jsx'))
-const AccountsPortal = lazy(() => import('./pages/admin/AccountsPortal.jsx'))
-const SalesPortal    = lazy(() => import('./pages/admin/SalesPortal.jsx'))
-const TeacherPortal  = lazy(() => import('./pages/teacher/TeacherPortal.jsx'))
-const StudentPortal  = lazy(() => import('./pages/student/StudentPortal.jsx'))
-const ParentPortal   = lazy(() => import('./pages/parent/ParentPortal.jsx'))
-const LabApp         = lazy(() => import('./lab/LabApp.jsx'))
+const LandingPage    = lazyPage(() => import('./pages/LandingPage.jsx'))
+const ArabicPage     = lazyPage(() => import('./pages/ArabicPage.jsx'))
+const ClassroomPage  = lazyPage(() => import('./pages/ClassroomPage.jsx'))
+const AdminPortal    = lazyPage(() => import('./pages/admin/AdminPortal.jsx'))
+const OpsPortal      = lazyPage(() => import('./pages/admin/OpsPortal.jsx'))
+const DOSPortal      = lazyPage(() => import('./pages/admin/DOSPortal.jsx'))
+const QAPortal       = lazyPage(() => import('./pages/admin/QAPortal.jsx'))
+const AccountsPortal = lazyPage(() => import('./pages/admin/AccountsPortal.jsx'))
+const SalesPortal    = lazyPage(() => import('./pages/admin/SalesPortal.jsx'))
+const TeacherPortal  = lazyPage(() => import('./pages/teacher/TeacherPortal.jsx'))
+const StudentPortal  = lazyPage(() => import('./pages/student/StudentPortal.jsx'))
+const ParentPortal   = lazyPage(() => import('./pages/parent/ParentPortal.jsx'))
+const LabApp         = lazyPage(() => import('./lab/LabApp.jsx'))
 
 // KaTeX draws mathematics in the portals (question bank, exams). The
 // website has none, so it is fetched only when a portal opens; until
