@@ -935,6 +935,23 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
     }
   }
 
+  // Reset a parent's or student's password: the temporary password is
+  // emailed, and shown here so it can be sent directly (WhatsApp, phone)
+  // when the family's email is unreliable.
+  const handleResetPassword = async (u) => {
+    const name = ((u.firstName || '') + ' ' + (u.lastName || '')).trim()
+    if (!window.confirm('Reset the password for ' + name + ' (' + u.email + ')?\n\nTheir current password stops working. You will see a temporary password to give them, and it is also emailed. They choose their own the next time they sign in.')) return
+    try {
+      const { data } = await api.post('/users/' + u._id + '/reset-password')
+      if (!data?.tempPassword) throw new Error(data?.message || 'No password returned.')
+      toast?.ok?.(data.message || 'Password reset.')
+      window.prompt('Temporary password for ' + name + ' (' + u.email + ').' + (data.emailed ? ' It was also emailed.' : ' The email could not be sent.') + ' Copy it and send it to them:', data.tempPassword)
+      loadUsers()
+    } catch (e) {
+      toast?.error?.(e?.response?.data?.message || e.message || 'Could not reset the password.')
+    }
+  }
+
   const handleEdit = (u) => {
     setUserForm({
       firstName: u.firstName || '', lastName: u.lastName || '', email: u.email || '',
@@ -1105,6 +1122,9 @@ function UsersModule({ refreshKey, toast, setUserForm, setUserModal, openAddUser
                               title={u.admissionPackSentAt ? 'Admission pack sent ' + new Date(u.admissionPackSentAt).toLocaleDateString() + ' · click to resend' : 'Email the Admission Pack'}>
                               {u.admissionPackSentAt ? 'Resend pack' : 'Send pack'}
                             </button>
+                          )}
+                          {(u.role === 'student' || u.role === 'parent') && !u.archived && (
+                            <button className="btn btn-g btn-sm" onClick={() => handleResetPassword(u)} title="Set a temporary password and show it to you">Reset password</button>
                           )}
                           <button className="btn btn-g btn-sm" onClick={() => handleEdit(u)}>Edit</button>
                           <button className="btn btn-d btn-sm" onClick={() => handleDelete(u)}>Delete</button>

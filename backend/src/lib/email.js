@@ -661,7 +661,45 @@ const sendAdmissionPackEmail = async ({ to, name, role, studentName, attachmentP
   }
 }
 
+// ─────────────────────────────────────────────────────────
+// PASSWORD RESET BY THE SCHOOL
+// Sent when an admin resets a parent's or student's password from the
+// Users list. The temporary password works once: signing in with it
+// leads straight to choosing their own (no email code needed).
+// ─────────────────────────────────────────────────────────
+const sendPasswordResetByAdminEmail = async ({ to, name, tempPassword, loginUrl }) => {
+  const t = getTransporter()
+  if (!t) return { success: false, message: 'Email service not configured' }
+  const url = loginUrl || 'https://smartioushomeschool.com/login'
+  const esc = (v) => String(v || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+  const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Your Smartious password was reset</title></head>
+<body style="margin:0;padding:0;background:#FBFAF5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1a1a1a;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBFAF5;padding:32px 16px;"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#FFFFFF;border-radius:12px;overflow:hidden;">
+  <tr><td style="background:#7D1025;padding:24px 32px;"><div style="font-size:20px;font-weight:800;color:#fff;">Your password was reset</div></td></tr>
+  <tr><td style="padding:28px 32px;">
+    <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Hi ${esc(name) || 'there'},</p>
+    <p style="font-size:15px;line-height:1.6;margin:0 0 20px;">The Smartious team has reset the password for your account. Sign in with this temporary password, and you'll then choose your own.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FBFAF5;border:1px solid #EFE6D8;border-radius:10px;margin:0 0 22px;"><tr><td style="padding:16px 20px;font-size:14px;line-height:1.8;">
+      Email: <strong>${esc(to)}</strong><br/>Temporary password: <strong style="font-family:Menlo,Consolas,monospace;font-size:16px;letter-spacing:.04em;">${esc(tempPassword)}</strong>
+    </td></tr></table>
+    <a href="${url}" style="display:inline-block;background:#7D1025;color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:13px 26px;border-radius:8px;">Sign in</a>
+    <p style="font-size:13px;line-height:1.6;color:#6b6b6b;margin:22px 0 0;">If you didn't ask for this, reply to this email or contact the school.</p>
+  </td></tr>
+  ${emailFooter()}
+</table></td></tr></table></body></html>`
+  const text = `Hi ${name || 'there'},\n\nThe Smartious team has reset the password for your account.\n\nEmail: ${to}\nTemporary password: ${tempPassword}\n\nSign in at ${url} and you'll then choose your own password.\n\nIf you didn't ask for this, reply to this email or contact the school.`
+  try {
+    const info = await t.sendMail({ from: process.env.EMAIL_FROM || 'Smartious Homeschool <hello@smartioushomeschool.com>', to, subject: 'Your Smartious password was reset', html, text })
+    return { success: !info?.gateSkipped && !info?.suppressedSkip, messageId: info?.messageId }
+  } catch (err) {
+    console.error('[email] Failed to send password reset email to ' + to + ':', err.message)
+    return { success: false, message: err.message }
+  }
+}
+
 module.exports = {
+  sendPasswordResetByAdminEmail,
   sendAdmissionPackEmail,
   sendWelcomeEmail,
   sendLiveClassEmail,
