@@ -57,9 +57,12 @@ const CSS = `
 .lg-art{position:relative;overflow:hidden;min-height:100vh;background:#F1E4D5;isolation:isolate}
 .lg-art::before{content:'';position:absolute;inset:0;z-index:-2;background-image:linear-gradient(rgba(125,16,37,.055) 1px,transparent 1px);background-size:100% 34px;-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 100%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 100%)}
 .lg-art::after{content:'';position:absolute;top:0;bottom:0;left:clamp(40px,7%,84px);width:1.5px;z-index:-2;background:rgba(196,70,90,.22)}
-.lg-arch{position:absolute;left:64%;bottom:0;transform:translateX(-50%);width:min(64%,calc(72vh));height:74%;border-radius:999px 999px 0 0;z-index:-1;background:radial-gradient(90% 70% at 50% 72%,#A3192F 0%,#7D1025 55%,#5C0B1B 100%);box-shadow:inset 0 2px 0 rgba(255,255,255,.08)}
-.lg-arch::before{content:'';position:absolute;inset:-16px -16px 0 -16px;border-radius:999px 999px 0 0;border:1.5px solid #D2A24C;border-bottom:none;opacity:.85}
-.lg-arch::after{content:'';position:absolute;left:50%;top:14%;width:62%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,226,200,.42) 0%,rgba(255,226,200,0) 66%)}
+.lg-mirror{position:absolute;left:64%;bottom:3.5%;transform:translateX(-50%);width:min(60%,calc(66vh));height:72%;border-radius:999px 999px 10px 10px;z-index:-1;padding:14px;background:linear-gradient(135deg,#F1D58E 0%,#B8862E 28%,#E9C77B 50%,#9C6E22 74%,#D9B465 100%);box-shadow:0 30px 50px rgba(70,30,20,.22),0 4px 10px rgba(70,30,20,.12),inset 0 1px 0 rgba(255,255,255,.6)}
+.lg-glass{position:relative;width:100%;height:100%;border-radius:999px 999px 4px 4px;overflow:hidden;background:linear-gradient(170deg,#FBFCFC 0%,#E4E9EB 34%,#F3F5F6 52%,#D3DADD 78%,#E9EDEE 100%);box-shadow:inset 0 0 0 1px rgba(120,90,40,.35),inset 0 10px 30px rgba(60,70,80,.12)}
+.lg-glass::before{content:'';position:absolute;inset:-20%;background:linear-gradient(118deg,transparent 30%,rgba(255,255,255,.85) 37%,rgba(255,255,255,0) 44%,transparent 52%,rgba(255,255,255,.55) 57%,rgba(255,255,255,0) 63%)}
+.lg-glass::after{content:'';position:absolute;left:12%;right:12%;top:12%;height:38%;border-radius:999px 999px 6px 6px;background:radial-gradient(70% 60% at 50% 60%,rgba(241,228,213,.75),rgba(241,228,213,0) 72%)}
+.lg-floor{position:absolute;left:0;right:0;bottom:0;height:7%;z-index:-2;background:linear-gradient(180deg,rgba(150,105,70,0),rgba(150,105,70,.10))}
+.lg-floor::before{content:'';position:absolute;left:30%;right:-6%;bottom:2%;height:38px;border-radius:50%;background:radial-gradient(closest-side,rgba(70,35,20,.28),rgba(70,35,20,0))}
 .lg-art img{position:absolute;left:46%;bottom:0;transform:translateX(-50%);width:min(90%,calc(100vh * 0.98));height:auto;filter:drop-shadow(0 26px 30px rgba(60,10,20,.28))}
 .lg-copy{position:absolute;left:clamp(64px,11%,128px);top:clamp(44px,8vh,92px);max-width:420px;z-index:3}
 .lg-copy h2{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:clamp(2rem,2.7vw,2.7rem);line-height:1.06;letter-spacing:-.015em;color:#7D1025;margin:0 0 14px}
@@ -72,7 +75,7 @@ const CSS = `
 .lg-c1{left:clamp(36px,6%,90px);top:36%;transform:rotate(-3deg)}
 .lg-c1 i{background:#7D1025;color:#fff}
 .lg-c2{right:clamp(20px,5%,64px);top:25%;transform:rotate(2.5deg);animation-delay:-2s}
-.lg-c2 i{background:#E7F6EC;color:#15803D}
+.lg-c2 i{background:#7D1025;color:#fff}
 .lg-live{position:absolute;z-index:3;left:clamp(36px,6%,90px);top:51%;display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:999px;background:#1E1418;color:#FBF6EE;font-size:13px;font-weight:700;box-shadow:0 14px 30px rgba(30,10,15,.28);animation:lgFloat 7s ease-in-out infinite;animation-delay:-4s}
 .lg-av{display:flex}
 .lg-av em{width:26px;height:26px;border-radius:50%;border:2px solid #1E1418;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10.5px;font-weight:800;color:#1E1418}
@@ -86,8 +89,7 @@ const CSS = `
   .lg{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .lg-art{order:-1;min-height:0;height:clamp(360px,92vw,480px);border-radius:0 0 28px 28px}
   .lg-art::after{left:22px}
-  .lg-arch{left:64%;width:62%;height:72%}
-  .lg-arch::before{inset:-10px -10px 0 -10px}
+  .lg-mirror{left:64%;width:58%;height:70%;padding:9px;bottom:4%}
   .lg-art img{left:50%;width:auto;height:76%}
   .lg-copy,.lg-c1,.lg-c2,.lg-s2,.lg-s3{display:none}
   .lg-c1{left:16px;top:auto;bottom:34%;padding:9px 12px 9px 9px;border-radius:14px}
@@ -243,20 +245,21 @@ export default function LoginPage() {
           <h2>Learn from anywhere. <em>Grow with us.</em></h2>
           <p>IGCSE · IB · A-Level</p>
         </div>
-        <div className="lg-arch" aria-hidden="true"/>
+        <div className="lg-floor" aria-hidden="true"/>
+        <div className="lg-mirror" aria-hidden="true"><div className="lg-glass"/></div>
         <span className="lg-star lg-s1" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.7 6.4 5.6 11.3 12 12-6.4.7-11.3 5.6-12 12-.7-6.4-5.6-11.3-12-12C6.4 11.3 11.3 6.4 12 0z"/></svg></span>
         <span className="lg-star lg-s2" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.7 6.4 5.6 11.3 12 12-6.4.7-11.3 5.6-12 12-.7-6.4-5.6-11.3-12-12C6.4 11.3 11.3 6.4 12 0z"/></svg></span>
         <span className="lg-star lg-s3" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.7 6.4 5.6 11.3 12 12-6.4.7-11.3 5.6-12 12-.7-6.4-5.6-11.3-12-12C6.4 11.3 11.3 6.4 12 0z"/></svg></span>
         <picture>
           <source media="(max-width: 980px)" srcSet="/images/login/student-760.webp"/>
-          <img src="/images/login/student-1200.webp" width="1200" height="1027" alt="" fetchpriority="high" decoding="async"/>
+          <img src="/images/login/student-1200.webp" width="1200" height="1033" alt="" fetchpriority="high" decoding="async"/>
         </picture>
         <div className="lg-card lg-c1" aria-hidden="true">
           <i><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm-7-8h5v5h-5z"/></svg></i>
           <div><b>Next class · Biology</b><span>Today at 10:00</span></div>
         </div>
         <div className="lg-card lg-c2" aria-hidden="true">
-          <i><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></i>
+          <i><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm-2 14l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></i>
           <div><b>Homework submitted</b><span>Physics · Waves</span></div>
         </div>
         <div className="lg-live" aria-hidden="true">
