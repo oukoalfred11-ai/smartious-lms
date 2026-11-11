@@ -81,10 +81,13 @@ const CSS = `
 .lg-av em{width:26px;height:26px;border-radius:50%;border:2px solid #1E1418;margin-left:-8px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:10.5px;font-weight:800;color:#1E1418}
 .lg-av em:first-child{margin-left:0}
 .lg-rec{width:8px;height:8px;border-radius:50%;background:#EF4444;box-shadow:0 0 0 4px rgba(239,68,68,.25)}
-.lg-star{position:absolute;z-index:3;color:#D2A24C}
-.lg-s1{right:12%;top:15%;width:26px}.lg-s2{left:30%;top:31%;width:14px;opacity:.8}.lg-s3{right:31%;top:22%;width:12px;opacity:.7}
+.lg-star{position:absolute;z-index:3;color:#D2A24C;animation:lgTwinkle 3.6s ease-in-out infinite;transform-origin:50% 50%}
+.lg-star svg{display:block;width:100%;height:auto;filter:drop-shadow(0 0 0 rgba(232,186,96,0));animation:lgGlow 3.6s ease-in-out infinite;animation-delay:inherit}
+.lg-s1{right:12%;top:15%;width:26px}.lg-s2{left:30%;top:31%;width:14px;animation-delay:-1.3s;animation-duration:4.2s}.lg-s3{right:31%;top:22%;width:12px;animation-delay:-2.6s;animation-duration:3.1s}
+@keyframes lgTwinkle{0%,100%{opacity:.35;transform:scale(.6) rotate(0deg)}45%{opacity:1;transform:scale(1.12) rotate(18deg)}60%{opacity:.9;transform:scale(1) rotate(12deg)}}
+@keyframes lgGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(232,186,96,0))}45%{filter:drop-shadow(0 0 6px rgba(232,186,96,.85))}}
 @keyframes lgFloat{0%,100%{translate:0 0}50%{translate:0 -7px}}
-@media (prefers-reduced-motion: reduce){.lg-card,.lg-live{animation:none}}
+@media (prefers-reduced-motion: reduce){.lg-card,.lg-live,.lg-star,.lg-star svg{animation:none}.lg-star{opacity:.85}}
 @media (max-width: 980px){
   .lg{grid-template-columns:1fr;grid-template-rows:auto 1fr}
   .lg-art{order:-1;min-height:0;height:clamp(360px,92vw,480px);border-radius:0 0 28px 28px}
