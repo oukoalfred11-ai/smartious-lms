@@ -16,7 +16,7 @@
 ═══════════════════════════════════════════════════════════════════ */
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../../context/ctx.jsx'
-import AnnouncementsStrip from '../../components/AnnouncementsStrip.jsx'
+import SubjectIcon from '../../components/SubjectIcon.jsx'
 
 const CSS = `
 .sd{font-family:'DM Sans',system-ui,sans-serif;color:#1E1418;animation:sdIn .35s ease}
@@ -59,6 +59,20 @@ const CSS = `
 .sd-join:hover{transform:translateY(-1px)}
 .sd-sound{position:absolute;left:44px;bottom:18px;z-index:2;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:9px 15px;background:rgba(255,255,255,.14);color:#fff;font:800 14px 'DM Sans',system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .sd-sound:hover{background:rgba(255,255,255,.24)}
+.sd-nb{margin:6px 0 4px}
+.sd-nb-hint{font-size:13.5px;font-weight:700;color:#8C7A7E}
+.sd-nb-row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,360px);gap:16px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity}
+.sd-note{scroll-snap-align:start;background:#fff;border:1px solid #EFE6D8;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.sd-note.click{cursor:pointer}
+.sd-note.click:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(70,20,30,.1)}
+.sd-note-media{display:block;width:100%;height:150px;object-fit:cover;background:#1A0A12}
+.sd-note-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1}
+.sd-note-top{display:flex;gap:12px;align-items:center}
+.sd-note-cat{display:block;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7D1025}
+.sd-note-when{display:block;font-size:13.5px;color:#8C7A7E;margin-top:2px}
+.sd-note h5{font-family:'Source Serif 4',Georgia,serif;font-size:1.3rem;font-weight:700;line-height:1.2;margin:4px 0 0;color:#1E1418}
+.sd-note p{margin:0;font-size:15px;line-height:1.55;color:#5B4A4E;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sd-note-cta{margin-top:auto;padding-top:4px;font-size:14.5px;font-weight:800;color:#7D1025}
 .sd-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
 .sd-stat{background:#fff;border:1px solid #EFE6D8;border-radius:18px;padding:18px 20px;display:flex;gap:14px;align-items:center;transition:transform .2s,box-shadow .2s}
 .sd-stat:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(70,20,30,.08)}
@@ -90,6 +104,7 @@ const CSS = `
 .sd-tl li.done .sd-node{background:#E6DCCB;border-color:#E6DCCB}
 .sd-tl li.live .sd-node{border-color:#16A34A;background:#4ADE80}
 .sd-tl li.next .sd-node{border-color:#7D1025}
+.sd-who{display:flex;align-items:center;gap:12px;min-width:0}
 .sd-subj{font-size:17.5px;font-weight:800;color:#1E1418;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sd-teach{font-size:14.5px;color:#8C7A7E;margin-top:1px}
 .sd-tag{font-size:13px;font-weight:800;border-radius:999px;padding:6px 12px;white-space:nowrap}
@@ -99,7 +114,7 @@ const CSS = `
 .sd-tag.later{background:#F8F3EA;color:#6B5A5E}
 .sd-rings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:6px 20px 22px}
 .sd-ring{text-align:center;padding:14px 8px;border-radius:16px;background:#FBF6EE}
-.sd-ring svg{display:block;margin:0 auto 10px}
+.sd-ring .pc{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:1.6rem;font-weight:700;color:#1E1418;line-height:1;margin-bottom:6px}
 .sd-ring b{display:block;font-size:15.5px;color:#1E1418;line-height:1.25}
 .sd-ring span{display:block;font-size:13.5px;color:#8C7A7E;margin-top:2px}
 .sd-res{list-style:none;margin:0;padding:0 20px 14px}
@@ -165,6 +180,24 @@ const Icon = ({ name, size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={P[name]}/></svg>
 )
 
+// Notice board categories (same ids as the admin composer): solid icon,
+// label and the gradient tone of the icon tile.
+const CATS = {
+  general:     { label: 'Announcement', tone: 't-crimson', path: 'M18 11v2h4v-2h-4zm-2 6.61c.96.71 2.21 1.65 3.2 2.39.4-.53.8-1.07 1.2-1.6-.99-.74-2.24-1.68-3.2-2.4-.4.54-.8 1.08-1.2 1.61zM20.4 5.6c-.4-.53-.8-1.07-1.2-1.6-.99.74-2.24 1.68-3.2 2.4.4.53.8 1.07 1.2 1.6.96-.72 2.21-1.65 3.2-2.4zM4 9c-1.1 0-2 .9-2 2v2c0 1.1.9 2 2 2h1v4h2v-4h1l5 3V6L8 9H4zm11.5 3c0-1.33-.58-2.53-1.5-3.35v6.69c.92-.81 1.5-2.01 1.5-3.34z' },
+  event:       { label: 'Event', tone: 't-ember', path: 'M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z' },
+  academic:    { label: 'Academic', tone: 't-teal', path: 'M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z' },
+  holiday:     { label: 'Holiday', tone: 't-indigo', path: 'M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z' },
+  achievement: { label: 'Achievement', tone: 't-amber', path: 'M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z' },
+  reminder:    { label: 'Reminder', tone: 't-plum', path: 'M22 5.72l-4.6-3.86-1.29 1.53 4.6 3.86L22 5.72zM7.88 3.39L6.6 1.86 2 5.71l1.29 1.53 4.59-3.85zM12.5 8H11v6l4.75 2.85.75-1.23-4-2.37V8zM12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z' },
+}
+const MODULES = { timetable: 'timetable', lessons: 'lessons', homework: 'homework', exams: 'exams', results: 'results', curriculum: 'curriculum', clubs: 'clubs', library: 'library', communication: 'communication', messages: 'communication', profile: 'profile', attendance: 'attendance' }
+const noticeDate = (from, until) => {
+  const o = { day: 'numeric', month: 'short' }
+  const f = from ? new Date(from) : null, u = until ? new Date(until) : null
+  if (f && u) return f.toLocaleDateString('en-GB', o) + ' – ' + u.toLocaleDateString('en-GB', o)
+  return f ? f.toLocaleDateString('en-GB', o) : ''
+}
+
 // Grade bands as used across the portal.
 const gl = s => s >= 80 ? 'A*' : s >= 70 ? 'B' : s >= 60 ? 'C' : s >= 50 ? 'D' : s >= 40 ? 'E' : 'U'
 const gcol = s => s >= 80 ? ['#E7F6EC', '#166534'] : s >= 70 ? ['#E8EFFB', '#1E3A8A'] : s >= 60 ? ['#FBF1E3', '#92400E'] : ['#FDECEC', '#9B1C1C']
@@ -177,15 +210,20 @@ const QUOTES = [
   { text: 'Success is the sum of small efforts repeated day in and day out.', author: 'Robert Collier' },
 ]
 
-function Ring({ pct }) {
-  const r = 30, c = 2 * Math.PI * r
+function Ring({ pct, subject }) {
+  const r = 40, c = 2 * Math.PI * r
   return (
-    <svg width="76" height="76" viewBox="0 0 76 76" role="img" aria-label={pct + '%'}>
-      <circle cx="38" cy="38" r={r} fill="none" stroke="#EFE6D8" strokeWidth="7"/>
-      <circle cx="38" cy="38" r={r} fill="none" stroke="#7D1025" strokeWidth="7" strokeLinecap="round"
-        strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} transform="rotate(-90 38 38)" style={{ transition: 'stroke-dashoffset .8s ease' }}/>
-      <text x="38" y="43" textAnchor="middle" style={{ font: "700 17px 'Source Serif 4',Georgia,serif", fill: '#1E1418' }}>{pct}%</text>
-    </svg>
+    <div style={{ position: 'relative', width: 100, height: 100, margin: '0 auto 10px' }}>
+      <svg width="100" height="100" viewBox="0 0 100 100" role="img" aria-label={subject + ' ' + pct + '%'}>
+        <defs><linearGradient id="sdRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#E8A33D"/><stop offset="1" stopColor="#A3192F"/></linearGradient></defs>
+        <circle cx="50" cy="50" r={r} fill="none" stroke="#EFE6D8" strokeWidth="8"/>
+        <circle cx="50" cy="50" r={r} fill="none" stroke="url(#sdRing)" strokeWidth="8" strokeLinecap="round"
+          strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} transform="rotate(-90 50 50)" style={{ transition: 'stroke-dashoffset .8s ease' }}/>
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <SubjectIcon name={subject} size={26} pad={18} radius={999}/>
+      </div>
+    </div>
   )
 }
 
@@ -224,6 +262,14 @@ export default function StudentDashboard({ user, setPage }) {
         if (tt.status === 'fulfilled') setTimetable(tt.value.data?.data?.entries || tt.value.data?.entries || [])
       }).finally(() => setLoading(false))
   }, [user?._id])
+
+  // ── Notice board (announcements, scoped to this student server side) ──
+  const [notices, setNotices] = useState([])
+  useEffect(() => {
+    let gone = false
+    api.get('/announcements').then(r => { if (!gone) setNotices(r.data?.data?.announcements || []) }).catch(() => {})
+    return () => { gone = true }
+  }, [])
 
   // ── Banner video (an announcement flagged by admins) ──
   // Plays muted in its own framed panel beside the greeting; the
@@ -350,10 +396,39 @@ export default function StudentDashboard({ user, setPage }) {
         )}
       </section>
 
-      <AnnouncementsStrip onNavigate={(mod) => {
-        const map = { timetable: 'timetable', lessons: 'lessons', homework: 'homework', exams: 'exams', results: 'results', curriculum: 'curriculum', clubs: 'clubs', library: 'library', communication: 'communication', messages: 'communication', profile: 'profile', attendance: 'attendance' }
-        if (map[mod]) setPage(map[mod])
-      }}/>
+      {notices.length > 0 && (
+        <section className="sd-nb" aria-label="Notice board">
+          <div className="sd-ch" style={{ padding: '0 2px 12px' }}><div><small>Notice board</small><h4>From the school</h4></div>
+            {notices.length > 2 && <span className="sd-nb-hint">Swipe for more →</span>}</div>
+          <div className="sd-nb-row">
+            {notices.map(n => {
+              const c = CATS[n.category] || CATS.general
+              const toModule = !!(n.ctaModule && MODULES[n.ctaModule])
+              const clickable = toModule || !!n.ctaUrl
+              const open = () => { if (toModule) setPage(MODULES[n.ctaModule]); else if (n.ctaUrl) window.open(n.ctaUrl, '_blank', 'noopener,noreferrer') }
+              const when = noticeDate(n.showFrom, n.showUntil)
+              return (
+                <article key={n._id} className={'sd-note' + (clickable ? ' click' : '')} onClick={clickable ? open : undefined}>
+                  {n.videoUrl ? <video src={n.videoUrl} autoPlay muted loop playsInline className="sd-note-media"/>
+                    : n.imageData ? <img src={n.imageData} alt="" className="sd-note-media"/> : null}
+                  <div className="sd-note-body">
+                    <div className="sd-note-top">
+                      <span className={'sd-ic ' + c.tone} style={{ width: 42, height: 42, borderRadius: 12 }}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={c.path}/></svg></span>
+                      <div style={{ minWidth: 0 }}>
+                        <span className="sd-note-cat">{c.label}{n.pinned ? ' · Pinned' : ''}</span>
+                        {when && <span className="sd-note-when">{when}</span>}
+                      </div>
+                    </div>
+                    <h5>{n.title}</h5>
+                    {n.body && <p>{n.body}</p>}
+                    {(n.ctaLabel || clickable) && <span className="sd-note-cta">{n.ctaLabel || 'Open'} →</span>}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       <div className="sd-stats">
         <div className="sd-stat"><span className="sd-ic t-amber"><Icon name="star"/></span><div><div className="sd-val">{xp.toLocaleString()}</div><div className="sd-lbl">XP earned</div></div></div>
@@ -377,7 +452,7 @@ export default function StudentDashboard({ user, setPage }) {
                       <li key={e._id || i} className={st}>
                         <div><div className="sd-t1">{fmt(e.startTime)}</div><div className="sd-t2">{fmt(e.endTime)}</div></div>
                         <span className="sd-node"/>
-                        <div style={{ minWidth: 0 }}><div className="sd-subj">{e.subject}</div>{teacherOf(e) && <div className="sd-teach">{teacherOf(e)}</div>}</div>
+                        <div className="sd-who"><SubjectIcon name={e.subject} size={22} pad={16} radius={12} center={false}/><div style={{ minWidth: 0 }}><div className="sd-subj">{e.subject}</div>{teacherOf(e) && <div className="sd-teach">{teacherOf(e)}</div>}</div></div>
                         {st === 'live' ? <button className="sd-tag live" onClick={() => setPage('live')}>Join now</button>
                           : <span className={'sd-tag ' + st}>{st === 'done' ? 'Done' : st === 'next' ? 'Next' : 'Later'}</span>}
                       </li>
@@ -392,7 +467,8 @@ export default function StudentDashboard({ user, setPage }) {
               <div className="sd-rings">
                 {subjects.map(s => (
                   <div key={s.subject} className="sd-ring">
-                    <Ring pct={s.pct}/>
+                    <Ring pct={s.pct} subject={s.subject}/>
+                    <span className="pc">{s.pct}%</span>
                     <b>{s.subject}</b>
                     <span>Grade {gl(s.pct)} · {plural(s.n, 'session', 'sessions')}</span>
                   </div>
@@ -419,7 +495,7 @@ export default function StudentDashboard({ user, setPage }) {
                     <li key={e._id}>
                       {marked
                         ? <span className="sd-badge" style={{ background: bg, color: fg }}>{Math.round(sub.percentage)}%<small>{gl(sub.percentage)}</small></span>
-                        : <span className="sd-badge wait"><Icon name="exams" size={22}/></span>}
+                        : <SubjectIcon name={e.subject} size={28} pad={32} radius={14} center={false}/>}
                       <div className="sd-rt"><b>{e.title}</b><span>{e.subject}{status ? ' · ' + status : when ? ' · ' + when.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : ''}</span></div>
                     </li>
                   )
@@ -440,7 +516,7 @@ export default function StudentDashboard({ user, setPage }) {
                       const d = dueLabel(h)
                       return (
                         <li key={h._id || i}>
-                          <span className="sd-ic soft"><Icon name="homework" size={20}/></span>
+                          <SubjectIcon name={h.subject} size={24} pad={18} radius={12} center={false}/>
                           <div style={{ minWidth: 0 }}>
                             <div className="sd-subj" style={{ fontSize: 14.5 }}>{h.title}</div>
                             <div className="sd-teach">{h.subject}</div>

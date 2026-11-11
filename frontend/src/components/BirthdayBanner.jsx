@@ -8,6 +8,12 @@
  * is emailed and stored. Celebrants see a special greeting and
  * can read their received letters. Renders nothing on days
  * with no birthdays. Zero emojis by policy.
+ *
+ * Letter-only mode (the student portal, where birthdays arrive as
+ * notifications instead of a banner): pass `celebrant` (an item from
+ * /birthdays/today) and `onClose`. Only the letter window is shown:
+ * "Write a letter" for someone else, "Your birthday letters" for the
+ * student's own birthday.
  */
 import React, { useState, useEffect } from 'react'
 import { api } from '../context/ctx.jsx'
@@ -20,7 +26,7 @@ const SERIF = '"Source Serif 4",Georgia,serif'
 const initialsOf = (f = '', l = '') => ((f[0] || '') + (l[0] || '')).toUpperCase() || 'S'
 const roleLabel = r => ({ student: 'Student', teacher: 'Teacher', parent: 'Parent', admin: 'Staff', accountant: 'Staff', sales: 'Staff', ops_manager: 'Staff', dos: 'Staff' }[r] || 'Community member')
 
-export default function BirthdayBanner() {
+export default function BirthdayBanner({ celebrant = null, onClose = null } = {}) {
   const [celebrants, setCelebrants] = useState([])
   const [letterFor, setLetterFor] = useState(null)   // celebrant being written to
   const [message, setMessage] = useState('')
@@ -29,12 +35,21 @@ export default function BirthdayBanner() {
   const [myLetters, setMyLetters] = useState(null)   // null = closed, [] = open
 
   useEffect(() => {
+    if (celebrant) return
     api.get('/birthdays/today')
       .then(r => setCelebrants(r.data?.data?.celebrants || []))
       .catch(() => {})
-  }, [])
+  }, [celebrant])
 
-  if (!celebrants.length) return null
+  // Letter-only mode: open the right window for the celebrant straight away.
+  useEffect(() => {
+    if (!celebrant) return
+    if (celebrant.isMe) openMyLetters()
+    else { setLetterFor(celebrant); setMessage(''); setNotice('') }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [celebrant?._id])
+
+  if (!celebrant && !celebrants.length) return null
 
   const me = celebrants.find(c => c.isMe)
 
@@ -46,6 +61,7 @@ export default function BirthdayBanner() {
       setCelebrants(cs => cs.map(c => c._id === letterFor._id ? { ...c, letterSent: true } : c))
       setLetterFor(null); setMessage('')
       setNotice(data?.message || 'Your birthday letter has been delivered.')
+      if (celebrant && onClose) { onClose(data?.message || 'Your birthday letter has been delivered.'); return }
       setTimeout(() => setNotice(''), 4000)
     } catch (e) {
       setNotice(e?.response?.data?.message || 'Could not send the letter.')
@@ -62,9 +78,12 @@ export default function BirthdayBanner() {
   const modalBox = { position: 'fixed', inset: 0, background: 'rgba(8,12,20,.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 16 }
   const modalCard = { background: '#fff', borderRadius: 14, padding: '26px 28px', width: 480, maxWidth: '94vw', maxHeight: '86vh', overflowY: 'auto', fontFamily: '"DM Sans",system-ui,sans-serif' }
 
+  const closeLetter = () => { setLetterFor(null); if (celebrant && onClose) onClose() }
+  const closeMine = () => { setMyLetters(null); if (celebrant && onClose) onClose() }
+
   return (
-    <div style={{ marginBottom: 18, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
-      <div style={{ background: `linear-gradient(120deg, ${CRIMSON} 0%, #5A0B1B 65%, #3E0712 100%)`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 6px 24px rgba(125,16,37,.25)' }}>
+    <div style={{ marginBottom: celebrant ? 0 : 18, fontFamily: '"DM Sans",system-ui,sans-serif' }}>
+      {!celebrant && <div style={{ background: `linear-gradient(120deg, ${CRIMSON} 0%, #5A0B1B 65%, #3E0712 100%)`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 6px 24px rgba(125,16,37,.25)' }}>
         <div style={{ height: 3, background: GOLD }} />
         <div style={{ padding: '18px 24px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
@@ -114,11 +133,11 @@ export default function BirthdayBanner() {
             <div style={{ marginTop: 10, fontSize: 12.5, color: '#9BE3C0', fontWeight: 700 }}>{notice}</div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Write a letter */}
       {letterFor && (
-        <div style={modalBox} onClick={() => setLetterFor(null)}>
+        <div style={modalBox} onClick={closeLetter}>
           <div style={modalCard} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, color: CRIMSON }}>
               A birthday letter for {letterFor.firstName}
@@ -139,7 +158,7 @@ export default function BirthdayBanner() {
               {notice && <span style={{ fontSize: 12, color: '#B91C1C', fontWeight: 700 }}>{notice}</span>}
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 14 }}>
-              <button onClick={() => setLetterFor(null)} style={{ background: CREAM, color: '#080C14', border: '1px solid #E8E2D6', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={closeLetter} style={{ background: CREAM, color: '#080C14', border: '1px solid #E8E2D6', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
               <button disabled={sending} onClick={sendLetter} style={{ background: CRIMSON, color: '#fff', border: 'none', padding: '9px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>
                 {sending ? 'Sending...' : 'Send letter'}
               </button>
@@ -150,7 +169,7 @@ export default function BirthdayBanner() {
 
       {/* Read my letters (celebrant) */}
       {myLetters !== null && (
-        <div style={modalBox} onClick={() => setMyLetters(null)}>
+        <div style={modalBox} onClick={closeMine}>
           <div style={{ ...modalCard, width: 540 }} onClick={e => e.stopPropagation()}>
             <div style={{ fontFamily: SERIF, fontSize: 19, fontWeight: 700, color: CRIMSON, marginBottom: 12 }}>
               Your birthday letters
@@ -167,7 +186,7 @@ export default function BirthdayBanner() {
               </div>
             ))}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-              <button onClick={() => setMyLetters(null)} style={{ background: CREAM, color: '#080C14', border: '1px solid #E8E2D6', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Close</button>
+              <button onClick={closeMine} style={{ background: CREAM, color: '#080C14', border: '1px solid #E8E2D6', padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>
