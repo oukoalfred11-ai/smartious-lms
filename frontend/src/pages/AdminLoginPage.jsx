@@ -7,7 +7,8 @@ import SmartiousCrest from '../components/SmartiousCrest.jsx'
    AdminLoginPage — teacher and staff sign-in (/admin-login)
    ───────────────────────────────────────────────────────────────────
    Desktop: the teaching photo framed on the left
-   (public/images/login/staff-*.webp) with a rotating line of
+   (public/images/login/staff-split-*.webp: a market and medicine behind
+   the teacher and student, split by a gold diagonal) with a rotating line of
    motivation; the sign-in form on cream on the right.
    Mobile: the photo becomes a header, the form follows.
    The greeting follows the time of day. Headings in Source Serif 4,
@@ -22,16 +23,11 @@ const LINES = [
   'You notice the quiet ones. That is the job.',
 ]
 
-// The scene behind the teacher and student changes with each line: the
-// library, then the futures our students grow into (a market, medicine).
-const SCENES = ['library', 'market', 'medical']
-
 const CSS = `
 .sl{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);background:#F8F3EA;font-family:'DM Sans',system-ui,sans-serif;color:#1E1418}
 .sl *{box-sizing:border-box}
 .sl-photo{position:relative;margin:16px;border-radius:28px;overflow:hidden;min-height:calc(100vh - 32px);background:#3A0A14}
-.sl-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:45% 28%;opacity:0;transition:opacity 1.1s ease}
-.sl-photo img.on{opacity:1}
+.sl-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:45% 28%}
 .sl-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,4,12,.30) 0%,rgba(40,4,12,0) 26%,rgba(40,4,12,0) 46%,rgba(40,4,12,.55) 66%,rgba(36,3,10,.92) 100%)}
 .sl-tag{position:absolute;z-index:2;top:22px;left:22px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#FBF6EE;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 .sl-quote{position:absolute;z-index:2;left:clamp(26px,4vw,52px);right:clamp(26px,4vw,52px);bottom:clamp(28px,5vh,52px)}
@@ -81,7 +77,7 @@ const CSS = `
 .sl-foot a{color:#6B5A5E;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
 .sl-foot a:hover{color:#7D1025}
 .sl-foot b{font-weight:700;color:#7D1025}
-@media (prefers-reduced-motion: reduce){.sl-star{animation:none}.sl-line,.sl-photo img{transition:none}}
+@media (prefers-reduced-motion: reduce){.sl-star{animation:none}.sl-line{transition:none}}
 @media (max-width: 980px){
   .sl{grid-template-columns:1fr}
   .sl-photo{margin:0;border-radius:0 0 28px 28px;min-height:0;height:clamp(380px,100vw,520px)}
@@ -122,7 +118,7 @@ export default function AdminLoginPage() {
   const [line, setLine] = useState(0)
   const [fading, setFading] = useState(false)
 
-  // A new line of motivation (and scene) 7 seconds after the last change,
+  // A new line of motivation 7 seconds after the last change,
   // with a soft fade. Restarts whenever the line changes, so tapping a bar
   // never collides with an automatic change.
   useEffect(() => {
@@ -173,14 +169,10 @@ export default function AdminLoginPage() {
       <style>{CSS}</style>
 
       <div className="sl-photo">
-        {SCENES.map((k, i) => (
-          <picture key={k}>
-            <source media="(max-width: 980px)" srcSet={`/images/login/staff-${k}-720.webp`}/>
-            <img src={`/images/login/staff-${k}-1086.webp`} width="1086" height="1448" className={i === line % SCENES.length ? 'on' : ''}
-              alt={i === line % SCENES.length ? 'A Smartious teacher guiding a student through his work' : ''} aria-hidden={i === line % SCENES.length ? undefined : 'true'}
-              fetchpriority={i === 0 ? 'high' : 'low'} decoding="async"/>
-          </picture>
-        ))}
+        <picture>
+          <source media="(max-width: 980px)" srcSet="/images/login/staff-split-720.webp"/>
+          <img src="/images/login/staff-split-1086.webp" width="1086" height="1448" alt="A Smartious teacher guiding a student through his work" fetchpriority="high" decoding="async"/>
+        </picture>
         <span className="sl-tag">
           <SmartiousCrest size={18}/> Staff portal
         </span>
