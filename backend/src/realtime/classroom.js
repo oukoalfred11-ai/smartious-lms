@@ -111,7 +111,8 @@ function attachClassroom(httpServer, allowedOrigins) {
       const User = require('../models/User');
       const user = await User.findById(decoded.id)
         .select('firstName lastName role isActive linkedStudents children').lean();
-      if (!user || !user.isActive) return next(new Error('Invalid token.'));
+      if (!user) return next(new Error('Invalid token.'));
+      if (!user.isActive) return next(new Error('Account not active.'));
       socket.data.user = {
         id: String(user._id),
         name: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'User',
@@ -124,7 +125,9 @@ function attachClassroom(httpServer, allowedOrigins) {
       };
       next();
     } catch (e) {
-      next(new Error('Auth failed.'));
+      // The client shows a specific message (and a Sign in again button)
+      // for an expired session instead of "could not reach the server".
+      next(new Error(e && e.name === 'TokenExpiredError' ? 'Session expired.' : 'Auth failed.'));
     }
   });
 

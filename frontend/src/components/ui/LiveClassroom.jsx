@@ -534,6 +534,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
   const [lobbyPreview, setLobbyPreview] = useState(null)
   const [lobbyStatus, setLobbyStatus] = useState('')   // '', 'granted', 'audio', 'denied'
   const [errMsg, setErrMsg] = useState('')
+  const [errKind, setErrKind] = useState('')   // 'auth' | 'network' | '' (decides the error screen's button)
   const [classInfo, setClassInfo] = useState({})
   const [myRole, setMyRole] = useState('student')
   const [mediaNote, setMediaNote] = useState('')
@@ -1092,7 +1093,7 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         socket = io(BASE + '/classroom', {
           auth: { token },
           transports: ['websocket', 'polling'],
-          reconnection: true, reconnectionDelay: 1000, reconnectionAttempts: 8,
+          reconnection: true, reconnectionDelay: 1000, reconnectionDelayMax: 6000, reconnectionAttempts: 10,
         })
         socketRef.current = socket
 
@@ -1264,8 +1265,30 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
         })
         socket.on('disconnect', () => setReconnecting(true))
         socket.io.on('reconnect_attempt', () => setReconnecting(true))
-        socket.on('connect_error', () => {
-          if (!cancelled) { setPhase(p => p === 'live' ? p : 'error'); setErrMsg('Could not reach the classroom server.') }
+        // The server refuses a bad sign-in with a reason; anything else is
+        // the network (or the server waking up), which Socket.IO retries.
+        // Only an auth refusal, or every retry failing, ends on the error
+        // screen; a single failed attempt no longer does.
+        socket.on('connect_error', (err) => {
+          if (cancelled) return
+          const m = String(err?.message || '')
+          if (/session expired|auth failed|invalid token|no token|not active/i.test(m)) {
+            socket.io.opts.reconnection = false
+            socket.disconnect()
+            setErrKind('auth')
+            setErrMsg(/not active/i.test(m)
+              ? 'Your account is not active at the moment. Please contact the school.'
+              : 'Your sign-in has expired. Sign in again to join the class.')
+            setPhase('error')
+            return
+          }
+          setReconnecting(true)
+        })
+        socket.io.on('reconnect_failed', () => {
+          if (cancelled) return
+          setErrKind('network')
+          setErrMsg('Could not reach the classroom server. Check your internet connection, then try again.')
+          setPhase(p => p === 'live' ? p : 'error')
         })
         socket.on('peer:joined', (p) => {
           setRoster(prev => [...prev.filter(x => x.socketId !== p.socketId), p])
@@ -2385,7 +2408,21 @@ export default function LiveClassroom({ liveClassId, user, onLeave }) {
     <div style={{ position: 'fixed', inset: 0, background: '#0B0F17', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, zIndex: 500 }}>
       <div style={{ color: '#fff', fontSize: 17, fontWeight: 700 }}>Could not join the classroom</div>
       <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 13, maxWidth: 360, textAlign: 'center', lineHeight: 1.6 }}>{errMsg}</div>
-      <Btn onClick={leave} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Go back</Btn>
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+        {errKind === 'auth' && !/not active/.test(errMsg) && (
+          <Btn onClick={() => {
+            // Back into this class after signing in (LoginPage reads this).
+            try { sessionStorage.setItem('smartious.afterLogin', window.location.pathname) } catch (e) { /* noop */ }
+            try { localStorage.removeItem('sm_token'); localStorage.removeItem('sm_user') } catch (e) { /* noop */ }
+            const staff = ['teacher', 'admin', 'ops_manager', 'accountant', 'sales', 'dos', 'qa'].includes(user?.role)
+            window.location.href = staff ? '/admin-login' : '/login'
+          }} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Sign in again</Btn>
+        )}
+        {errKind === 'network' && (
+          <Btn onClick={() => window.location.reload()} style={{ background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Try again</Btn>
+        )}
+        <Btn onClick={leave} style={errKind ? { background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,.3)', fontWeight: 700 } : { background: '#C9A030', color: '#7D1025', fontWeight: 800 }}>Go back</Btn>
+      </div>
     </div>
   )
 
