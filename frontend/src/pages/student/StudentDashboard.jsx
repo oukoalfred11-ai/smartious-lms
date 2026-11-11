@@ -33,8 +33,6 @@ const CSS = `
 .sd-grain{position:absolute;inset:0;z-index:-2;opacity:.5;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1.2px);background-size:18px 18px}
 .sd-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-3}
 .sd-veil{position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,rgba(20,6,12,.86) 0%,rgba(20,6,12,.62) 38%,rgba(20,6,12,.12) 70%,rgba(20,6,12,0) 100%),linear-gradient(0deg,rgba(20,6,12,.5),rgba(20,6,12,0) 40%)}
-.sd-hstar{position:absolute;z-index:-1;color:#F0CC5A;animation:sdTw 3.6s ease-in-out infinite}
-.sd-hstar svg{display:block;width:100%;height:auto}
 .sd-hero-in{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:30px;align-items:center;padding:40px 40px 52px 44px;min-height:330px}
 .sd-left{display:flex;flex-direction:column;justify-content:center;min-width:0}
 .sd-eb{font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:#F0CC5A;margin:0 0 12px}
@@ -131,9 +129,7 @@ const CSS = `
 .sd-quote .mk{display:block;font-family:'Source Serif 4',Georgia,serif;font-size:60px;line-height:.6;height:26px;margin-top:12px;color:#E8BA60}
 .sd-quote p{font-family:'Source Serif 4',Georgia,serif;font-style:italic;font-size:1.35rem;line-height:1.45;margin:0 0 10px;color:#fff}
 .sd-quote span{font-size:14px;color:rgba(251,246,238,.65)}
-.sd-star{position:absolute;right:20px;top:18px;width:18px;color:#E8BA60;animation:sdTw 3.6s ease-in-out infinite}
-@keyframes sdTw{0%,100%{opacity:.4;transform:scale(.65) rotate(0)}45%{opacity:1;transform:scale(1.12) rotate(18deg)}}
-@media (prefers-reduced-motion: reduce){.sd,.sd-live,.sd-star,.sd-hstar,.sd-aurora{animation:none}}
+@media (prefers-reduced-motion: reduce){.sd,.sd-live,.sd-aurora{animation:none}}
 @media (max-width: 1180px){
   .sd-grid{grid-template-columns:minmax(0,1fr) 320px}
   .sd-rings{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -168,7 +164,6 @@ const P = {
 const Icon = ({ name, size = 22 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d={P[name]}/></svg>
 )
-const STAR = <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c.7 6.4 5.6 11.3 12 12-6.4.7-11.3 5.6-12 12-.7-6.4-5.6-11.3-12-12C6.4 11.3 11.3 6.4 12 0z"/></svg>
 
 // Grade bands as used across the portal.
 const gl = s => s >= 80 ? 'A*' : s >= 70 ? 'B' : s >= 60 ? 'C' : s >= 50 ? 'D' : s >= 40 ? 'E' : 'U'
@@ -326,11 +321,6 @@ export default function StudentDashboard({ user, setPage }) {
           ? <video ref={videoRef} src={heroVideo} autoPlay muted loop playsInline preload="auto" onError={() => setHeroVideo('')}/>
           : <><div className="sd-aurora" aria-hidden="true"/><div className="sd-grain" aria-hidden="true"/></>}
         {heroVideo && <div className="sd-veil" aria-hidden="true"/>}
-        {!heroVideo && <>
-          <span className="sd-hstar" style={{ right: '42%', top: '14%', width: 18 }} aria-hidden="true">{STAR}</span>
-          <span className="sd-hstar" style={{ right: '8%', top: '10%', width: 12, animationDelay: '-1.4s' }} aria-hidden="true">{STAR}</span>
-          <span className="sd-hstar" style={{ left: '46%', bottom: '14%', width: 10, animationDelay: '-2.5s' }} aria-hidden="true">{STAR}</span>
-        </>}
         <div className="sd-hero-in">
           <div className="sd-left">
             <p className="sd-eb">{dayLabel}</p>
@@ -475,7 +465,6 @@ export default function StudentDashboard({ user, setPage }) {
 
           <div className="sd-quote">
             <div className="sd-aurora" aria-hidden="true"/>
-            <span className="sd-star" aria-hidden="true">{STAR}</span>
             <small>Daily affirmation</small>
             <span className="mk" aria-hidden="true">“</span>
             <p>{q.text}</p>
