@@ -7,6 +7,8 @@
  * file names. Reloads are limited to one per 30 seconds per tab, so a file
  * that is genuinely missing shows the error screen instead of looping.
  */
+import { lazy } from 'react'
+
 const KEY = 'sm_chunk_reload_at'
 
 export const isChunkError = (e) =>
@@ -36,3 +38,10 @@ export function installChunkRecovery() {
   if (typeof window === 'undefined') return
   window.addEventListener('vite:preloadError', (e) => { if (reloadForNewVersion()) e.preventDefault() })
 }
+
+/** React.lazy for the app's pages. When a page's file fails to load and
+ *  installChunkRecovery() has already started a reload, Vite swallows the
+ *  error and the import resolves to undefined; plain lazy() then crashes
+ *  reading .default. Here the page stays on its loading state instead,
+ *  until the reload replaces it. */
+export const lazyPage = (load) => lazy(() => load().then(m => m || new Promise(() => {})))

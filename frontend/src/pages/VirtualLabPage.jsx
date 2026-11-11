@@ -7,14 +7,15 @@
  * titration bench and the 3D skeleton) load three.js only when the visitor
  * presses Start, so the page itself stays light.
  */
-import { lazy, Suspense, useState } from 'react'
+import { Suspense, useState } from 'react'
+import { lazyPage } from '../lib/chunkReload.js'
 import {
   VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL,
   VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS,
 } from '../data/virtualLab.js'
 
-const LabDemo = lazy(() => import('../lab/LabDemo.jsx'))
-const ModelViewer = lazy(() => Promise.all([import('../lab/models/ModelsPage.jsx'), import('../lab/lab.css')])
+const LabDemo = lazyPage(() => import('../lab/LabDemo.jsx'))
+const ModelViewer = lazyPage(() => Promise.all([import('../lab/models/ModelsPage.jsx'), import('../lab/lab.css')])
   .then(([m]) => ({ default: () => <m.ModelViewer modelId="skeleton" embedded /> })))
 
 const C = { cr: '#8B1A2E', gold: '#C9973A', ink: '#080C14', ink2: '#0D1220', sl: '#2E3D55', bone: '#FDFAF4', bone2: '#F8F2E6', line: '#E8DFCC' }
