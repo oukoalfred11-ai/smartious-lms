@@ -126,6 +126,17 @@ router.patch('/:id', auth, FINANCE, async (req, res) => {
     for (const k of ['purchaseCost', 'reorderLevel']) {
       if (b[k] !== undefined && Number(b[k]) >= 0) item[k] = Number(b[k]);
     }
+    // Quantity edited in the item form: a correction, logged in the trail
+    // like a stock adjustment. A blank field leaves it unchanged.
+    if (b.quantity !== undefined && String(b.quantity).trim() !== '') {
+      const q = Number(b.quantity);
+      if (!Number.isFinite(q) || q < 0) return res.status(400).json({ success: false, message: 'Quantity must be a number, zero or more.' });
+      if (q !== (item.quantity || 0)) {
+        const delta = q - (item.quantity || 0);
+        item.movements.push(move(by, 'stock', 'Quantity edited: ' + (item.quantity || 0) + ' \u2192 ' + q + ' ' + (item.unit || '') + ' (' + (delta > 0 ? '+' : '') + delta + ')'));
+        item.quantity = q;
+      }
+    }
     if (b.purchaseDate !== undefined) item.purchaseDate = b.purchaseDate ? new Date(b.purchaseDate) : null;
     if (b.category !== undefined && InventoryItem.CATEGORIES.includes(b.category)) item.category = b.category;
 
