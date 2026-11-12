@@ -231,6 +231,82 @@ async function sendAnnouncementEmail({ announcement, recipients }) {
   return sent
 }
 
+// ── Announcement updated ────────────────────────────────────
+// Sent when an announcement that was ALREADY emailed is edited, so the
+// first email is not left standing with old details. Shows what changed
+// (old struck through, new highlighted) and then the full new text.
+function lineDiff(a, b) {
+  const A = String(a || '').split('\n'), B = String(b || '').split('\n')
+  const n = A.length, m = B.length
+  const L = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0))
+  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--)
+    L[i][j] = A[i] === B[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1])
+  const out = []
+  let i = 0, j = 0
+  while (i < n && j < m) {
+    if (A[i] === B[j]) { out.push({ t: 'same', s: A[i] }); i++; j++ }
+    else if (L[i + 1][j] >= L[i][j + 1]) out.push({ t: 'del', s: A[i++] })
+    else out.push({ t: 'add', s: B[j++] })
+  }
+  while (i < n) out.push({ t: 'del', s: A[i++] })
+  while (j < m) out.push({ t: 'add', s: B[j++] })
+  return out
+}
+
+async function sendAnnouncementUpdateEmail({ announcement, previous = {}, changes = [], recipients }) {
+  const t = getTransporter()
+  const list = dedupeEmails(recipients)
+  if (!t) { console.warn('[notify] Email not configured; announcement update not emailed:', announcement.title); return 0 }
+  if (!list.length) return 0
+
+  const a = announcement, p = previous
+  const label = CATEGORY_LABEL[a.category] || 'Announcement'
+  const portal = (process.env.CLIENT_URL || 'https://smartioushomeschool.com').replace(/\/$/, '')
+  const del = (s) => `<span style="background:#FDECEC;color:#991B1B;text-decoration:line-through;">${esc(s)}</span>`
+  const add = (s) => `<span style="background:#E7F7EF;color:#065F46;font-weight:bold;">${esc(s)}</span>`
+  const rows = []
+  if (changes.includes('title')) rows.push(`<p style="margin:0 0 10px;"><b>Title:</b> ${del(p.title)} &rarr; ${add(a.title)}</p>`)
+  if (changes.includes('body')) {
+    const d = lineDiff(p.body, a.body).filter((x, k, arr) => x.t !== 'same' || (arr[k - 1] && arr[k - 1].t !== 'same') || (arr[k + 1] && arr[k + 1].t !== 'same'))
+    rows.push(`<p style="margin:0 0 6px;"><b>Message:</b></p><div style="font-size:13.5px;line-height:1.6;">` +
+      d.map(x => x.t === 'same' ? `<div style="color:#6B7280;">${esc(x.s) || '&nbsp;'}</div>` : x.t === 'del' ? `<div>${del(x.s || ' ')}</div>` : `<div>${add(x.s || ' ')}</div>`).join('') + `</div>`)
+  }
+  if (changes.includes('category')) rows.push(`<p style="margin:10px 0 0;"><b>Type:</b> ${del(CATEGORY_LABEL[p.category] || p.category)} &rarr; ${add(label)}</p>`)
+  if (changes.includes('link')) rows.push(`<p style="margin:10px 0 0;"><b>Button:</b> ${a.ctaUrl ? add((a.ctaLabel || 'Open') + ' (' + a.ctaUrl + ')') : del('removed')}</p>`)
+  if (changes.includes('picture')) rows.push(`<p style="margin:10px 0 0;"><b>Picture:</b> ${add(a.imageData ? 'updated, see the portal' : 'removed')}</p>`)
+  if (changes.includes('video')) rows.push(`<p style="margin:10px 0 0;"><b>Video:</b> ${add(a.videoUrl ? 'updated, see the portal' : 'removed')}</p>`)
+
+  const cta = a.ctaUrl
+    ? `<p style="margin:22px 0 6px;"><a href="${esc(a.ctaUrl)}" style="display:inline-block;background:${CRIMSON};color:#fff;text-decoration:none;font-weight:bold;padding:11px 22px;border-radius:8px;">${esc(a.ctaLabel || 'Open')}</a></p>`
+    : ''
+  const html = brandWrap('Updated: ' + esc(a.title), `
+    <div style="background:#FEF3C7;border-left:4px solid #D97706;padding:12px 14px;border-radius:6px;margin-bottom:18px;font-size:14px;color:#78350F;">
+      <b>This announcement has been updated.</b> Please read the changes below. They replace the details in the earlier email.
+    </div>
+    <div style="border:1px solid #E8E2D6;border-radius:8px;padding:14px 16px;margin-bottom:22px;">
+      <div style="font-size:11px;letter-spacing:2px;color:${GOLD};font-weight:bold;margin-bottom:10px;">WHAT CHANGED</div>
+      ${rows.join('') || '<p style="margin:0;">Minor corrections.</p>'}
+    </div>
+    <div style="font-size:11px;letter-spacing:2px;color:${GOLD};font-weight:bold;margin-bottom:10px;">${esc(label).toUpperCase()} &middot; UPDATED</div>
+    <div style="white-space:pre-wrap;">${esc(a.body)}</div>
+    ${cta}
+    <p style="margin-top:22px;font-size:12.5px;color:#6B7280;">
+      Updated by ${esc(a.updatedByName || a.authorName || 'Smartious Homeschool')}.
+      The latest version is always on your <a href="${portal}" style="color:${CRIMSON};">Smartious portal</a>.
+    </p>
+  `)
+  const subject = `Updated ${label.toLowerCase()}: ${a.title}`
+
+  let sent = 0
+  const BATCH = 60
+  for (let i = 0; i < list.length; i += BATCH) {
+    const bcc = list.slice(i, i + BATCH)
+    try { await t.sendMail({ from: FROM(), to: FROM(), bcc, subject, html }); sent += bcc.length }
+    catch (e) { console.error('[notify] Announcement update batch failed:', e.message) }
+  }
+  return sent
+}
+
 // ── Exam result release ─────────────────────────────────────
 // Sent the moment a teacher saves marks on a paper. One email to the
 // student and every attached parent (resolved by lib/recipients.js
@@ -266,4 +342,4 @@ async function sendExamResultEmail({ student, recipients = [], exam = {}, submis
   return safeSend(to.join(', '), title + ' - ' + studentName, html)
 }
 
-module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail, sendAnnouncementEmail, sendExamResultEmail }
+module.exports = { sendPauseNotice, sendReportBackNotice, sendBirthdayEmail, sendBirthdayLetterEmail, sendAnnouncementEmail, sendAnnouncementUpdateEmail, sendExamResultEmail, lineDiff }

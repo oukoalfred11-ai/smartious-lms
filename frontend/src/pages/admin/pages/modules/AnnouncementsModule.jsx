@@ -46,6 +46,10 @@ export default function AnnouncementsModule({ toast }) {
   const [vidBusy, setVidBusy] = useState(false)
   const [vidPct, setVidPct] = useState(0)
   const [vidNote, setVidNote] = useState('')   // size + speed readout while uploading
+  // Editing an announcement that was already emailed: send an "Updated"
+  // email to the same audience (on by default; untick for a typo fix).
+  const [wasEmailed, setWasEmailed] = useState(null)   // { count, at } or null
+  const [notifyChange, setNotifyChange] = useState(true)
 
   // Presigned video upload: browser straight to R2, then the public
   // URL lands in the form. MP4 or WebM, up to 200 MB.
@@ -108,8 +112,10 @@ export default function AnnouncementsModule({ toast }) {
       showFrom: toLocalInput(a.showFrom), showUntil: toLocalInput(a.showUntil),
     })
     setEditing(a._id)
+    setWasEmailed(a.emailSentAt ? { count: a.emailCount || 0, at: a.emailSentAt } : null)
+    setNotifyChange(true)
   }
-  const cancel = () => { setEditing(null); setForm(EMPTY) }
+  const cancel = () => { setEditing(null); setForm(EMPTY); setWasEmailed(null) }
 
   const save = async () => {
     const bannerOnly = !!(form.videoUrl && form.heroBanner)
@@ -121,9 +127,13 @@ export default function AnnouncementsModule({ toast }) {
       showUntil: form.showUntil ? new Date(form.showUntil).toISOString() : null,
     }
     try {
-      if (editing === 'new') await api.post('/announcements', payload)
-      else await api.patch('/announcements/' + editing, payload)
-      toast?.ok?.('Announcement saved.')
+      if (editing === 'new') { await api.post('/announcements', payload); toast?.ok?.('Announcement saved.') }
+      else {
+        const r = await api.patch('/announcements/' + editing, { ...payload, notifyChange })
+        const u = r.data?.data?.updateEmail
+        toast?.ok?.(u === 'sending' ? 'Saved. An "Updated" email showing the changes is going to everyone who got the first one.'
+          : u === 'skipped' ? 'Saved. No update email sent.' : 'Announcement saved.')
+      }
       cancel(); load()
     } catch (e) {
       toast?.error?.(e?.response?.data?.message || 'Save failed.')
@@ -314,8 +324,18 @@ export default function AnnouncementsModule({ toast }) {
             </div>
           </div>
 
+          {editing !== 'new' && wasEmailed && (
+            <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: notifyChange ? '#FFFBEB' : '#F9FAFB', border: '1px solid ' + (notifyChange ? '#FCD34D' : TOKENS.line), borderRadius: 10, padding: '12px 14px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={notifyChange} onChange={e => setNotifyChange(e.target.checked)} style={{ marginTop: 3, width: 16, height: 16 }} />
+              <span style={{ fontSize: 13, color: TOKENS.s900, lineHeight: 1.5 }}>
+                <b>Email everyone about this change.</b> This announcement was already emailed to {wasEmailed.count} {wasEmailed.count === 1 ? 'person' : 'people'}. If you change the title, message, type, button, picture or video, they get an <b>"Updated"</b> email showing exactly what changed, so the first email is not left with old details.
+                <span style={{ display: 'block', color: S600, fontSize: 12, marginTop: 3 }}>Untick for a small typo fix you don't need to announce.</span>
+              </span>
+            </label>
+          )}
+
           <div style={{ display: 'flex', gap: 10 }}>
-            <button style={btn('primary')} disabled={saving} onClick={save}>{saving ? 'Saving...' : 'Save announcement'}</button>
+            <button style={btn('primary')} disabled={saving} onClick={save}>{saving ? 'Saving...' : (editing !== 'new' && wasEmailed && notifyChange ? 'Save and email the update' : 'Save announcement')}</button>
             <button style={btn()} onClick={cancel}>Cancel</button>
           </div>
         </div>
@@ -349,7 +369,7 @@ export default function AnnouncementsModule({ toast }) {
                     {a.showUntil && <span>Until {fmtDate(a.showUntil)}</span>}
                     {a.authorName && <span>By {a.authorName}</span>}
                     {a.emailSentAt
-                      ? <span style={{ color: '#166534', fontWeight: 700 }}>Emailed to {a.emailCount || 0} {a.emailCount === 1 ? 'person' : 'people'}</span>
+                      ? <span style={{ color: '#166534', fontWeight: 700 }}>Emailed to {a.emailCount || 0} {a.emailCount === 1 ? 'person' : 'people'}{(a.updateEmails || []).length ? ` · update emailed ${a.updateEmails.length}× (last ${fmtDate(a.updateEmails[a.updateEmails.length - 1].at)})` : ''}</span>
                       : a.published
                         ? <span style={{ color: '#92400E', fontWeight: 700 }}>{a.scheduled ? 'Email goes out when it goes live' : 'Email sending...'}</span>
                         : <span>Draft, not emailed</span>}

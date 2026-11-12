@@ -9,7 +9,7 @@
  * appears and disappears on its own.
  */
 const express = require('express');
-const { dispatchSoon } = require('../services/announcementMailer');
+const { dispatchSoon, sendUpdateNotice } = require('../services/announcementMailer');
 const router = express.Router();
 const { auth, requireRole } = require('../middleware/auth');
 const Announcement = require('../models/Announcement');
@@ -194,13 +194,34 @@ router.post('/', auth, requireRole(...STAFF), async (req, res) => {
 router.patch('/:id', auth, requireRole(...STAFF), async (req, res) => {
   try {
     const data = sanitize(req.body);
+    const prev = await Announcement.findById(req.params.id).lean();
+    if (!prev) return res.status(404).json({ success: false, message: 'Announcement not found.' });
+    data.updatedByName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || prev.authorName || 'Smartious';
     const doc = await Announcement.findByIdAndUpdate(req.params.id, { $set: data }, { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'Announcement not found.' });
+
+    // Already emailed and now edited: tell the same audience what changed,
+    // unless the editor unticked "notify". Pin/publish toggles and schedule
+    // tweaks are not content changes and never send.
+    const changes = [];
+    const same = (x, y) => String(x || '').trim() === String(y || '').trim();
+    if ('title' in data && !same(prev.title, doc.title)) changes.push('title');
+    if ('body' in data && !same(prev.body, doc.body)) changes.push('body');
+    if ('category' in data && prev.category !== doc.category) changes.push('category');
+    if (('ctaUrl' in data || 'ctaLabel' in data) && (!same(prev.ctaUrl, doc.ctaUrl) || !same(prev.ctaLabel, doc.ctaLabel))) changes.push('link');
+    if ('imageData' in data && (prev.imageData || '') !== (doc.imageData || '')) changes.push('picture');
+    if ('videoUrl' in data && !same(prev.videoUrl, doc.videoUrl)) changes.push('video');
+    const isCarrier = doc.heroBanner && !(doc.body || '').trim();
+    let updateEmail = 'none';
+    if (prev.emailSentAt && doc.published && !isCarrier && changes.length) {
+      if (req.body.notifyChange === false) updateEmail = 'skipped';
+      else { updateEmail = 'sending'; sendUpdateNotice(prev, doc.toObject(), changes); }
+    }
     // Publishing a draft (or moving showFrom into the present) sends it;
     // an already-emailed announcement is never re-sent (emailSentAt guard).
     const isBannerCarrier2 = doc.heroBanner && !(doc.body || '').trim();
     if (doc.published && !doc.emailSentAt && !isBannerCarrier2) dispatchSoon();
-    return res.json({ success: true, data: { announcement: doc } });
+    return res.json({ success: true, data: { announcement: doc, updateEmail, changes } });
   } catch (e) {
     return res.status(500).json({ success: false, message: e.message });
   }
