@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { api } from '../../../../context/ctx.jsx'
 import { TOKENS } from '../shared/tokens.js'
 import { joinClassroom } from '../../../../lib/joinClassroom.js'
+import { useClashes, ClashNote } from '../../../../components/ClubsHub.jsx'
 
 const LINE = TOKENS.line || '#EAE4DC'
 const S600 = TOKENS.s600 || '#6B5D57'
@@ -13,6 +14,7 @@ const fmtWhen = (d) => new Date(d).toLocaleString('en-GB', { weekday: 'short', d
 
 export default function ClubsModule({ toast }) {
   const [clubs, setClubs] = useState([])
+  const [events, setEvents] = useState([])
   const [teachers, setTeachers] = useState([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(null)        // club being created/edited
@@ -28,7 +30,8 @@ export default function ClubsModule({ toast }) {
     Promise.all([
       api.get('/clubs', { params: { all: true } }).catch(() => ({ data: { data: { clubs: [] } } })),
       api.get('/clubs/admin/teachers').catch(() => ({ data: { data: { teachers: [] } } })),
-    ]).then(([c, t]) => { setClubs(c.data?.data?.clubs || []); setTeachers(t.data?.data?.teachers || []) })
+      api.get('/clubs/events').catch(() => ({ data: { data: { events: [] } } })),
+    ]).then(([c, t, e]) => { setClubs(c.data?.data?.clubs || []); setTeachers(t.data?.data?.teachers || []); setEvents(e.data?.data?.events || []) })
       .finally(() => setLoading(false))
   }, [])
   useEffect(() => { load() }, [load])
@@ -60,9 +63,9 @@ export default function ClubsModule({ toast }) {
     try {
       // datetime-local has no time zone: send the instant the person picked
       // (their local time), not a bare string the server would read as UTC.
-      await api.post(`/clubs/${meeting.clubId}/meetings`, { ...meeting, scheduledAt: new Date(meeting.scheduledAt).toISOString() })
-      toast?.ok?.('Session scheduled. It will open in the meeting view and record automatically.')
-      setMeeting(null); if (detail) openDetail(detail.club)
+      const r = await api.post(`/clubs/${meeting.clubId}/meetings`, { ...meeting, scheduledAt: new Date(meeting.scheduledAt).toISOString() })
+      toast?.ok?.((r.data?.message || 'Session scheduled.') + ' Sessions open in the meeting view and record automatically.')
+      setMeeting(null); load(); if (detail) openDetail(detail.club)
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
     finally { setBusy(false) }
   }
@@ -76,7 +79,7 @@ export default function ClubsModule({ toast }) {
   const btn = (primary, color) => ({ padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${primary ? (color || TOKENS.crimson) : LINE}`, background: primary ? (color || TOKENS.crimson) : '#fff', color: primary ? '#fff' : S600 })
 
   return (
-    <div style={{ display: 'grid', gap: 18, maxWidth: 1040 }}>
+    <div style={{ display: 'grid', gap: 16, maxWidth: 1180 }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ flex: 1 }}>
           <h2 style={{ fontSize: 21, fontWeight: 800, color: TOKENS.s900, margin: 0 }}>Clubs</h2>
@@ -88,32 +91,71 @@ export default function ClubsModule({ toast }) {
 
       {loading ? <div style={{ ...card, textAlign: 'center', color: TOKENS.s500 }}>Loading...</div> : clubs.length === 0 ? (
         <div style={{ ...card, textAlign: 'center', color: TOKENS.s500 }}>No clubs yet. Use <b>Add starter clubs</b> for the standard twelve, or create your own.</div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-          {clubs.map(c => (
-            <div key={c._id} style={{ ...card, padding: 0, overflow: 'hidden', borderTop: `4px solid ${c.color}`, opacity: c.isActive ? 1 : .6 }}>
-              <div style={{ height: 84, background: c.coverImage ? `url(${c.coverImage}) center/cover no-repeat, linear-gradient(135deg, ${c.color}, #1A1A1A)` : `linear-gradient(135deg, ${c.color}, #1A1A1A)` }} />
-              <div style={{ padding: 18 }}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                <span style={{ width: 42, height: 42, borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontWeight: 800 }}>{c.name[0]}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 15, color: TOKENS.s900 }}>{c.name} {!c.isActive && <span style={{ fontSize: 10, color: '#B91C1C', fontWeight: 800 }}>INACTIVE</span>}</div>
-                  <div style={{ fontSize: 12, color: S600, marginTop: 3, lineHeight: 1.45 }}>{c.tagline}</div>
-                  <div style={{ fontSize: 11.5, color: TOKENS.s500, marginTop: 6 }}>
-                    {c.memberCount} member{c.memberCount === 1 ? '' : 's'} &middot; {c.leaders.length ? 'Led by ' + c.leaders.map(l => l.name).join(', ') : <span style={{ color: '#B45309', fontWeight: 700 }}>No teacher assigned</span>}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                <button style={btn(true, c.color)} onClick={() => setMeeting({ clubId: c._id, clubName: c.name, title: `${c.name} meeting`, scheduledAt: '', durationMins: c.durationMins || 60, kind: 'club', teacherId: c.leaders[0]?._id || '' })}>Schedule session</button>
-                <button style={btn(false)} onClick={() => openDetail(c)}>Members & sessions</button>
-                <button style={btn(false)} onClick={() => setForm({ ...EMPTY, ...c, leaders: c.leaders.map(l => l._id) })}>Edit</button>
-              </div>
-              </div>
+      ) : (<>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 12 }}>
+          {[['Active clubs', clubs.filter(c => c.isActive).length, TOKENS.s900],
+            ['Members', clubs.reduce((n, c) => n + (c.memberCount || 0), 0), TOKENS.s900],
+            ['Sessions next 7 days', events.filter(e => new Date(e.scheduledAt) < new Date(Date.now() + 7 * 864e5)).length, '#1E3A8A'],
+            ['Need a teacher', clubs.filter(c => c.isActive && !c.leaders.length).length, '#B45309']].map(([l, n, col]) => (
+            <div key={l} style={{ ...card, padding: '14px 16px' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.1em', color: TOKENS.s500, textTransform: 'uppercase' }}>{l}</div>
+              <div style={{ fontSize: 26, fontWeight: 800, color: col, marginTop: 4 }}>{n}</div>
             </div>
           ))}
         </div>
-      )}
+
+        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '14px 18px 6px', fontSize: 17, fontWeight: 800, color: TOKENS.s900 }}>Next 7 days</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 8, padding: '6px 18px 16px' }}>
+            {Array.from({ length: 7 }, (_, i) => { const d = new Date(); d.setHours(0, 0, 0, 0); return new Date(d.getTime() + i * 864e5) }).map((d, i) => {
+              const list = events.filter(e => new Date(e.scheduledAt).toDateString() === d.toDateString()).sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+              return (
+                <div key={i} style={{ background: '#FAF7F2', borderRadius: 10, padding: 8, minHeight: 70 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em', color: i === 0 ? TOKENS.crimson : TOKENS.s500, marginBottom: 6 }}>{i === 0 ? 'TODAY' : d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()} {d.getDate()}</div>
+                  {list.length === 0 ? <div style={{ fontSize: 11, color: '#B3A89E' }}>Free</div> : list.map(e => (
+                    <div key={e._id} title={e.title} style={{ background: e.club?.color || TOKENS.crimson, color: '#fff', borderRadius: 7, padding: '4px 7px', fontSize: 11, fontWeight: 700, marginBottom: 4, lineHeight: 1.25 }}>
+                      {new Date(e.scheduledAt).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true })} {e.club?.name}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 760 }}>
+            <thead><tr>{['Club', 'Leader', 'Members', 'Next session', ''].map(h => <th key={h} style={{ textAlign: 'left', fontSize: 10.5, letterSpacing: '.1em', color: TOKENS.s500, padding: '12px 16px', borderBottom: `1px solid ${LINE}`, textTransform: 'uppercase' }}>{h}</th>)}</tr></thead>
+            <tbody>
+              {clubs.map(c => (
+                <tr key={c._id} style={{ borderBottom: `1px solid ${LINE}`, opacity: c.isActive ? 1 : .55 }}>
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <span style={{ width: 64, height: 38, borderRadius: 8, flexShrink: 0, background: c.coverImage ? `url(${c.coverImage}) 70% 50%/cover, ${c.color}` : c.color }} />
+                      <div>
+                        <div style={{ fontWeight: 800, color: TOKENS.s900 }}>{c.name} {!c.isActive && <span style={{ fontSize: 10, color: '#B91C1C', fontWeight: 800 }}>INACTIVE</span>}</div>
+                        <div style={{ fontSize: 11.5, color: TOKENS.s500 }}>{c.category}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style={{ padding: '10px 16px' }}>{c.leaders.length ? c.leaders.map(l => l.name).join(', ') : <button onClick={() => setForm({ ...EMPTY, ...c, leaders: [] })} style={{ background: '#FEF3C7', color: '#92400E', border: 'none', borderRadius: 7, padding: '5px 10px', fontSize: 12, fontWeight: 800, cursor: 'pointer' }}>Assign teacher</button>}</td>
+                  <td style={{ padding: '10px 16px' }}>{c.memberCount}</td>
+                  <td style={{ padding: '10px 16px', color: c.nextSession ? TOKENS.s900 : TOKENS.s500 }}>{c.nextSession ? fmtWhen(c.nextSession.scheduledAt) : 'None planned'}</td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                      <button style={{ ...btn(true, c.color), padding: '6px 11px' }} onClick={() => setMeeting({ clubId: c._id, clubName: c.name, title: `${c.name} meeting`, scheduledAt: '', _date: '', _time: '', durationMins: c.durationMins || 60, kind: 'club', teacherId: c.leaders[0]?._id || '', repeatWeeks: 1 })}>Schedule</button>
+                      <button style={{ ...btn(false), padding: '6px 11px' }} onClick={() => openDetail(c)}>Sessions</button>
+                      <button style={{ ...btn(false), padding: '6px 11px' }} onClick={() => setForm({ ...EMPTY, ...c, leaders: c.leaders.map(l => l._id) })}>Edit</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </>)}
 
       {/* Create / edit */}
       {form && (
@@ -192,26 +234,13 @@ export default function ClubsModule({ toast }) {
       {/* Schedule session */}
       {meeting && (
         <div onClick={() => setMeeting(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 16, width: 'min(480px, 100%)', padding: 24 }}>
-            <h3 style={{ margin: '0 0 4px', fontSize: 18, color: TOKENS.s900 }}>Schedule a session</h3>
-            <div style={{ fontSize: 12.5, color: S600, marginBottom: 14 }}>{meeting.clubName}. Opens in the classroom's meeting view and records automatically.</div>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <input style={input} value={meeting.title} onChange={e => setMeeting(m => ({ ...m, title: e.target.value }))} placeholder="Session title" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 12 }}>
-                <input type="datetime-local" style={input} value={meeting.scheduledAt} onChange={e => setMeeting(m => ({ ...m, scheduledAt: e.target.value }))} />
-                <input type="number" style={input} value={meeting.durationMins} onChange={e => setMeeting(m => ({ ...m, durationMins: Number(e.target.value) }))} placeholder="Minutes" />
-              </div>
-              <select style={input} value={meeting.kind} onChange={e => setMeeting(m => ({ ...m, kind: e.target.value }))}>
-                <option value="club">Regular meeting</option><option value="competition">Competition</option><option value="event">Event</option>
-              </select>
-              <select style={input} value={meeting.teacherId} onChange={e => setMeeting(m => ({ ...m, teacherId: e.target.value }))}>
-                <option value="">Host: first assigned teacher</option>
-                {teachers.map(t => <option key={t._id} value={t._id}>Host: {t.name}</option>)}
-              </select>
-            </div>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, width: 'min(540px, 100%)', padding: 24, maxHeight: '92vh', overflowY: 'auto' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: 20, color: TOKENS.s900 }}>Schedule a session</h3>
+            <div style={{ fontSize: 12.5, color: S600, marginBottom: 14 }}>{meeting.clubName}. Runs in the live classroom and records automatically.</div>
+            <ScheduleFields meeting={meeting} setMeeting={setMeeting} teachers={teachers} input={input} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
               <button style={btn(false)} onClick={() => setMeeting(null)}>Cancel</button>
-              <button style={btn(true)} onClick={schedule} disabled={busy}>{busy ? 'Scheduling...' : 'Schedule'}</button>
+              <button style={btn(true)} onClick={schedule} disabled={busy}>{busy ? 'Scheduling...' : meeting.repeatWeeks > 1 ? `Schedule ${meeting.repeatWeeks} sessions` : 'Schedule'}</button>
             </div>
           </div>
         </div>
@@ -258,6 +287,59 @@ export default function ClubsModule({ toast }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+
+// Date, quick start times (any hour, Nairobi time), length, weekly repeat,
+// kind, host and a live clash check.
+const SLOTS = ['08:00', '09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00']
+const slotLabel = (t) => { const [h, m] = t.split(':').map(Number); return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}` }
+function ScheduleFields({ meeting, setMeeting, teachers, input }) {
+  const set = (patch) => setMeeting(m => {
+    const n = { ...m, ...patch }
+    n.scheduledAt = n._date && n._time ? `${n._date}T${n._time}` : ''
+    return n
+  })
+  const clashes = useClashes(meeting.clubId, meeting)
+  const lab = { fontSize: 10.5, fontWeight: 800, letterSpacing: '.1em', color: TOKENS.crimson, margin: '12px 0 6px', textTransform: 'uppercase' }
+  const custom = meeting._time && !SLOTS.includes(meeting._time)
+  return (
+    <div>
+      <div style={lab}>Title</div>
+      <input style={input} value={meeting.title} onChange={e => setMeeting(m => ({ ...m, title: e.target.value }))} placeholder="Session title" />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 130px', gap: 10 }}>
+        <div><div style={lab}>Date</div><input type="date" style={input} value={meeting._date || ''} onChange={e => set({ _date: e.target.value })} /></div>
+        <div><div style={lab}>Length</div>
+          <select style={input} value={meeting.durationMins} onChange={e => setMeeting(m => ({ ...m, durationMins: Number(e.target.value) }))}>
+            {[30, 45, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}
+          </select></div>
+      </div>
+      <div style={lab}>Start time (your local time)</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        {SLOTS.map(t => (
+          <button key={t} type="button" onClick={() => set({ _time: t })} style={{ padding: '7px 11px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+            border: `1.5px solid ${meeting._time === t ? '#1E3A8A' : LINE}`, background: meeting._time === t ? '#1E3A8A' : '#fff', color: meeting._time === t ? '#fff' : S600 }}>{slotLabel(t)}</button>
+        ))}
+        <input type="time" value={meeting._time || ''} onChange={e => set({ _time: e.target.value })} title="Other time" style={{ ...input, width: 120, padding: '6px 9px', borderColor: custom ? '#1E3A8A' : LINE }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div><div style={lab}>Repeat</div>
+          <select style={input} value={meeting.repeatWeeks || 1} onChange={e => setMeeting(m => ({ ...m, repeatWeeks: Number(e.target.value) }))}>
+            {[1, 2, 4, 6, 8, 10, 12].map(n => <option key={n} value={n}>{n === 1 ? 'Just once' : `Every week for ${n} weeks`}</option>)}
+          </select></div>
+        <div><div style={lab}>Type</div>
+          <select style={input} value={meeting.kind} onChange={e => setMeeting(m => ({ ...m, kind: e.target.value }))}>
+            <option value="club">Regular meeting</option><option value="competition">Competition</option><option value="event">Event</option>
+          </select></div>
+      </div>
+      <div style={lab}>Host</div>
+      <select style={input} value={meeting.teacherId} onChange={e => setMeeting(m => ({ ...m, teacherId: e.target.value }))}>
+        <option value="">First assigned teacher</option>
+        {teachers.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+      </select>
+      <ClashNote clashes={clashes} ready={!!meeting.scheduledAt} />
     </div>
   )
 }

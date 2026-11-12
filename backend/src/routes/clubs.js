@@ -57,11 +57,40 @@ const ADMIN = ['admin', 'ops_manager', 'dos'];
 const slugify = (s) => String(s || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const oid = (v) => mongoose.Types.ObjectId.isValid(v);
 
+// A bare "2026-11-18T10:00" (no zone) is the school's local time, Nairobi,
+// not UTC (read as UTC it landed three hours late).
+const parseWhen = (v) => {
+  const raw = String(v || '');
+  return new Date(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw) ? raw + '+03:00' : raw);
+};
+const WEEK = 7 * 24 * 3600 * 1000;
+
+// Original illustrated covers shipped with the site (no stock photos).
+const LOCAL_COVERS = new Set(['debate-and-mun', 'coding-and-ai', 'science-and-innovation', 'creative-arts', 'entrepreneurship', 'chess-club',
+  'public-speaking', 'writing-and-literature', 'music-club', 'drama-and-theatre', 'sports-and-wellness', 'community-service']);
+const localCover = (slug) => LOCAL_COVERS.has(slug) ? `/images/clubs/${slug}.webp` : '';
+// Covers the starter seed set from Unsplash are replaced by the local ones;
+// a cover the school uploaded itself is always kept.
+const coverFor = (c) => (!c.coverImage || /images\.unsplash\.com/.test(c.coverImage)) ? (localCover(c.slug) || c.coverImage || '') : c.coverImage;
+
+// The next live or scheduled session of every club, in one query.
+async function nextSessions(clubIds) {
+  if (!clubIds.length) return {};
+  const rows = await LiveClass.aggregate([
+    { $match: { clubId: { $in: clubIds }, status: { $nin: ['cancelled', 'ended'] }, scheduledAt: { $gte: new Date(Date.now() - 2 * 3600 * 1000) } } },
+    { $sort: { scheduledAt: 1 } },
+    { $group: { _id: '$clubId', id: { $first: '$_id' }, title: { $first: '$title' }, scheduledAt: { $first: '$scheduledAt' }, status: { $first: '$status' }, durationMins: { $first: '$durationMins' } } },
+  ]);
+  const out = {};
+  rows.forEach(r => { out[String(r._id)] = { _id: r.id, title: r.title, scheduledAt: r.scheduledAt, status: r.status, durationMins: r.durationMins }; });
+  return out;
+}
+
 const isLeaderOf = (club, userId) => (club.leaders || []).some(l => String(l._id || l) === String(userId));
 
 const shapeClub = (c, userId) => ({
   _id: c._id, name: c.name, slug: c.slug, tagline: c.tagline, description: c.description,
-  icon: c.icon, color: c.color, coverImage: c.coverImage, category: c.category,
+  icon: c.icon, color: c.color, coverImage: coverFor(c), category: c.category,
   meetingSchedule: c.meetingSchedule, durationMins: c.durationMins, capacity: c.capacity,
   isActive: c.isActive, featured: c.featured, sortOrder: c.sortOrder,
   leaders: (c.leaders || []).map(l => l && l.firstName !== undefined
@@ -80,7 +109,8 @@ router.get('/', auth, async (req, res) => {
     const clubs = await Club.find(all ? {} : { isActive: true })
       .populate('leaders', 'firstName lastName avatar')
       .sort({ featured: -1, sortOrder: 1, name: 1 }).lean();
-    res.json({ success: true, data: { clubs: clubs.map(c => shapeClub(c, req.user._id)) } });
+    const next = await nextSessions(clubs.map(c => c._id));
+    res.json({ success: true, data: { clubs: clubs.map(c => ({ ...shapeClub(c, req.user._id), nextSession: next[String(c._id)] || null })) } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
@@ -220,21 +250,19 @@ router.post('/:id/meetings', auth, requireRole('teacher', ...ADMIN), async (req,
     if (!c) return res.status(404).json({ success: false, message: 'Club not found.' });
     const admin = ADMIN.includes(req.user.role);
     if (!admin && !isLeaderOf(c, req.user._id)) return res.status(403).json({ success: false, message: 'Only this club\'s leaders can schedule meetings.' });
-    const { title, scheduledAt, durationMins, kind, teacherId } = req.body || {};
-    // A bare "2026-11-18T10:00" (no zone) is the school's local time,
-    // Nairobi, not UTC: read as UTC it landed three hours late, so a
-    // morning session showed up in the afternoon.
-    const raw = String(scheduledAt || '');
-    const when = new Date(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw) ? raw + '+03:00' : raw);
+    const { title, scheduledAt, durationMins, kind, teacherId, repeatWeeks } = req.body || {};
+    const when = parseWhen(scheduledAt);
     if (!scheduledAt || isNaN(when)) return res.status(400).json({ success: false, message: 'A valid date and time is required.' });
+    // Repeat weekly: the same slot for up to 12 weeks in one go.
+    const weeks = Math.min(12, Math.max(1, parseInt(repeatWeeks, 10) || 1));
     // The meeting's host: the leader scheduling it, or (admin) a chosen leader, else the first leader.
     let host = req.user._id;
     if (admin) host = (teacherId && oid(teacherId)) ? teacherId : (c.leaders && c.leaders[0]) || req.user._id;
-    const lc = await LiveClass.create({
+    const docs = Array.from({ length: weeks }, (_, i) => ({
       title: (title || `${c.name} meeting`).trim().slice(0, 140),
       description: c.tagline || '',
       subject: c.name, curriculum: 'Clubs', grade: 'All',
-      teacherId: host, scheduledAt: when,
+      teacherId: host, scheduledAt: new Date(when.getTime() + i * WEEK),
       durationMins: Math.min(240, Math.max(15, Number(durationMins) || c.durationMins || 60)),
       assignedStudents: c.members || [],
       clubId: c._id, kind: ['club', 'competition', 'event'].includes(kind) ? kind : 'club',
@@ -242,10 +270,46 @@ router.post('/:id/meetings', auth, requireRole('teacher', ...ADMIN), async (req,
       // Club sessions always run in the Smartious room (native classroom):
       // no external link needed, auto-recording, meeting view by default.
       classroomMode: 'native', deliveryMode: 'virtual', meetingLink: '',
-    });
-    res.json({ success: true, data: { meeting: lc } });
+    }));
+    const made = await LiveClass.insertMany(docs);
+    res.json({ success: true, message: weeks > 1 ? `${weeks} weekly sessions scheduled.` : 'Session scheduled.', data: { meeting: made[0], count: made.length } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
+// GET /api/clubs/:id/clash?scheduledAt&durationMins&teacherId&repeatWeeks
+// Before scheduling: does the slot overlap the host teacher's classes or a
+// member's classes? Advisory only; the leader decides.
+router.get('/:id/clash', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
+  try {
+    const c = await Club.findById(req.params.id).populate('members', 'firstName lastName').lean();
+    if (!c) return res.status(404).json({ success: false, message: 'Club not found.' });
+    const when = parseWhen(req.query.scheduledAt);
+    if (isNaN(when)) return res.json({ success: true, data: { clashes: [] } });
+    const mins = Math.min(240, Math.max(15, Number(req.query.durationMins) || c.durationMins || 60));
+    const weeks = Math.min(12, Math.max(1, parseInt(req.query.repeatWeeks, 10) || 1));
+    let host = req.user._id;
+    if (ADMIN.includes(req.user.role)) host = (req.query.teacherId && oid(req.query.teacherId)) ? req.query.teacherId : (c.leaders && c.leaders[0]) || req.user._id;
+    const memberIds = (c.members || []).map(m => m._id);
+    const names = {}; (c.members || []).forEach(m => { names[String(m._id)] = [m.firstName, m.lastName].filter(Boolean).join(' '); });
+    const clashes = [];
+    for (let i = 0; i < weeks && clashes.length < 8; i++) {
+      const start = new Date(when.getTime() + i * WEEK), end = new Date(start.getTime() + mins * 60000);
+      const rows = await LiveClass.find({
+        status: { $nin: ['cancelled', 'ended'] }, clubId: { $ne: c._id },
+        scheduledAt: { $lt: end, $gte: new Date(start.getTime() - 4 * 3600 * 1000) },
+        $or: [{ teacherId: host }, { assignedStudents: { $in: memberIds } }],
+      }).select('title scheduledAt durationMins teacherId assignedStudents').lean();
+      rows.filter(r => new Date(r.scheduledAt.getTime() + (r.durationMins || 60) * 60000) > start).forEach(r => {
+        const who = String(r.teacherId) === String(host) ? 'the host teacher'
+          : (() => { const hit = (r.assignedStudents || []).map(String).filter(id => names[id]); return hit.length ? hit.slice(0, 2).map(id => names[id]).join(', ') + (hit.length > 2 ? ` and ${hit.length - 2} more` : '') : 'a member'; })();
+        clashes.push({ title: r.title, scheduledAt: r.scheduledAt, who });
+      });
+    }
+    const seen = new Set();
+    const unique = clashes.filter(c => { const k = c.title + '|' + new Date(c.scheduledAt).getTime() + '|' + c.who; if (seen.has(k)) return false; seen.add(k); return true; });
+    res.json({ success: true, data: { clashes: unique.slice(0, 8) } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 router.delete('/:id/meetings/:meetingId', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
   try {
     const c = await Club.findById(req.params.id).lean();
@@ -463,29 +527,29 @@ router.get('/admin/teachers', auth, requireRole(...ADMIN), async (req, res) => {
 // POST /api/clubs/admin/seed   create the starter set (skips any that exist)
 const STARTER = [
   { name: 'Debate & MUN',          icon: 'debate',    color: '#1E3A8A',
-    coverImage: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=900&q=60', category: 'Leadership',  tagline: 'Build confidence, critical thinking and leadership through debates and Model UN sessions.' },
+    category: 'Leadership',  tagline: 'Build confidence, critical thinking and leadership through debates and Model UN sessions.' },
   { name: 'Coding & AI',           icon: 'code',      color: '#6D28D9',
-    coverImage: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=60', category: 'Technology',  tagline: 'Explore programming, artificial intelligence and build real-world tech projects.' },
+    category: 'Technology',  tagline: 'Explore programming, artificial intelligence and build real-world tech projects.' },
   { name: 'Science & Innovation',  icon: 'science',   color: '#3F6212',
-    coverImage: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=900&q=60', category: 'STEM',        tagline: 'Experiment, discover and innovate through fun science projects and challenges.' },
+    category: 'STEM',        tagline: 'Experiment, discover and innovate through fun science projects and challenges.' },
   { name: 'Creative Arts',         icon: 'art',       color: '#BE185D',
-    coverImage: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Express yourself through drawing, painting, digital art, photography and design.' },
+    category: 'Arts',        tagline: 'Express yourself through drawing, painting, digital art, photography and design.' },
   { name: 'Entrepreneurship',      icon: 'rocket',    color: '#C2410C',
-    coverImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=60', category: 'Business',    tagline: 'Develop business ideas, problem solving and financial literacy skills.' },
+    category: 'Business',    tagline: 'Develop business ideas, problem solving and financial literacy skills.' },
   { name: 'Chess Club',            icon: 'chess',     color: '#78350F',
-    coverImage: 'https://images.unsplash.com/photo-1529699211952-734e80c4d42b?auto=format&fit=crop&w=900&q=60', category: 'Strategy',    tagline: 'Sharpen your strategy, focus and analytical skills in friendly competitions.' },
+    category: 'Strategy',    tagline: 'Sharpen your strategy, focus and analytical skills in friendly competitions.' },
   { name: 'Public Speaking',       icon: 'mic',       color: '#0E7490',
-    coverImage: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?auto=format&fit=crop&w=900&q=60', category: 'Leadership',  tagline: 'Improve your speaking skills and present with clarity and confidence.' },
+    category: 'Leadership',  tagline: 'Improve your speaking skills and present with clarity and confidence.' },
   { name: 'Writing & Literature',  icon: 'book',      color: '#1D4ED8',
-    coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Unlock your creativity with storytelling, poetry and creative writing challenges.' },
+    category: 'Arts',        tagline: 'Unlock your creativity with storytelling, poetry and creative writing challenges.' },
   { name: 'Music Club',            icon: 'music',     color: '#5B21B6',
-    coverImage: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Share your talent, learn new skills and create beautiful music together.' },
+    category: 'Arts',        tagline: 'Share your talent, learn new skills and create beautiful music together.' },
   { name: 'Drama & Theatre',       icon: 'theatre',   color: '#B91C1C',
-    coverImage: 'https://images.unsplash.com/photo-1507924538820-ede94a04019d?auto=format&fit=crop&w=900&q=60', category: 'Arts',        tagline: 'Act, perform and bring stories to life on our virtual theatre stage.' },
+    category: 'Arts',        tagline: 'Act, perform and bring stories to life on our virtual theatre stage.' },
   { name: 'Sports & Wellness',     icon: 'sports',    color: '#0F766E',
-    coverImage: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=900&q=60', category: 'Wellbeing',   tagline: 'Stay active, healthy and motivated through fitness challenges and sports activities.' },
+    category: 'Wellbeing',   tagline: 'Stay active, healthy and motivated through fitness challenges and sports activities.' },
   { name: 'Community Service',     icon: 'heart',     color: '#2563EB',
-    coverImage: 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=60', category: 'Service',     tagline: 'Make a difference through service projects and acts of kindness.' },
+    category: 'Service',     tagline: 'Make a difference through service projects and acts of kindness.' },
 ];
 router.post('/admin/seed', auth, requireRole(...ADMIN), async (req, res) => {
   try {
@@ -493,16 +557,18 @@ router.post('/admin/seed', auth, requireRole(...ADMIN), async (req, res) => {
     for (let i = 0; i < STARTER.length; i++) {
       const s = STARTER[i]; const slug = slugify(s.name);
       const existing = await Club.findOne({ slug }).select('coverImage').lean();
+      const cover = localCover(slug);
       if (existing) {
-        // Backfill the cover photo onto an existing club that has none;
-        // a cover the school set itself is never overwritten.
-        if (!existing.coverImage && s.coverImage) {
-          await Club.updateOne({ _id: existing._id }, { $set: { coverImage: s.coverImage } });
+        // Backfill the illustrated cover onto a club that has none, or that
+        // still carries the old stock photo from an earlier seed; a cover
+        // the school uploaded itself is never overwritten.
+        if (cover && (!existing.coverImage || /images\.unsplash\.com/.test(existing.coverImage))) {
+          await Club.updateOne({ _id: existing._id }, { $set: { coverImage: cover } });
           updated++;
         }
         continue;
       }
-      await Club.create({ ...s, slug, sortOrder: i, createdBy: req.user._id, meetingSchedule: '' });
+      await Club.create({ ...s, coverImage: cover, slug, sortOrder: i, createdBy: req.user._id, meetingSchedule: '' });
       created++;
     }
     const bits = [];
