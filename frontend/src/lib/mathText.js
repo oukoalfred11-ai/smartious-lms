@@ -282,10 +282,13 @@ function scriptEnd(s, i) {
   if (s[i] === '^' && /[+\-]/.test(c) && !/[\d\w]/.test(s[j + 1] || '')) return j + 1   // H^+, Cl^-
   return -1
 }
-function bareLatex(text) {
+// Split plain text into prose and the LaTeX runs typed without $…$ in it.
+function bareLatexSegments(text) {
   const s = String(text)
-  if (!/[\\^_]/.test(s)) return s
-  let out = '', i = 0
+  if (!/[\\^_]/.test(s)) return [{ math: false, text: s }]
+  const parts = []
+  let buf = '', i = 0
+  const flush = () => { if (buf) { parts.push({ math: false, text: buf }); buf = '' } }
   while (i < s.length) {
     if (s[i] === '\\' && /[A-Za-z]/.test(s[i + 1] || '')) {
       let j = i + 1
@@ -296,20 +299,25 @@ function bareLatex(text) {
         if (s[j] === '^' || s[j] === '_') { const k = scriptEnd(s, j); if (k === -1) break; j = k; continue }
         break
       }
-      out += plainMath(s.slice(i, j)); i = j; continue
+      // A base letter or number just before (x\sqrt{2}) belongs to the run.
+      flush(); parts.push({ math: true, text: s.slice(i, j) }); i = j; continue
     }
     if ((s[i] === '^' || s[i] === '_') && i > 0 && /[\p{L}\p{N})\]}]/u.test(s[i - 1])) {
       const k = scriptEnd(s, i)
       if (k !== -1) {
         const body = s.slice(i + 1, k)
-        out += plainMath(s[i] + (body[0] === '{' ? body : '{' + body + '}')); i = k; continue
+        flush(); parts.push({ math: true, script: true, text: s[i] + (body[0] === '{' ? body : '{' + body + '}') }); i = k; continue
       }
     }
     // Spacing commands (\, \; \: \!) carry no meaning on paper.
-    if (s[i] === '\\' && /[,;:! ]/.test(s[i + 1] || '')) { out += s[i + 1] === '!' ? '' : ' '; i += 2; continue }
-    out += s[i++]
+    if (s[i] === '\\' && /[,;:! ]/.test(s[i + 1] || '')) { buf += s[i + 1] === '!' ? '' : ' '; i += 2; continue }
+    buf += s[i++]
   }
-  return out
+  flush()
+  return parts
+}
+function bareLatex(text) {
+  return bareLatexSegments(text).map(p => (p.math ? plainMath(p.text) : p.text)).join('')
 }
 
 /**
@@ -343,4 +351,4 @@ function cleanForPaper(text) {
   return s.trim()
 }
 
-export { mathToText, plainMath, cleanForPaper, splitMath, stripHtml, keyboardMath }
+export { mathToText, plainMath, cleanForPaper, splitMath, stripHtml, keyboardMath, bareLatexSegments }

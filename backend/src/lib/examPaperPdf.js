@@ -38,6 +38,7 @@
 
 const PDFDocument = require('pdfkit')
 const { cleanForPaper } = require('./mathText');
+const { drawRich, needsTypeset } = require('./mathTypeset');
 const { OBJECTIVE, BLANK, shuffled, answerKeyText } = require('./answerTypes');
 const path = require('path')
 const fs   = require('fs')
@@ -68,6 +69,28 @@ const esc = s => String(s == null ? '' : s)
 const paperText = (s) => {
   let n = 0
   return esc(cleanForPaper(String(s == null ? '' : s).replace(BLANK, () => ` ________(${++n})________ `)))
+}
+/**
+ * Draw a field of question text. Formulas with structure (fractions,
+ * roots, integrals...) are typeset properly inline; plain prose and
+ * simple maths keep the ordinary text path. Set font and size first.
+ */
+const paperRaw = (s) => {
+  let n = 0
+  return String(s == null ? '' : s).replace(BLANK, () => ` ________(${++n})________ `)
+    .replace(/\(\s*\d+\s*marks?\s*\)\s*\.?/gi, '')
+}
+function richOrText(doc, raw, x, y, width, prefix = '', label = null) {
+  try {
+    if (drawRich(doc, paperRaw(raw), x, y, width, { prefix, label })) return doc
+  } catch (e) { console.error('[exam paper pdf] maths typesetting failed, printing as text:', e.message) }
+  if (label) {
+    // Typesetting gave up (e.g. a mistyped formula): still print the number.
+    const keepFont = doc._font, keepSize = doc._fontSize
+    doc.font(label.font || 'Helvetica-Bold').fontSize(label.size || keepSize).text(label.text, label.x, y, { width: label.width || 26, lineBreak: false })
+    doc._font = keepFont; doc._fontSize = keepSize
+  }
+  return doc.text(prefix + paperText(raw), x, y, { width })
 }
 const leafSum = (parts) => (parts || []).reduce((n, c) =>
   n + (Array.isArray(c.parts) && c.parts.length ? leafSum(c.parts) : (Number(c.marks) || 0)), 0)
@@ -325,13 +348,18 @@ function renderParts(doc, parts, depth, x, width, scheme) {
 
     if (doc.y > PAGE_H - M - 90) doc.addPage()
 
-    doc.fontSize(9.5).font('Helvetica-Bold').fillColor(INK)
-       .text(label, x, doc.y, { width: 26, continued: false })
-    const labelY = doc.y
-    doc.y = labelY - doc.currentLineHeight()
+    if (needsTypeset(paperRaw(p.text))) {
+      doc.fontSize(9.5).font('Helvetica').fillColor(INK)
+      richOrText(doc, p.text, x + 26, doc.y, width - 26 - 34, '', { text: label, x, width: 26, font: 'Helvetica-Bold', size: 9.5 })
+    } else {
+      doc.fontSize(9.5).font('Helvetica-Bold').fillColor(INK)
+         .text(label, x, doc.y, { width: 26, continued: false })
+      const labelY = doc.y
+      doc.y = labelY - doc.currentLineHeight()
 
-    doc.fontSize(9.5).font('Helvetica').fillColor(INK)
-       .text(paperText(p.text), x + 26, doc.y, { width: width - 26 - 34 })
+      doc.fontSize(9.5).font('Helvetica').fillColor(INK)
+      richOrText(doc, p.text, x + 26, doc.y, width - 26 - 34)
+    }
 
     if (!hasChildren && marks > 0) {
       const my = doc.y - doc.currentLineHeight()
@@ -365,7 +393,7 @@ function drawAnswerArea(doc, n, x, width, scheme, marks, size = 9.5) {
   const optList = (list, labelFor) => {
     list.forEach((opt, oi) => {
       doc.fontSize(size).font('Helvetica').fillColor(INK)
-         .text(`${labelFor(oi)}   ${paperText(opt)}`, x + 18, doc.y, { width: width - 18 - 40 })
+      richOrText(doc, opt, x + 18, doc.y, width - 18 - 40, `${labelFor(oi)}   `)
       doc.y += 2
     })
     doc.y += 4
@@ -516,14 +544,14 @@ function drawSchemeBlock(doc, q, x, width, paperKey = '') {
   if (ms.modelAnswer) {
     doc.fontSize(9).font('Helvetica-Bold').fillColor(INK).text('Model answer', x, doc.y)
     doc.fontSize(9).font('Helvetica').fillColor(INK)
-       .text(paperText(ms.modelAnswer), x, doc.y + 1, { width: width - 20 })
+    richOrText(doc, ms.modelAnswer, x, doc.y + 1, width - 20)
     doc.y += 3
   }
   if ((ms.points || []).length) {
     doc.fontSize(9).font('Helvetica-Bold').fillColor(INK).text('Award', x, doc.y + 2)
     ms.points.forEach(pt => {
       doc.fontSize(9).font('Helvetica').fillColor(INK)
-         .text(`•  ${paperText(pt.text)}`, x + 8, doc.y + 1, { width: width - 60, continued: false })
+      richOrText(doc, pt.text, x + 8, doc.y + 1, width - 60, '•  ')
       const py = doc.y - doc.currentLineHeight()
       doc.text(`[${Number(pt.marks) || 1}]`, x + width - 34, py, { width: 30, align: 'right' })
     })
@@ -554,13 +582,19 @@ function renderQuestion(doc, q, number, scheme) {
   // Keep the stem with at least the start of its answer space.
   if (doc.y > PAGE_H - M - 140) doc.addPage()
 
-  doc.fontSize(10.5).font('Helvetica-Bold').fillColor(INK)
-     .text(String(number), x, doc.y, { width: 22 })
-  const ny = doc.y - doc.currentLineHeight()
-  doc.y = ny
+  if (needsTypeset(paperRaw(q.questionText))) {
+    // Formula in the stem: the number is placed on the first line's baseline.
+    doc.fontSize(10).font('Helvetica').fillColor(INK)
+    richOrText(doc, q.questionText, x + 22, doc.y, CW - 22 - 40, '', { text: String(number), x, width: 22, font: 'Helvetica-Bold', size: 10.5 })
+  } else {
+    doc.fontSize(10.5).font('Helvetica-Bold').fillColor(INK)
+       .text(String(number), x, doc.y, { width: 22 })
+    const ny = doc.y - doc.currentLineHeight()
+    doc.y = ny
 
-  doc.fontSize(10).font('Helvetica').fillColor(INK)
-     .text(paperText(q.questionText), x + 22, doc.y, { width: CW - 22 - 40 })
+    doc.fontSize(10).font('Helvetica').fillColor(INK)
+    richOrText(doc, q.questionText, x + 22, doc.y, CW - 22 - 40)
+  }
   doc.y += 6
 
   drawImages(doc, q, x + 22, CW - 22 - 40)

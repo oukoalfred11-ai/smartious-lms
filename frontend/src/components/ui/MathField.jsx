@@ -1,4 +1,4 @@
-import { splitMath, plainMath, keyboardMath, cleanForPaper } from '../../lib/mathText.js'
+import { splitMath, plainMath, keyboardMath, bareLatexSegments } from '../../lib/mathText.js'
 import React, { useState, useRef, useEffect } from 'react'
 
 /**
@@ -83,13 +83,26 @@ export const MATH_GROUPS = [
  * as money ("costs $80") stays text, and empty [[]] blanks from
  * fill-the-blank questions show as numbered gaps.
  */
+// Fractions full size, as on a printed paper (inline KaTeX shrinks them).
+const fullSize = (tex) => (/\\[dt]?frac|\\int|\\sum|\\lim/.test(tex) && !/\\(display|text)style/.test(tex) ? '\\displaystyle ' + tex : tex)
+
 export function renderMath(text) {
   if (!text) return ''
   const hasKatex = typeof window !== 'undefined' && window.katex
   let blank = 0
   return splitMath(String(text)).map((part, i) => {
     if (!part.math) {
-      // Maths typed without $…$ (\frac{1}{2}, H_2O, x^2) still reads as maths.
+      // Maths typed without $…$ (\frac{1}{2}, H_2O, x^2) still reads as
+      // maths: structured formulas are drawn by KaTeX, the rest as Unicode.
+      if (hasKatex && !part.text.includes('[[]]') && /\\[A-Za-z]/.test(part.text)) {
+        return <span key={i}>{bareLatexSegments(part.text).map((r, k) => {
+          if (!r.math) return <span key={k}>{keyboardMath(r.text)}</span>
+          if (r.script) return <span key={k}>{plainMath(r.text)}</span>
+          try {
+            return <span key={k} dangerouslySetInnerHTML={{ __html: window.katex.renderToString(fullSize(r.text), { throwOnError: false }) }} />
+          } catch { return <span key={k}>{plainMath(r.text)}</span> }
+        })}</span>
+      }
       const txt = keyboardMath(part.text)
       if (!txt.includes('[[]]')) return <span key={i}>{txt}</span>
       return <span key={i}>{txt.split('[[]]').map((t, k) => k === 0 ? t : (
@@ -99,7 +112,7 @@ export function renderMath(text) {
     if (hasKatex) {
       try {
         return <span key={i} dangerouslySetInnerHTML={{
-          __html: window.katex.renderToString(part.text, { throwOnError: false, displayMode: !!part.display }),
+          __html: window.katex.renderToString(fullSize(part.text), { throwOnError: false, displayMode: !!part.display }),
         }} />
       } catch { /* fall through to plain */ }
     }
@@ -207,10 +220,8 @@ export default function MathField({
       {hasMath && (
         <div style={{ marginTop:8, padding:'10px 12px', borderRadius:8,
                       border:'1px solid #E8D9AE', background:'#FBF6EA' }}>
-          <div style={{ ...lbl, color:'#8A6414', marginBottom:5 }}>How students will see it</div>
-          <div style={{ fontSize:14.5, lineHeight:1.7, color:'#0D1220' }}>{renderMath(value)}</div>
-          <div style={{ ...lbl, color:'#8A6414', margin:'9px 0 4px' }}>On the printed paper</div>
-          <div style={{ fontSize:13.5, lineHeight:1.6, color:'#0D1220', fontFamily:'"DejaVu Sans", Arial, sans-serif', whiteSpace:'pre-wrap' }}>{cleanForPaper(value)}</div>
+          <div style={{ ...lbl, color:'#8A6414', marginBottom:5 }}>Preview: how it looks on screen and on the printed paper</div>
+          <div style={{ fontSize:15, lineHeight:1.9, color:'#0D1220' }}>{renderMath(value)}</div>
         </div>
       )}
 
@@ -289,7 +300,7 @@ function EquationEditor({ onClose, onInsert }) {
           {state === 'loading' && <div style={{ padding:22, textAlign:'center', color:'#6B7280', fontSize:13, border:'1.5px dashed #E8E0D0', borderRadius:10 }}>Loading the equation editor…</div>}
           {state === 'failed' && <div style={{ padding:16, color:'#991B1B', fontSize:13, background:'#FEF2F2', borderRadius:10 }}>The equation editor could not load (check the internet connection). You can still use Symbols, or type maths such as x^2 or \frac{1}{2}.</div>}
         </div>
-        {latex && <div style={{ marginTop:10, fontSize:12.5, color:'#6B7280' }}>On the printed paper: <span style={{ color:'#0D1220', fontFamily:'"DejaVu Sans", Arial, sans-serif' }}>{plainMath(latex)}</span></div>}
+
         <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
           <button type="button" onClick={onClose} style={{ padding:'9px 16px', borderRadius:9, border:'1.5px solid #E8E0D0', background:'#fff', color:'#4A5261', fontWeight:700, fontSize:13, cursor:'pointer' }}>Cancel</button>
           <button type="button" disabled={!latex.trim()} onClick={() => onInsert(latex)} style={{ padding:'9px 18px', borderRadius:9, border:'none', background: latex.trim() ? '#8B1A2E' : '#D1D5DB', color:'#fff', fontWeight:800, fontSize:13, cursor: latex.trim() ? 'pointer' : 'default' }}>Insert into question</button>
