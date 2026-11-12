@@ -93,7 +93,8 @@ function PayrollModule({ refreshKey, toast }) {
     setSaving(true)
     try {
       const r = await api.post('/payroll/'+payModal._id+'/mark-paid', payForm)
-      toast?.ok?.(r.data?.message||'Marked as paid.')
+      if (r.data?.data?.emailSent === false) toast?.error?.(r.data?.message||'Marked as paid, but the payslip email was not sent.')
+      else toast?.ok?.(r.data?.message||'Marked as paid.')
       setPayModal(null); load()
     } catch(e) { toast?.error?.(e?.response?.data?.message||'Failed.') }
     finally { setSaving(false) }
@@ -126,6 +127,26 @@ function PayrollModule({ refreshKey, toast }) {
       const r = await api.get('/payroll/'+id+'/payslip-html')
       const w = window.open('','_blank'); w.document.write(r.data?.data?.html||''); w.document.close()
     } catch(e) { toast?.error?.('Could not load payslip.') }
+  }
+
+  // Branded PDF payslip, as a file download.
+  const downloadPdf = async (r) => {
+    try {
+      const res = await api.get('/payroll/'+r._id+'/payslip-pdf', { responseType:'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type:'application/pdf' }))
+      const a = document.createElement('a'); a.href = url
+      a.download = ('Payslip-'+(r.teacherName||'')+'-'+(r.periodLabel||'')).replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')+'.pdf'
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 2000)
+    } catch { toast?.error?.('Could not download the PDF payslip.') }
+  }
+
+  // Email (or re-email) the PDF payslip for a paid month.
+  const [emailing, setEmailing] = useState(null)
+  const emailPayslip = async (r) => {
+    setEmailing(r._id)
+    try { const res = await api.post('/payroll/'+r._id+'/resend-payslip'); toast?.ok?.(res.data?.message||'Payslip emailed.'); load() }
+    catch(e) { toast?.error?.(e?.response?.data?.message||'Could not email the payslip.') }
+    finally { setEmailing(null) }
   }
 
   // Pending extras across all records
@@ -249,6 +270,8 @@ function PayrollModule({ refreshKey, toast }) {
                       <div style={{ display:'flex', gap:5, flexWrap:'nowrap' }}>
                         {r.status!=='paid'&&<button onClick={()=>setEditModal({...r, _basic:r.basicSalary, _deds:JSON.parse(JSON.stringify(r.deductions||[]))})} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:600, cursor:'pointer' }}>Edit</button>}
                         {r.status!=='paid'&&<button onClick={()=>{ setPayModal(r); setPayForm({paymentDate:new Date().toISOString().split('T')[0],paymentMethod:r.paymentMethod||'Bank transfer',paymentRef:'',paymentNote:''}) }} style={{ padding:'5px 9px', borderRadius:6, border:'none', background:TOKENS.accentEmerald, color:'#fff', fontSize:11.5, fontWeight:700, cursor:'pointer' }}>Mark paid</button>}
+                        {r.status==='paid'&&<button onClick={()=>emailPayslip(r)} disabled={emailing===r._id} title={'Email the PDF payslip to '+r.teacherEmail} style={{ padding:'5px 9px', borderRadius:6, border:'none', background:TOKENS.crimson, color:'#fff', fontSize:11.5, fontWeight:700, cursor:'pointer', opacity:emailing===r._id?.6:1, whiteSpace:'nowrap' }}>{emailing===r._id?'Sending…':(r.payslipEmailSentAt?'Re-send PDF':'Email PDF')}</button>}
+                        {r.status==='paid'&&<button onClick={()=>downloadPdf(r)} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:600, cursor:'pointer' }}>PDF</button>}
                         <button onClick={()=>openPayslip(r._id)} title={r.status==='paid'?'Payslip':'Draft payslip: not yet paid'} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.crimson, background:'#fff', color:TOKENS.crimson, fontSize:11.5, fontWeight:700, cursor:'pointer' }}>Payslip</button>
                         {r.status!=='paid'&&<button onClick={()=>del(r._id)} disabled={deleting===r._id} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', fontSize:11.5, cursor:'pointer', opacity:deleting===r._id?.5:1 }}>
                           {deleting===r._id?'…':'Delete'}
@@ -414,7 +437,7 @@ function PayrollModule({ refreshKey, toast }) {
               </div>
             </div>
             <div style={{ background:'#F0FDF4', border:'1px solid #BBF7D0', borderRadius:8, padding:'10px 14px', marginTop:14, fontSize:12, color:'#065F46' }}>
-              A payslip will be emailed to {payModal.teacherEmail} automatically.
+              The PDF payslip will be emailed to {payModal.teacherEmail} automatically.
             </div>
             <div style={{ display:'flex', gap:10, marginTop:18 }}>
               <button onClick={markPaid} disabled={saving} style={{ flex:1, background:saving?TOKENS.s300:TOKENS.accentEmerald, color:'#fff', border:'none', padding:'11px 0', borderRadius:8, fontSize:13, fontWeight:700, cursor:saving?'not-allowed':'pointer' }}>{saving?'Processing...':'Confirm payment & send payslip'}</button>

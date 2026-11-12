@@ -57,6 +57,17 @@ export default function MyPayslipsModule({ toast }) {
     } catch { toast?.error?.('Payslip not available.') }
   }
 
+  // Branded PDF payslip, as a file download.
+  const downloadPdf = async (r) => {
+    try {
+      const res = await api.get('/payroll/'+r._id+'/payslip-pdf', { responseType:'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type:'application/pdf' }))
+      const a = document.createElement('a'); a.href = url
+      a.download = ('Payslip-'+(r.teacherName||'')+'-'+(r.periodLabel||'')).replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')+'.pdf'
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 2000)
+    } catch { toast?.error?.('Could not download the PDF payslip.') }
+  }
+
   const year = new Date().getFullYear()
   const paidThisYear = records.filter(r => r.status === 'paid' && r.periodYear === year)
   const ytdNet = paidThisYear.reduce((s, r) => s + (r.netPay || 0), 0)
@@ -167,7 +178,8 @@ export default function MyPayslipsModule({ toast }) {
                     <button onClick={() => openPayslip(r._id)} style={{ background: CR, color: '#fff', border: 'none', padding: '9px 18px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>
                       {r.status === 'paid' ? 'View / print payslip' : 'View draft payslip'}
                     </button>
-                    {r.payslipEmailSentAt && <span style={{ fontSize: 12, color: MUTED }}>Emailed {fmtDate(r.payslipEmailSentAt)}</span>}
+                    {r.status === 'paid' && <button onClick={() => downloadPdf(r)} style={{ background: '#fff', color: CR, border: '1.5px solid ' + CR, padding: '8px 16px', borderRadius: 8, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>Download PDF</button>}
+                    {r.payslipEmailSentAt && <span style={{ fontSize: 12, color: MUTED }}>PDF emailed {fmtDate(r.payslipEmailSentAt)}</span>}
                   </div>
                 </div>
               )
