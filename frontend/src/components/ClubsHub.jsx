@@ -119,7 +119,8 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
 
   const scheduleMeeting = async (clubId, form) => {
     try {
-      await api.post(`/clubs/${clubId}/meetings`, form)
+      // Send the picked local time as a real instant (see ClubsModule).
+      await api.post(`/clubs/${clubId}/meetings`, { ...form, scheduledAt: new Date(form.scheduledAt).toISOString() })
       toast?.ok?.('Session scheduled. Members will find it in Events.')
       refreshDetail(clubId); load()
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
