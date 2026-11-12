@@ -63,11 +63,24 @@ export default function ClubsModule({ toast }) {
     try {
       // datetime-local has no time zone: send the instant the person picked
       // (their local time), not a bare string the server would read as UTC.
-      const r = await api.post(`/clubs/${meeting.clubId}/meetings`, { ...meeting, scheduledAt: new Date(meeting.scheduledAt).toISOString() })
-      toast?.ok?.((r.data?.message || 'Session scheduled.') + ' Sessions open in the meeting view and record automatically.')
+      const body = { ...meeting, scheduledAt: new Date(meeting.scheduledAt).toISOString() }
+      if (meeting._editId) {
+        const r = await api.patch(`/clubs/${meeting.clubId}/meetings/${meeting._editId}`, { title: body.title, scheduledAt: body.scheduledAt, durationMins: body.durationMins, kind: body.kind, teacherId: body.teacherId })
+        toast?.ok?.(r.data?.message || 'Session updated.')
+      } else {
+        const r = await api.post(`/clubs/${meeting.clubId}/meetings`, body)
+        toast?.ok?.((r.data?.message || 'Session scheduled.') + ' Sessions open in the meeting view and record automatically.')
+      }
       setMeeting(null); load(); if (detail) openDetail(detail.club)
-    } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
+    } catch (e) { toast?.error?.(e?.response?.data?.message || (meeting._editId ? 'Could not save the changes.' : 'Could not schedule.')) }
     finally { setBusy(false) }
+  }
+  // Open the schedule window pre-filled to edit an existing session.
+  const editMeeting = (club, m) => {
+    const d = new Date(m.scheduledAt), pad = (n) => String(n).padStart(2, '0')
+    const _date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, _time = `${pad(d.getHours())}:${pad(d.getMinutes())}`
+    setMeeting({ _editId: m._id, _live: m.status === 'live', clubId: club._id, clubName: club.name, title: m.title, _date, _time, scheduledAt: `${_date}T${_time}`,
+      durationMins: m.durationMins || club.durationMins || 60, kind: m.kind || 'club', teacherId: m.teacherId ? String(m.teacherId) : '', repeatWeeks: 1 })
   }
   const cancelMeeting = async (m) => {
     if (!window.confirm('Cancel this session?')) return
@@ -113,7 +126,7 @@ export default function ClubsModule({ toast }) {
                 <div key={i} style={{ background: '#FAF7F2', borderRadius: 10, padding: 8, minHeight: 70 }}>
                   <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.08em', color: i === 0 ? TOKENS.crimson : TOKENS.s500, marginBottom: 6 }}>{i === 0 ? 'TODAY' : d.toLocaleDateString('en-GB', { weekday: 'short' }).toUpperCase()} {d.getDate()}</div>
                   {list.length === 0 ? <div style={{ fontSize: 11, color: '#B3A89E' }}>Free</div> : list.map(e => (
-                    <div key={e._id} title={e.title} style={{ background: e.club?.color || TOKENS.crimson, color: '#fff', borderRadius: 7, padding: '4px 7px', fontSize: 11, fontWeight: 700, marginBottom: 4, lineHeight: 1.25 }}>
+                    <div key={e._id} title={'Edit: ' + e.title} onClick={() => { const c = clubs.find(x => String(x._id) === String(e.club?._id)); if (c) editMeeting(c, e) }} style={{ cursor: 'pointer', background: e.club?.color || TOKENS.crimson, color: '#fff', borderRadius: 7, padding: '4px 7px', fontSize: 11, fontWeight: 700, marginBottom: 4, lineHeight: 1.25 }}>
                       {new Date(e.scheduledAt).toLocaleTimeString('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true })} {e.club?.name}
                     </div>
                   ))}
@@ -235,12 +248,13 @@ export default function ClubsModule({ toast }) {
       {meeting && (
         <div onClick={() => setMeeting(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.5)', zIndex: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, width: 'min(540px, 100%)', padding: 24, maxHeight: '92vh', overflowY: 'auto' }}>
-            <h3 style={{ margin: '0 0 4px', fontSize: 20, color: TOKENS.s900 }}>Schedule a session</h3>
+            <h3 style={{ margin: '0 0 4px', fontSize: 20, color: TOKENS.s900 }}>{meeting._editId ? 'Edit session' : 'Schedule a session'}</h3>
+            {meeting._live && <div style={{ fontSize: 12.5, color: '#92400E', background: '#FEF3C7', borderRadius: 8, padding: '8px 10px', margin: '6px 0 4px' }}>This session is live now: only its title can be changed.</div>}
             <div style={{ fontSize: 12.5, color: S600, marginBottom: 14 }}>{meeting.clubName}. Runs in the live classroom and records automatically.</div>
             <ScheduleFields meeting={meeting} setMeeting={setMeeting} teachers={teachers} input={input} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 18 }}>
               <button style={btn(false)} onClick={() => setMeeting(null)}>Cancel</button>
-              <button style={btn(true)} onClick={schedule} disabled={busy}>{busy ? 'Scheduling...' : meeting.repeatWeeks > 1 ? `Schedule ${meeting.repeatWeeks} sessions` : 'Schedule'}</button>
+              <button style={btn(true)} onClick={schedule} disabled={busy}>{busy ? 'Saving...' : meeting._editId ? 'Save changes' : meeting.repeatWeeks > 1 ? `Schedule ${meeting.repeatWeeks} sessions` : 'Schedule'}</button>
             </div>
           </div>
         </div>
@@ -262,6 +276,7 @@ export default function ClubsModule({ toast }) {
                 <span style={{ flex: 1, fontWeight: 600, color: TOKENS.s900 }}>{m.title} {m.status === 'live' && <span style={{ fontSize: 10, color: '#fff', background: '#DC2626', padding: '1px 7px', borderRadius: 999, fontWeight: 800 }}>LIVE</span>}</span>
                 <span style={{ color: S600, fontSize: 12 }}>{fmtWhen(m.scheduledAt)}</span>
                 <button style={btn(true, detail.club.color)} onClick={() => joinClassroom(m._id)}>{m.status === 'live' ? 'Join' : 'Open'}</button>
+                <button style={btn(false)} onClick={() => editMeeting(detail.club, m)}>Edit</button>
                 <button style={{ ...btn(false), color: '#B91C1C', borderColor: '#FCA5A5' }} onClick={() => cancelMeeting(m)}>Cancel</button>
               </div>
             ))}
@@ -313,7 +328,7 @@ function ScheduleFields({ meeting, setMeeting, teachers, input }) {
         <div><div style={lab}>Date</div><input type="date" style={input} value={meeting._date || ''} onChange={e => set({ _date: e.target.value })} /></div>
         <div><div style={lab}>Length</div>
           <select style={input} value={meeting.durationMins} onChange={e => setMeeting(m => ({ ...m, durationMins: Number(e.target.value) }))}>
-            {[30, 45, 60, 90, 120].map(n => <option key={n} value={n}>{n} minutes</option>)}
+            {[...new Set([30, 45, 60, 90, 120, Number(meeting.durationMins) || 60])].sort((a, b) => a - b).map(n => <option key={n} value={n}>{n} minutes</option>)}
           </select></div>
       </div>
       <div style={lab}>Start time (your local time)</div>
@@ -324,11 +339,11 @@ function ScheduleFields({ meeting, setMeeting, teachers, input }) {
         ))}
         <input type="time" value={meeting._time || ''} onChange={e => set({ _time: e.target.value })} title="Other time" style={{ ...input, width: 120, padding: '6px 9px', borderColor: custom ? '#1E3A8A' : LINE }} />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div><div style={lab}>Repeat</div>
+      <div style={{ display: 'grid', gridTemplateColumns: meeting._editId ? '1fr' : '1fr 1fr', gap: 10 }}>
+        {meeting._editId ? null : <div><div style={lab}>Repeat</div>
           <select style={input} value={meeting.repeatWeeks || 1} onChange={e => setMeeting(m => ({ ...m, repeatWeeks: Number(e.target.value) }))}>
             {[1, 2, 4, 6, 8, 10, 12].map(n => <option key={n} value={n}>{n === 1 ? 'Just once' : `Every week for ${n} weeks`}</option>)}
-          </select></div>
+          </select></div>}
         <div><div style={lab}>Type</div>
           <select style={input} value={meeting.kind} onChange={e => setMeeting(m => ({ ...m, kind: e.target.value }))}>
             <option value="club">Regular meeting</option><option value="competition">Competition</option><option value="event">Event</option>

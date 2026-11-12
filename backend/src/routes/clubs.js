@@ -132,6 +132,7 @@ router.get('/events', auth, async (req, res) => {
       .sort({ scheduledAt: 1 }).limit(30).lean();
     res.json({ success: true, data: { events: rows.map(r => ({
       _id: r._id, title: r.title, kind: r.kind, status: r.status, scheduledAt: r.scheduledAt, durationMins: r.durationMins,
+      teacherId: r.teacherId ? r.teacherId._id : null,
       club: r.clubId ? { _id: r.clubId._id, name: r.clubId.name, color: r.clubId.color, icon: r.clubId.icon } : null,
       leader: r.teacherId ? [r.teacherId.firstName, r.teacherId.lastName].filter(Boolean).join(' ') : '',
     })) } });
@@ -175,7 +176,7 @@ router.get('/:id', auth, async (req, res) => {
       club: shaped,
       members: canSeeMembers ? (c.members || []).map(m => ({ _id: m._id, name: [m.firstName, m.lastName].filter(Boolean).join(' '), avatar: m.avatar || '', gradeLevel: m.gradeLevel || '' })) : [],
       upcoming: meetings.filter(m => new Date(m.scheduledAt) >= new Date(now - 2 * 3600 * 1000) && m.status !== 'ended').reverse()
-        .map(m => ({ _id: m._id, title: m.title, kind: m.kind, status: m.status, scheduledAt: m.scheduledAt, durationMins: m.durationMins })),
+        .map(m => ({ _id: m._id, title: m.title, kind: m.kind, status: m.status, scheduledAt: m.scheduledAt, durationMins: m.durationMins, teacherId: m.teacherId })),
       past: meetings.filter(m => m.status === 'ended' || new Date(m.scheduledAt) < new Date(now - 2 * 3600 * 1000))
         .map(m => ({ _id: m._id, title: m.title, kind: m.kind, scheduledAt: m.scheduledAt, recordings: (m.recordings || []).map(r => ({ recId: r._id, url: r.url, durationSec: r.durationSec, recordedAt: r.recordedAt })) })),
     }});
@@ -307,6 +308,45 @@ router.get('/:id/clash', auth, requireRole('teacher', ...ADMIN), async (req, res
     const seen = new Set();
     const unique = clashes.filter(c => { const k = c.title + '|' + new Date(c.scheduledAt).getTime() + '|' + c.who; if (seen.has(k)) return false; seen.add(k); return true; });
     res.json({ success: true, data: { clashes: unique.slice(0, 8) } });
+  } catch (e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
+// PATCH /api/clubs/:id/meetings/:meetingId  { title, scheduledAt, durationMins, kind, teacherId }
+// Edit a scheduled session (admins, and the club's own leaders). A session
+// already live can only be renamed; one that has ended or was cancelled
+// cannot be edited.
+router.patch('/:id/meetings/:meetingId', auth, requireRole('teacher', ...ADMIN), async (req, res) => {
+  try {
+    if (!oid(req.params.meetingId)) return res.status(400).json({ success: false, message: 'Bad id.' });
+    const c = await Club.findById(req.params.id).lean();
+    if (!c) return res.status(404).json({ success: false, message: 'Club not found.' });
+    const admin = ADMIN.includes(req.user.role);
+    if (!admin && !isLeaderOf(c, req.user._id)) return res.status(403).json({ success: false, message: 'Only this club\'s leaders can edit its sessions.' });
+    const lc = await LiveClass.findOne({ _id: req.params.meetingId, clubId: c._id });
+    if (!lc) return res.status(404).json({ success: false, message: 'Session not found.' });
+    if (['ended', 'cancelled'].includes(lc.status)) return res.status(400).json({ success: false, message: 'This session has already ' + (lc.status === 'ended' ? 'ended' : 'been cancelled') + ' and cannot be edited.' });
+    const { title, scheduledAt, durationMins, kind, teacherId } = req.body || {};
+    const live = lc.status === 'live';
+    if (typeof title === 'string' && title.trim()) lc.title = title.trim().slice(0, 140);
+    if (scheduledAt !== undefined || durationMins !== undefined || teacherId !== undefined) {
+      if (live) return res.status(400).json({ success: false, message: 'This session is live now: only its title can be changed.' });
+    }
+    if (scheduledAt !== undefined) {
+      const when = parseWhen(scheduledAt);
+      if (isNaN(when)) return res.status(400).json({ success: false, message: 'A valid date and time is required.' });
+      lc.scheduledAt = when;
+    }
+    if (durationMins !== undefined) lc.durationMins = Math.min(240, Math.max(15, Number(durationMins) || lc.durationMins || 60));
+    if (kind !== undefined && ['club', 'competition', 'event'].includes(kind)) lc.kind = kind;
+    // Host: admins may hand the session to another teacher; a leader keeps it.
+    if (admin && teacherId !== undefined) {
+      if (teacherId && oid(teacherId)) lc.teacherId = teacherId;
+      else if (!teacherId && c.leaders && c.leaders[0]) lc.teacherId = c.leaders[0];
+    }
+    // Members who joined since it was scheduled are let in too.
+    lc.assignedStudents = Array.from(new Set([...(lc.assignedStudents || []).map(String), ...(c.members || []).map(String)]));
+    await lc.save();
+    res.json({ success: true, message: 'Session updated.', data: { meeting: lc } });
   } catch (e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
