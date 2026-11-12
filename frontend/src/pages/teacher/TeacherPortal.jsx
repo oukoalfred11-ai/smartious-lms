@@ -13366,6 +13366,17 @@ function EarningsTab({ user, toast }) {
   }
   useEffect(()=>{ load() },[])
 
+  // Branded PDF payslip, as a file download.
+  const downloadPdf = async (r) => {
+    try {
+      const res = await api.get('/payroll/'+r._id+'/payslip-pdf', { responseType:'blob' })
+      const url = URL.createObjectURL(new Blob([res.data], { type:'application/pdf' }))
+      const a = document.createElement('a'); a.href = url
+      a.download = ('Payslip-'+(r.teacherName||'')+'-'+(r.periodLabel||'')).replace(/[^a-z0-9]+/gi,'-').replace(/^-|-$/g,'')+'.pdf'
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 2000)
+    } catch { toast?.error?.('Could not download the PDF payslip.') }
+  }
+
   const openPayslip = async (id) => {
     try {
       const r = await api.get('/payroll/'+id+'/payslip-html')
@@ -13518,7 +13529,8 @@ function EarningsTab({ user, toast }) {
                     <button onClick={()=>openPayslip(r._id)} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
                       {r.status==='paid' ? 'Download / print payslip' : 'View draft payslip'}
                     </button>
-                    {r.payslipEmailSentAt&&<span style={{ fontSize:12, color:'#7A6652', alignSelf:'center' }}>Payslip emailed {fmtDate(r.payslipEmailSentAt)}</span>}
+                    {r.status==='paid'&&<button onClick={()=>downloadPdf(r)} style={{ background:'#fff', color:'#7D1025', border:'1.5px solid #7D1025', padding:'7px 16px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>Download PDF</button>}
+                    {r.payslipEmailSentAt&&<span style={{ fontSize:12, color:'#7A6652', alignSelf:'center' }}>PDF emailed {fmtDate(r.payslipEmailSentAt)}</span>}
                   </div>
                 )}
               </div>

@@ -293,12 +293,14 @@ router.post('/:id/mark-paid', auth, ACCT, async (req, res) => {
 
     await record.save()
 
-    // Send payslip email
-    let emailSent = false
+    // Send payslip email, with the PDF attached
+    let emailSent = false, emailError = ''
     try {
       const t = getTransporter()
-      if (t) {
-        // Attach the branded payslip PDF so the teacher has a document
+      if (!t) emailError = 'Email is not configured on the server.'
+      else if (!record.teacherEmail) emailError = 'No email address on file for this staff member.'
+      else {
+        // Attach the branded payslip PDF so the staff member has a document
         // to file, not just an email body.
         let attachments = []
         if (buildPayslipPdfBuffer) {
@@ -337,9 +339,11 @@ router.post('/:id/mark-paid', auth, ACCT, async (req, res) => {
                     `${attachments.length ? 'PDF attached' : 'no attachment'}` +
                     `${financeCopy ? ', finance copied' : ''}`)
       }
-    } catch(e) { console.error('[payroll email]', e.message) }
+    } catch(e) { emailError = e.message; console.error('[payroll email]', e.message) }
 
-    return ok(res, { record, emailSent }, `Payroll marked as paid.${emailSent?' Payslip emailed to teacher.':' (Email not configured)'}`)
+    return ok(res, { record, emailSent, emailError },
+      emailSent ? `Payroll marked as paid. PDF payslip emailed to ${record.teacherEmail}.`
+                : `Payroll marked as paid, but the payslip email was not sent: ${emailError} Use "Email PDF" on the Payroll page to try again.`)
   } catch(e) { return fail(res,500,e.message) }
 })
 
@@ -453,7 +457,7 @@ router.post('/:id/resend-payslip', auth, ACCT, async (req, res) => {
     record.payslipEmailSentAt = new Date()
     await record.save()
 
-    return ok(res, { record }, `Payslip re-sent to ${record.teacherEmail}.`)
+    return ok(res, { record }, `PDF payslip emailed to ${record.teacherEmail}.`)
   } catch (e) { return fail(res, 500, e.message) }
 })
 
