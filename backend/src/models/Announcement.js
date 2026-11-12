@@ -58,6 +58,9 @@ const announcementSchema = new mongoose.Schema({
   // goes live and an edit never re-sends.
   emailSentAt:   { type: Date, default: null },
   emailCount:    { type: Number, default: 0 },
+  // Each "this announcement was updated" email sent after an edit.
+  updateEmails: [{ at: Date, count: Number, changes: [String], _id: false }],
+  updatedByName: { type: String, default: '' },
 
   author:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   authorName: { type: String, default: '' },      // snapshot so it survives staff changes

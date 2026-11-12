@@ -16,7 +16,7 @@
  */
 const Announcement = require('../models/Announcement');
 const User = require('../models/User');
-const { sendAnnouncementEmail } = require('./notificationEmails');
+const { sendAnnouncementEmail, sendAnnouncementUpdateEmail } = require('./notificationEmails');
 
 const ROLES_FOR = {
   all:      ['student', 'parent', 'teacher', 'admin', 'dos', 'ops_manager', 'accountant', 'sales'],
@@ -90,4 +90,19 @@ function startAnnouncementMailer() {
   console.log('[announcements] mailer started (checks every 3 min)');
 }
 
-module.exports = { startAnnouncementMailer, dispatchDueAnnouncements, dispatchSoon };
+/**
+ * An announcement that was already emailed has been edited: email the
+ * same audience what changed. Runs in the background; the change is
+ * recorded on the announcement (updateEmails) for the admin list.
+ */
+async function sendUpdateNotice(previous, current, changes) {
+  try {
+    const recipients = await recipientsFor(current.audience);
+    const sent = await sendAnnouncementUpdateEmail({ announcement: current, previous, changes, recipients });
+    await Announcement.updateOne({ _id: current._id }, { $push: { updateEmails: { at: new Date(), count: sent, changes } } });
+    console.log(`[announcements] update to "${current.title}" emailed to ${sent} of ${recipients.length} (${changes.join(', ')})`);
+    return sent;
+  } catch (e) { console.error('[announcements] update email failed:', e.message); return 0; }
+}
+
+module.exports = { startAnnouncementMailer, dispatchDueAnnouncements, dispatchSoon, sendUpdateNotice };
