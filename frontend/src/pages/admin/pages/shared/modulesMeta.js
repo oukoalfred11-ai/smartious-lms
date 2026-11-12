@@ -28,6 +28,7 @@ export const MODULES = {
   qaoverview:      { label: 'QA Overview',      accent: TOKENS.gold,    icon: 'chart' },
   teacherprofiles: { label: 'Team Profiles',    accent: TOKENS.crimson, icon: 'users' },
   myprofile:       { label: 'My Profile',       accent: TOKENS.crimson, icon: 'users' },
+  mypayslips:      { label: 'My Payslips',      accent: TOKENS.accentEmerald, icon: 'payroll' },
   mystafffile:     { label: 'My Staff File',    accent: TOKENS.gold,    icon: 'documents' },
   tdp:             { label: 'Teacher Development', accent: TOKENS.gold, icon: 'teacher' },
   accreditations:  { label: 'Accreditations',   accent: TOKENS.gold,    icon: 'documents' },

@@ -15,6 +15,7 @@ import { QAOverviewModule, TeamProfilesModule, TDPModule, AccreditationsModule }
 import StaffFile from '../../../components/StaffFile.jsx'
 import AdmissionDocsModule from './modules/AdmissionDocsModule.jsx'
 import MyProfileModule, { Avatar as ProfileAvatar } from './modules/MyProfileModule.jsx'
+import MyPayslipsModule from './modules/MyPayslipsModule.jsx'
 import FrontDeskModule from './modules/FrontDeskModule.jsx'
 import CareersModule from './modules/CareersModule.jsx'
 import PartnershipsModule from './modules/PartnershipsModule.jsx'
@@ -92,14 +93,14 @@ const NAV_SECTIONS = {
     { label: 'Quality',     items: ['qaoverview', 'teacherprofiles', 'tdp', 'accreditations'] },
     { label: 'Marketing',   items: ['leads', 'studio'] },
     { label: 'System',      items: ['userlogs', 'billing', 'website', 'settings', 'ai', 'suggestions'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mypayslips', 'mystafffile'] },
   ],
   accountant: [
     { label: 'Overview',    items: ['dashboard', 'analytics'] },
     { label: 'Fee Management', items: ['feecollection', 'billing', 'documents', 'sessions'] },
     { label: 'Finance',     items: ['payroll', 'inventory'] },
     { label: 'System',      items: ['settings'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mypayslips', 'mystafffile'] },
   ],
   sales: [
     { label: 'Overview',    items: ['dashboard', 'salesperf'] },
@@ -108,14 +109,14 @@ const NAV_SECTIONS = {
     { label: 'Admissions',  items: ['assessment', 'frontdesk', 'communication'] },
     { label: 'Content',     items: ['documents'] },
     { label: 'System',      items: ['settings'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mypayslips', 'mystafffile'] },
   ],
   qa: [
     { label: 'Overview',  items: ['dashboard'] },
     { label: 'Our School', items: ['teacherprofiles', 'careers', 'tdp', 'accreditations', 'partnerships'] },
     { label: 'Academics', items: ['curriculum', 'questionbank', 'exams'] },
     { label: 'Quality & Reports', items: ['reports', 'dosanalytics', 'dosattend'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mypayslips', 'mystafffile'] },
   ],
   // Dean & Operations: one merged role. The Dean of Studies and the
   // Operations Manager accounts share this portal and its access.
@@ -131,7 +132,7 @@ const NAV_SECTIONS = {
     { label: 'Operations',  items: ['partnerships', 'leave', 'programmes', 'inventory'] },
     { label: 'Reports',     items: ['reports', 'dosanalytics'] },
     { label: 'System',      items: ['userlogs', 'settings', 'ai'] },
-    { label: 'Me',          items: ['myprofile', 'mystafffile'] },
+    { label: 'Me',          items: ['myprofile', 'mypayslips', 'mystafffile'] },
   ],
 }
 
@@ -489,6 +490,7 @@ export default function AdminDashboard({ page, setPage, userStats, pendingAlloca
         {safePage === 'documents' && <DocumentsModule toast={toast} />}
         {safePage === 'teacherprofiles' && <TeamProfilesModule toast={toast} />}
         {safePage === 'mystafffile' && <StaffFile toast={toast} showTeaching={false} />}
+        {safePage === 'mypayslips' && <MyPayslipsModule toast={toast} />}
         {safePage === 'admissiondocs' && <AdmissionDocsModule toast={toast} />}
         {safePage === 'virtuallab' && <VirtualLabLauncher />}
         {safePage === 'myprofile' && <MyProfileModule toast={toast} setPage={setPage} />}

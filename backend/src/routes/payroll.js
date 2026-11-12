@@ -38,6 +38,12 @@ const ACCT  = requireRole('admin', 'accountant')
 const DOS   = requireRole('admin', 'dos', 'accountant', 'ops_manager')
 // A payslip is read by its owner, Finance and the Principal: nobody else.
 const canReadRecord = (user, record) => ['admin', 'accountant'].includes(user.role) || String(record.teacherId) === String(user._id)
+// Everyone who works for the school can be on payroll and read their own
+// payslips: teachers and every other staff role.
+const STAFF_ROLES = ['admin', 'accountant', 'sales', 'ops_manager', 'dos', 'teacher', 'qa']
+const ROLE_LABEL = { admin:'Principal', accountant:'Finance', sales:'Admissions & Sales', ops_manager:'Dean & Operations', dos:'Dean of Studies', teacher:'Teacher', qa:'Quality Assurance' }
+const isStaff = (user) => STAFF_ROLES.includes(user?.role) || (user?.additionalRoles || []).includes('teacher')
+const roleLabel = (role) => ROLE_LABEL[role] || 'Staff'
 const ok    = (res, data, msg) => res.json({ success:true, data, message:msg })
 const fail  = (res, code, msg) => res.status(code).json({ success:false, message:msg })
 
@@ -63,22 +69,26 @@ function computeNet(rec) {
   return { net:(rec.basicSalary||0)-ded+extras, totalDeductions:ded, totalApprovedExtras:extras }
 }
 
-// ── GET /api/payroll/teachers ─────────────────────────────
-// List teachers for payroll (for creating new payroll records)
-router.get('/teachers', auth, ACCT, async (req, res) => {
+// ── GET /api/payroll/staff (alias /teachers) ──────────────
+// Everyone who can be put on payroll: teachers and all other staff.
+async function listStaff(req, res) {
   try {
-    const teachers = await User.find({ role:'teacher', isActive:true })
-      .select('firstName lastName email currency')
+    const staff = await User.find({ role:{ $in:STAFF_ROLES }, isActive:true })
+      .select('firstName lastName email currency role')
+      .sort({ firstName:1, lastName:1 })
       .lean()
-    return ok(res, { teachers })
+    const out = staff.map(s => ({ ...s, roleLabel: roleLabel(s.role) }))
+    return ok(res, { staff: out, teachers: out })
   } catch(e) { return fail(res,500,e.message) }
-})
+}
+router.get('/staff', auth, ACCT, listStaff)
+router.get('/teachers', auth, ACCT, listStaff)
 
 // ── GET /api/payroll/my ───────────────────────────────────
 // Teacher: my payroll history + pending extras
 router.get('/my', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') return fail(res,403,'Teachers only.')
+    if (!isStaff(req.user)) return fail(res,403,'Staff only.')
     const records = await Payroll.find({ teacherId:req.user._id })
       .sort({ periodYear:-1, periodMonth:-1 })
       .lean()
@@ -90,7 +100,7 @@ router.get('/my', auth, async (req, res) => {
 // Teacher submits a tuition extra claim (pending DOS/accountant approval)
 router.post('/my/extras', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') return fail(res,403,'Teachers only.')
+    if (!isStaff(req.user)) return fail(res,403,'Staff only.')
     const { description, studentName, subject, sessions, ratePerSession, totalAmount, date, periodMonth, periodYear } = req.body
 
     if (!description || !totalAmount) return fail(res,400,'Description and amount required.')
@@ -101,12 +111,13 @@ router.post('/my/extras', auth, async (req, res) => {
 
     let record = await Payroll.findOne({ teacherId:req.user._id, periodMonth:month, periodYear:year })
     if (!record) {
-      const teacher = await User.findById(req.user._id).select('firstName lastName email').lean()
+      const teacher = await User.findById(req.user._id).select('firstName lastName email role').lean()
       const months  = ['January','February','March','April','May','June','July','August','September','October','November','December']
       record = await Payroll.create({
         teacherId:    req.user._id,
         teacherName:  teacher.firstName+' '+teacher.lastName,
         teacherEmail: teacher.email,
+        staffRole:    roleLabel(teacher.role),
         periodLabel:  months[month-1]+' '+year,
         periodMonth:  month,
         periodYear:   year,
@@ -140,7 +151,7 @@ router.post('/my/extras', auth, async (req, res) => {
 // Teacher deletes a pending extra
 router.delete('/my/extras/:extraId', auth, async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') return fail(res,403,'Teachers only.')
+    if (!isStaff(req.user)) return fail(res,403,'Staff only.')
     const record = await Payroll.findOne({ teacherId:req.user._id, 'tuitionExtras._id':req.params.extraId })
     if (!record) return fail(res,404,'Not found.')
     const extra = record.tuitionExtras.id(req.params.extraId)
@@ -191,14 +202,14 @@ router.post('/', auth, ACCT, async (req, res) => {
     const { teacherId, periodMonth, periodYear, basicSalary, currency, deductions, paymentDate, paymentMethod } = req.body
     if (!teacherId || !periodMonth || !periodYear) return fail(res,400,'teacherId, periodMonth, periodYear required.')
 
-    const teacher = await User.findById(teacherId).select('firstName lastName email').lean()
-    if (!teacher) return fail(res,404,'Teacher not found.')
+    const teacher = await User.findById(teacherId).select('firstName lastName email role').lean()
+    if (!teacher) return fail(res,404,'Staff member not found.')
 
     const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
     // Check duplicate
     const exists = await Payroll.findOne({ teacherId, periodMonth:parseInt(periodMonth,10), periodYear:parseInt(periodYear,10) })
-    if (exists) return fail(res,409,'Payroll record already exists for this teacher/period.')
+    if (exists) return fail(res,409,'Payroll record already exists for this staff member and period.')
 
     const deds = (deductions||[]).map(d=>({ label:d.label, amount:parseFloat(d.amount)||0 }))
     const dedTotal = deds.reduce((s,d)=>s+d.amount,0)
@@ -209,6 +220,7 @@ router.post('/', auth, ACCT, async (req, res) => {
       teacherId,
       teacherName:  teacher.firstName+' '+teacher.lastName,
       teacherEmail: teacher.email,
+      staffRole:    roleLabel(teacher.role),
       periodLabel:  months[parseInt(periodMonth,10)-1]+' '+periodYear,
       periodMonth:  parseInt(periodMonth,10),
       periodYear:   parseInt(periodYear,10),
@@ -457,9 +469,19 @@ router.delete('/:id', auth, ACCT, async (req, res) => {
 })
 
 // ── Payslip HTML generator ────────────────────────────────
+// Claim text is typed by staff, so it is escaped before it goes into HTML.
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c])
+
 function buildPayslipHTML(r) {
   const cur = r.currency||'KES'
   const approvedExtras = (r.tuitionExtras||[]).filter(e=>e.status==='approved')
+  const pendingExtras  = (r.tuitionExtras||[]).filter(e=>e.status==='pending')
+  const isPaid = r.status === 'paid'
+  const tuitionLabel = e => {
+    const bits = [e.subject, e.studentName, e.sessions ? e.sessions+' session'+(e.sessions===1?'':'s')+(e.ratePerSession?' × '+money(e.ratePerSession,cur):'') : '']
+      .filter(Boolean).map(esc).join(' · ')
+    return esc(e.description) + (bits ? `<div style="font-size:11px;color:#9A9A9A;margin-top:2px">${bits}</div>` : '')
+  }
   const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}):'—'
   const row = (l,v,bold) => `<tr><td style="padding:8px 0;font-size:13px;color:#6B6B6B;border-bottom:1px solid #F4EFEB">${l}</td><td style="padding:8px 0;font-size:13px;font-weight:${bold?700:500};color:${bold?'#1A0F0E':'#3A3A3A'};text-align:right;border-bottom:1px solid #F4EFEB">${v}</td></tr>`
 
@@ -473,6 +495,7 @@ table{width:100%}
 @media print{body{padding:0}.wrap{border:none;border-radius:0}}
 </style></head><body>
 <div class="wrap">
+${isPaid ? '' : `<div style="background:#FEF3C7;color:#92400E;font-size:12px;font-weight:700;text-align:center;padding:9px 16px;letter-spacing:.04em">${r.status==='processing'?'PROCESSING':'DRAFT'}: NOT YET PAID. Figures may still change before payment.</div>`}
 <div class="hdr">
   <div style="display:flex;justify-content:space-between;align-items:flex-start">
     <div>
@@ -490,9 +513,9 @@ table{width:100%}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
     <div style="background:#FBFAF5;border-radius:8px;padding:14px 16px">
       <div style="font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Employee</div>
-      <div style="font-size:15px;font-weight:800;color:#1A0F0E">${r.teacherName}</div>
-      <div style="font-size:12px;color:#6B6B6B;margin-top:3px">${r.teacherEmail}</div>
-      <div style="font-size:12px;color:#6B6B6B;margin-top:2px">Teacher</div>
+      <div style="font-size:15px;font-weight:800;color:#1A0F0E">${esc(r.teacherName)}</div>
+      <div style="font-size:12px;color:#6B6B6B;margin-top:3px">${esc(r.teacherEmail)}</div>
+      <div style="font-size:12px;color:#6B6B6B;margin-top:2px">${esc(r.staffRole || 'Staff')}</div>
     </div>
     <div style="background:#FBFAF5;border-radius:8px;padding:14px 16px">
       <div style="font-size:10px;font-weight:700;color:#7D1025;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Payment</div>
@@ -504,14 +527,21 @@ table{width:100%}
 
   <div class="sec">Earnings</div>
   <table><tbody>
-    ${row('Basic salary', money(r.basicSalary,cur))}
-    ${approvedExtras.map(e=>row(`${e.description}${e.studentName?' ('+e.studentName+')':''}`, money(e.totalAmount,cur))).join('')}
-    ${row('Total earnings', money((r.basicSalary||0)+(r.totalApprovedExtras||0),cur), true)}
+    ${row('Basic monthly salary', money(r.basicSalary,cur))}
+    ${row('Approved tuitions ('+approvedExtras.length+')', money(r.totalApprovedExtras,cur))}
+    ${row('Gross pay', money((r.basicSalary||0)+(r.totalApprovedExtras||0),cur), true)}
   </tbody></table>
+
+  <div class="sec">Approved tuitions in detail</div>
+  <table><tbody>
+    ${approvedExtras.length===0?row('No approved tuitions this period','—'):approvedExtras.map(e=>row(tuitionLabel(e), money(e.totalAmount,cur))).join('')}
+    ${approvedExtras.length?row('Total approved tuitions', money(r.totalApprovedExtras,cur), true):''}
+  </tbody></table>
+  ${pendingExtras.length?`<div style="font-size:11.5px;color:#92400E;margin-top:8px">${pendingExtras.length} tuition claim${pendingExtras.length>1?'s':''} awaiting approval (${money(pendingExtras.reduce((s,e)=>s+(e.totalAmount||0),0),cur)}) not included until approved.</div>`:''}
 
   <div class="sec">Deductions</div>
   <table><tbody>
-    ${(r.deductions||[]).length===0?row('No deductions','—'):(r.deductions||[]).map(d=>row(d.label,`(${money(d.amount,cur)})`)).join('')}
+    ${(r.deductions||[]).length===0?row('No deductions','—'):(r.deductions||[]).map(d=>row(esc(d.label),`(${money(d.amount,cur)})`)).join('')}
     ${row('Total deductions', money(r.totalDeductions,cur), true)}
   </tbody></table>
 
@@ -520,7 +550,7 @@ table{width:100%}
     <div style="font-size:24px;font-weight:800;color:#C9A030">${money(r.netPay,cur)}</div>
   </div>
 
-  ${r.paymentNote?`<div style="margin-top:14px;font-size:12px;color:#6B6B6B;font-style:italic">${r.paymentNote}</div>`:''}
+  ${r.paymentNote?`<div style="margin-top:14px;font-size:12px;color:#6B6B6B;font-style:italic">${esc(r.paymentNote)}</div>`:''}
   <div style="margin-top:24px;padding-top:16px;border-top:1px solid #E8E2D6;font-size:11px;color:#9A9A9A;text-align:center">
     Generated by Smartious Homeschool Global Finance · Diamond Plaza, Parklands & Karen West, Nairobi · hello@smartioushomeschool.com
   </div>
