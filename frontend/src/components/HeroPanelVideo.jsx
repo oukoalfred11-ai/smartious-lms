@@ -29,7 +29,7 @@ function fetchHeroUrl() {
   return heroUrlPromise
 }
 
-export default function HeroPanelVideo({ band = false }) {
+export default function HeroPanelVideo({ band = false, tone = 'crimson' }) {
   const [src, setSrc] = useState('')
   const [dead, setDead] = useState(false)
   useEffect(() => {
@@ -46,8 +46,19 @@ export default function HeroPanelVideo({ band = false }) {
       {/* Dye, not veil: a solid crimson multiplied into the footage
           keeps the brand colour deep and vivid instead of the washed,
           faded look a translucent overlay gives over bright video. */}
-      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: '#7D1025', mixBlendMode: 'multiply', opacity: .82 }} />
-      <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(100deg, rgba(20,2,6,.5) 0%, rgba(20,2,6,.15) 45%, rgba(20,2,6,.35) 100%)' }} />
+      {tone === 'cinematic' ? (
+        // Cinematic: the footage keeps its own colours; a warm dark grade on
+        // the left carries the white text, the right stays clear.
+        <>
+          <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(90deg, rgba(40,6,14,.88) 0%, rgba(40,6,14,.62) 38%, rgba(40,6,14,.12) 72%, rgba(40,6,14,.05) 100%)' }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(0deg, rgba(20,3,8,.55) 0%, rgba(20,3,8,0) 40%)' }} />
+        </>
+      ) : (
+        <>
+          <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: '#7D1025', mixBlendMode: 'multiply', opacity: .82 }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: radius, background: 'linear-gradient(100deg, rgba(20,2,6,.5) 0%, rgba(20,2,6,.15) 45%, rgba(20,2,6,.35) 100%)' }} />
+        </>
+      )}
     </>
   )
 
