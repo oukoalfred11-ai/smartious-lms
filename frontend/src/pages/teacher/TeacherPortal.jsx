@@ -2368,8 +2368,8 @@ function QuestionBankTab({ user, store, setPage, toast }) {
                   rows={4}
                   value={form.questionText}
                   onChange={v => setF('questionText', v)}
-                  placeholder="Type your question here. Use Insert formula for mathematics, e.g. $x^2 + 3x$"
-                  hint="Mathematics and chemical formulae go between dollar signs so they render correctly and can be marked accurately."
+                  placeholder="Type your question here. For fractions, powers and roots use the Equation editor above."
+                  hint="Check the preview: it shows exactly how the question will look to students and on the printed paper."
                 />
               </div>
  
