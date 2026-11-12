@@ -1,4 +1,4 @@
-import { splitMath, plainMath } from '../../lib/mathText.js'
+import { splitMath, plainMath, keyboardMath, cleanForPaper } from '../../lib/mathText.js'
 import React, { useState, useRef, useEffect } from 'react'
 
 /**
@@ -89,8 +89,10 @@ export function renderMath(text) {
   let blank = 0
   return splitMath(String(text)).map((part, i) => {
     if (!part.math) {
-      if (!part.text.includes('[[]]')) return <span key={i}>{part.text}</span>
-      return <span key={i}>{part.text.split('[[]]').map((t, k) => k === 0 ? t : (
+      // Maths typed without $…$ (\frac{1}{2}, H_2O, x^2) still reads as maths.
+      const txt = keyboardMath(part.text)
+      if (!txt.includes('[[]]')) return <span key={i}>{txt}</span>
+      return <span key={i}>{txt.split('[[]]').map((t, k) => k === 0 ? t : (
         <span key={k}><span style={{ display: 'inline-block', minWidth: 64, borderBottom: '2px solid currentColor', margin: '0 4px', textAlign: 'center', fontWeight: 700, fontSize: '.8em', opacity: .75 }}>({++blank})</span>{t}</span>
       ))}</span>
     }
@@ -150,19 +152,27 @@ export default function MathField({
     })
   }
 
-  const hasMath = /\$[^$]+\$/.test(value || '')
+  // Any maths at all, with or without $…$: show the preview.
+  const hasMath = /\$[^$]+\$/.test(value || '') || /\\[A-Za-z]|[\w)\]}][\^_][{\w\-+]/.test(value || '')
+  const [editor, setEditor] = useState(false)
 
   return (
     <div>
-      {label && (
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:5 }}>
-          <span style={lbl}>{label}</span>
+      {/* The formula tools are always on offer, label or not. (They used to
+          appear only with a label, so the exam builder never showed them.) */}
+      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8, marginBottom:5, flexWrap:'wrap' }}>
+        <span style={lbl}>{label || ''}</span>
+        <div style={{ display:'flex', gap:6 }}>
+          <button type="button" onClick={() => setEditor(true)} disabled={disabled}
+            style={{ ...toolBtn, background:'#8B1A2E', color:'#fff', borderColor:'#8B1A2E' }}>
+            ∑ Equation editor
+          </button>
           <button type="button" onClick={() => setShowTools(v => !v)} disabled={disabled}
             style={{ ...toolBtn, background: showTools ? '#8B1A2E' : '#fff', color: showTools ? '#fff' : '#8B1A2E' }}>
-            {showTools ? 'Hide symbols' : 'Insert formula'}
+            {showTools ? 'Hide symbols' : 'Symbols'}
           </button>
         </div>
-      )}
+      </div>
 
       {showTools && (
         <div style={{ border:'1px solid #E8E0D0', borderRadius:9, padding:'10px 11px', marginBottom:8, background:'#FBF9F4' }}>
@@ -180,8 +190,7 @@ export default function MathField({
             ))}
           </div>
           <p style={{ margin:'9px 0 0', fontSize:11, color:'#6B7280', lineHeight:1.5 }}>
-            Mathematics is written between dollar signs, for example <code>$x^2 + 3x$</code>.
-            Anything outside them stays ordinary text.
+            Click a symbol to insert it. For fractions, powers and roots the <b>Equation editor</b> is easiest.
           </p>
         </div>
       )}
@@ -198,14 +207,94 @@ export default function MathField({
       {hasMath && (
         <div style={{ marginTop:8, padding:'10px 12px', borderRadius:8,
                       border:'1px solid #E8D9AE', background:'#FBF6EA' }}>
-          <div style={{ ...lbl, color:'#8A6414', marginBottom:5 }}>
-            Preview {katexReady ? '' : '(approximate — add KaTeX for exact rendering)'}
-          </div>
+          <div style={{ ...lbl, color:'#8A6414', marginBottom:5 }}>How students will see it</div>
           <div style={{ fontSize:14.5, lineHeight:1.7, color:'#0D1220' }}>{renderMath(value)}</div>
+          <div style={{ ...lbl, color:'#8A6414', margin:'9px 0 4px' }}>On the printed paper</div>
+          <div style={{ fontSize:13.5, lineHeight:1.6, color:'#0D1220', fontFamily:'"DejaVu Sans", Arial, sans-serif', whiteSpace:'pre-wrap' }}>{cleanForPaper(value)}</div>
         </div>
       )}
 
       {hint && <p style={{ margin:'6px 0 0', fontSize:11.5, color:'#6B7280', lineHeight:1.5 }}>{hint}</p>}
+
+      {editor && <EquationEditor onClose={() => setEditor(false)} onInsert={(tex) => { setEditor(false); if (tex.trim()) insert(tex.trim()) }} />}
+    </div>
+  )
+}
+
+/* ── Visual equation editor ───────────────────────────────────────
+   MathLive (MIT) gives a WYSIWYG maths box: type "1/2" and it becomes a
+   fraction, "sqrt" a root, x then ^ a power, and an on-screen maths
+   keyboard on phones and tablets. It is loaded from the CDN only when a
+   teacher opens the editor, so it costs nothing anywhere else. The
+   result is LaTeX, inserted between $…$ like the symbol buttons. */
+const MATHLIVE_SRC = 'https://cdn.jsdelivr.net/npm/mathlive@0.105.3/mathlive.min.js'
+let mathlivePromise = null
+function loadMathLive() {
+  if (typeof window === 'undefined') return Promise.reject(new Error('no window'))
+  if (window.MathfieldElement) return Promise.resolve()
+  if (!mathlivePromise) {
+    mathlivePromise = new Promise((resolve, reject) => {
+      const sc = document.createElement('script')
+      sc.src = MATHLIVE_SRC; sc.async = true
+      sc.onload = () => resolve()
+      sc.onerror = () => { mathlivePromise = null; reject(new Error('MathLive failed to load')) }
+      document.head.appendChild(sc)
+    })
+  }
+  return mathlivePromise
+}
+
+const QUICK = [
+  ['Fraction', '\\frac{#@}{#?}'], ['Power', '#@^{#?}'], ['Square root', '\\sqrt{#0}'], ['Subscript', '#@_{#?}'],
+  ['π', '\\pi'], ['θ', '\\theta'], ['±', '\\pm'], ['×', '\\times'], ['÷', '\\div'], ['≤', '\\leq'], ['≥', '\\geq'], ['°', '^{\\circ}'],
+  ['→', '\\rightarrow'], ['⇌', '\\rightleftharpoons'], ['∫', '\\int_{#?}^{#?}'], ['Σ', '\\sum_{#?}^{#?}'],
+]
+
+function EquationEditor({ onClose, onInsert }) {
+  const host = useRef(null)
+  const mfRef = useRef(null)
+  const [state, setState] = useState('loading')   // loading | ready | failed
+  const [latex, setLatex] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    loadMathLive().then(() => {
+      if (!alive || !host.current) return
+      const mf = new window.MathfieldElement()
+      mf.smartFence = true
+      mf.style.cssText = 'width:100%;font-size:26px;padding:10px 12px;border:1.5px solid #E8E0D0;border-radius:10px;min-height:64px;box-sizing:border-box;'
+      mf.addEventListener('input', () => setLatex(mf.value))
+      host.current.appendChild(mf)
+      mfRef.current = mf
+      setState('ready')
+      setTimeout(() => mf.focus(), 50)
+    }).catch(() => { if (alive) setState('failed') })
+    return () => { alive = false; try { window.mathVirtualKeyboard?.hide?.() } catch { /* noop */ } }
+  }, [])
+
+  const put = (tex) => { const mf = mfRef.current; if (!mf) return; mf.executeCommand(['insert', tex, { selectionMode: 'placeholder' }]); mf.focus() }
+
+  return (
+    <div onClick={onClose} style={{ position:'fixed', inset:0, background:'rgba(13,18,32,.55)', zIndex:9999, display:'flex', alignItems:'center', justifyContent:'center', padding:16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background:'#fff', borderRadius:16, width:'min(640px, 100%)', padding:22, boxShadow:'0 24px 60px rgba(0,0,0,.3)' }}>
+        <div style={{ fontFamily:'"Source Serif 4",Georgia,serif', fontSize:20, fontWeight:700, color:'#0D1220' }}>Equation editor</div>
+        <div style={{ fontSize:12.5, color:'#6B7280', margin:'4px 0 14px', lineHeight:1.5 }}>
+          Type the maths as you would say it: <b>1/2</b> makes a fraction, <b>x^2</b> a power, <b>sqrt</b> a square root, <b>pi</b> gives π. Or use the buttons.
+        </div>
+        <div style={{ display:'flex', gap:5, flexWrap:'wrap', marginBottom:10 }}>
+          {QUICK.map(([l, t]) => <button key={l} type="button" disabled={state !== 'ready'} onClick={() => put(t)} style={{ ...symBtn, fontSize: l.length > 2 ? 12 : 14 }}>{l}</button>)}
+          <button type="button" disabled={state !== 'ready'} onClick={() => { try { window.mathVirtualKeyboard.show() } catch { /* noop */ } }} style={{ ...symBtn, fontSize:12 }}>⌨ Maths keyboard</button>
+        </div>
+        <div ref={host}>
+          {state === 'loading' && <div style={{ padding:22, textAlign:'center', color:'#6B7280', fontSize:13, border:'1.5px dashed #E8E0D0', borderRadius:10 }}>Loading the equation editor…</div>}
+          {state === 'failed' && <div style={{ padding:16, color:'#991B1B', fontSize:13, background:'#FEF2F2', borderRadius:10 }}>The equation editor could not load (check the internet connection). You can still use Symbols, or type maths such as x^2 or \frac{1}{2}.</div>}
+        </div>
+        {latex && <div style={{ marginTop:10, fontSize:12.5, color:'#6B7280' }}>On the printed paper: <span style={{ color:'#0D1220', fontFamily:'"DejaVu Sans", Arial, sans-serif' }}>{plainMath(latex)}</span></div>}
+        <div style={{ display:'flex', justifyContent:'flex-end', gap:8, marginTop:16 }}>
+          <button type="button" onClick={onClose} style={{ padding:'9px 16px', borderRadius:9, border:'1.5px solid #E8E0D0', background:'#fff', color:'#4A5261', fontWeight:700, fontSize:13, cursor:'pointer' }}>Cancel</button>
+          <button type="button" disabled={!latex.trim()} onClick={() => onInsert(latex)} style={{ padding:'9px 18px', borderRadius:9, border:'none', background: latex.trim() ? '#8B1A2E' : '#D1D5DB', color:'#fff', fontWeight:800, fontSize:13, cursor: latex.trim() ? 'pointer' : 'default' }}>Insert into question</button>
+        </div>
+      </div>
     </div>
   )
 }

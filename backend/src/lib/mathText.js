@@ -49,6 +49,8 @@ const SYMBOLS = {
   prime: '′', ell: 'ℓ', hbar: 'ħ', langle: '⟨', rangle: '⟩', lfloor: '⌊', rfloor: '⌋',
   lceil: '⌈', rceil: '⌉', mid: '|', vert: '|', Vert: '‖', backslash: '\\',
   quad: '  ', qquad: '    ', colon: ':', surd: '√',
+  // MathLive (the equation editor) writes these.
+  differentialD: 'd', exponentialE: 'e', imaginaryI: 'i', imaginaryJ: 'j', placeholder: '',
   // Function names print as words.
   sin: 'sin', cos: 'cos', tan: 'tan', sec: 'sec', csc: 'csc', cot: 'cot',
   arcsin: 'arcsin', arccos: 'arccos', arctan: 'arctan', sinh: 'sinh', cosh: 'cosh', tanh: 'tanh',
@@ -57,7 +59,7 @@ const SYMBOLS = {
 }
 // Commands that only size or space things: drop them, keep what follows.
 const IGNORE = new Set([
-  'left', 'right', 'middle', 'big', 'Big', 'bigg', 'Bigg', 'bigl', 'bigr', 'Bigl', 'Bigr',
+  'left', 'right', 'middle', 'mleft', 'mright', 'big', 'Big', 'bigg', 'Bigg', 'bigl', 'bigr', 'Bigl', 'Bigr',
   'biggl', 'biggr', 'displaystyle', 'textstyle', 'scriptstyle', 'limits', 'nolimits',
   'nonumber', 'notag', 'label', 'hline', 'cline',
 ])
@@ -125,7 +127,10 @@ function plainMath(tex) {
 
     if (name === 'frac' || name === 'dfrac' || name === 'tfrac' || name === 'cfrac') {
       const a = arg(), b = arg()
-      return `${wrap(a)}/${wrap(b)}`
+      // A fraction reads unambiguously on one line only with brackets
+      // round anything longer than a number or one symbol: (3x²)/(6x).
+      const fw = (t) => (/^[\p{N}.]+$/u.test(t) || [...t].length <= 1 ? t : `(${t})`)
+      return `${fw(a)}/${fw(b)}`
     }
     if (name === 'binom' || name === 'dbinom') { const a = arg(), b = arg(); return `C(${a}, ${b})` }
     if (name === 'sqrt') {
@@ -149,6 +154,8 @@ function plainMath(tex) {
     if (name === 'overset' || name === 'stackrel') { const top = arg(); const base = arg(); return `${base}${top ? '^' + top : ''}` }
     if (name === 'pmod') return `(mod ${arg()})`
     if (name in SYMBOLS) {
+      // dy/dx from the equation editor: "\differentialD y" reads "dy".
+      if (name === 'differentialD' || name === 'exponentialE' || name === 'imaginaryI') skipSpace()
       const s = SYMBOLS[name]
       // Function names need a space before a following letter: \sin x.
       return /^[a-z]{2,}$/.test(s) && /^[ ]*[A-Za-z0-9\\(]/.test(src.slice(i)) ? s + ' ' : s
@@ -248,12 +255,69 @@ function splitMath(text) {
 }
 
 /**
+ * LaTeX typed WITHOUT dollar signs, the commonest slip when a teacher
+ * types a question: "\frac{1}{2}x", "\pi r^2", "H_2SO_4", "ms^{-1}".
+ * Outside $…$ these used to reach the paper as raw codes. Each run that
+ * is clearly LaTeX (a \command with its {arguments}, or a ^/_ script
+ * after a letter, digit or bracket) is converted on its own; the prose
+ * around it is left exactly as typed.
+ */
+function groupEnd(s, j) {
+  let depth = 0
+  for (; j < s.length; j++) {
+    if (s[j] === '\\') { j++; continue }
+    if (s[j] === '{') depth++
+    else if (s[j] === '}') { depth--; if (depth === 0) return j + 1 }
+  }
+  return s.length
+}
+function scriptEnd(s, i) {
+  // s[i] is ^ or _; returns the end of its script, or -1 if none.
+  const j = i + 1, c = s[j] || ''
+  if (c === '{') return groupEnd(s, j)
+  if (/\d/.test(c) || (c === '-' && /\d/.test(s[j + 1] || ''))) { let k = j + 1; while (k < s.length && /\d/.test(s[k])) k++; return k }
+  if (c === '\\' && /[A-Za-z]/.test(s[j + 1] || '')) { let k = j + 1; while (k < s.length && /[A-Za-z]/.test(s[k])) k++; return k }
+  if (/[A-Za-z]/.test(c) && !/[A-Za-z]/.test(s[j + 1] || '')) return j + 1   // x^n, a_n
+  if (s[i] === '^' && /[+\-]/.test(c) && !/[\d\w]/.test(s[j + 1] || '')) return j + 1   // H^+, Cl^-
+  return -1
+}
+function bareLatex(text) {
+  const s = String(text)
+  if (!/[\\^_]/.test(s)) return s
+  let out = '', i = 0
+  while (i < s.length) {
+    if (s[i] === '\\' && /[A-Za-z]/.test(s[i + 1] || '')) {
+      let j = i + 1
+      while (j < s.length && /[A-Za-z]/.test(s[j])) j++
+      for (;;) {
+        if (s[j] === '[') { const k = s.indexOf(']', j); if (k === -1) break; j = k + 1; continue }
+        if (s[j] === '{') { j = groupEnd(s, j); continue }
+        if (s[j] === '^' || s[j] === '_') { const k = scriptEnd(s, j); if (k === -1) break; j = k; continue }
+        break
+      }
+      out += plainMath(s.slice(i, j)); i = j; continue
+    }
+    if ((s[i] === '^' || s[i] === '_') && i > 0 && /[\p{L}\p{N})\]}]/u.test(s[i - 1])) {
+      const k = scriptEnd(s, i)
+      if (k !== -1) {
+        const body = s.slice(i + 1, k)
+        out += plainMath(s[i] + (body[0] === '{' ? body : '{' + body + '}')); i = k; continue
+      }
+    }
+    // Spacing commands (\, \; \: \!) carry no meaning on paper.
+    if (s[i] === '\\' && /[,;:! ]/.test(s[i + 1] || '')) { out += s[i + 1] === '!' ? '' : ' '; i += 2; continue }
+    out += s[i++]
+  }
+  return out
+}
+
+/**
  * Keyboard maths typed without dollar signs (the admin bank's "plain
  * text" convention): x^2 → x², 10^-3 → 10⁻³, sqrt(50) → √(50).
  * Deliberately narrow so ordinary prose is never touched.
  */
 function keyboardMath(text) {
-  return String(text)
+  return bareLatex(String(text))
     .replace(/(\w|\))\^\(?(-?\d{1,3})\)?/g, (_, b, e) => b + [...e].map(c => SUP[c] || c).join(''))
     .replace(/\bsqrt\(([^()]{1,40})\)/g, '√($1)')
 }
@@ -278,4 +342,4 @@ function cleanForPaper(text) {
   return s.trim()
 }
 
-module.exports = { mathToText, plainMath, cleanForPaper, splitMath, stripHtml, keyboardMath }
+module.exports = { mathToText, plainMath, cleanForPaper, splitMath, stripHtml, keyboardMath, bareLatex }

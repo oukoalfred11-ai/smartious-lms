@@ -680,9 +680,17 @@ function render(exam, questions, opts, scheme, images) {
       try {
         const path = require('path')
         const ttf = path.join(path.dirname(require.resolve('dejavu-fonts-ttf/package.json')), 'ttf')
-        doc.registerFont('Helvetica', path.join(ttf, 'DejaVuSans.ttf'))
-        doc.registerFont('Helvetica-Bold', path.join(ttf, 'DejaVuSans-Bold.ttf'))
-        doc.registerFont('Helvetica-Oblique', path.join(ttf, 'DejaVuSans-Oblique.ttf'))
+        // Registered under NEW names: pdfkit loads and caches the core
+        // Helvetica the moment a document is created, so registering a
+        // font under the name "Helvetica" was silently ignored and every
+        // π, √ or θ still went to Helvetica and printed as garbage. The
+        // paper's font() calls are routed to the Unicode font instead.
+        doc.registerFont('SmUni', path.join(ttf, 'DejaVuSans.ttf'))
+        doc.registerFont('SmUni-Bold', path.join(ttf, 'DejaVuSans-Bold.ttf'))
+        doc.registerFont('SmUni-Oblique', path.join(ttf, 'DejaVuSans-Oblique.ttf'))
+        const UNI = { Helvetica: 'SmUni', 'Helvetica-Bold': 'SmUni-Bold', 'Helvetica-Oblique': 'SmUni-Oblique' }
+        const coreFont = doc.font.bind(doc)
+        doc.font = (src, ...rest) => coreFont(UNI[src] || src, ...rest)
       } catch (e) { console.error('[exam paper pdf] Unicode font unavailable, using core font:', e.message) }
       const chunks = []
       doc.on('data', c => chunks.push(c))
