@@ -13354,7 +13354,7 @@ function EarningsTab({ user, toast }) {
   const [deleting, setDeleting] = useState(null)
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-  const money   = (n, c='KES') => ({KES:'KES ',USD:'$',GBP:'£'})[c]||''+(n||0).toLocaleString('en-US',{minimumFractionDigits:0})
+  const money   = (n, c='KES') => (({KES:'KES ',USD:'$',GBP:'£'})[c]||'') + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})
   const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
 
   const load = () => {
@@ -13475,7 +13475,7 @@ function EarningsTab({ user, toast }) {
                     {deductions.map((d,i)=><div key={i} style={{ fontSize:11, color:'#7A6652', marginTop:2 }}>{d.label}: {money(d.amount,cur)}</div>)}
                   </div>
                   <div>
-                    <div style={{ fontSize:10, fontWeight:700, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Approved extras</div>
+                    <div style={{ fontSize:10, fontWeight:700, color:'#065F46', textTransform:'uppercase', letterSpacing:'.08em', marginBottom:4 }}>Approved tuitions</div>
                     <div style={{ fontSize:17, fontWeight:800, color:'#065F46' }}>{r.totalApprovedExtras>0?'+'+money(r.totalApprovedExtras,cur):'—'}</div>
                   </div>
                 </div>
@@ -13513,10 +13513,10 @@ function EarningsTab({ user, toast }) {
                 )}
 
                 {/* Actions */}
-                {r.status==='paid' && (
+                {(
                   <div style={{ padding:'10px 20px', borderTop:'1px solid #E8DDD5', display:'flex', gap:10 }}>
                     <button onClick={()=>openPayslip(r._id)} style={{ background:'#7D1025', color:'#fff', border:'none', padding:'8px 18px', borderRadius:7, fontSize:12.5, fontWeight:700, cursor:'pointer' }}>
-                      Download / print payslip
+                      {r.status==='paid' ? 'Download / print payslip' : 'View draft payslip'}
                     </button>
                     {r.payslipEmailSentAt&&<span style={{ fontSize:12, color:'#7A6652', alignSelf:'center' }}>Payslip emailed {fmtDate(r.payslipEmailSentAt)}</span>}
                   </div>

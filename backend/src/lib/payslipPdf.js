@@ -156,7 +156,9 @@ function buildPayslipPdfBuffer(r) {
     if (extras.length) {
       extras.forEach(e => {
         const label = e.description || 'Tuition extra'
-        const detail = [e.subject, e.sessions ? e.sessions + ' session' + (e.sessions === 1 ? '' : 's') : null]
+        const detail = [e.subject, e.studentName,
+          e.sessions ? e.sessions + ' session' + (e.sessions === 1 ? '' : 's') +
+            (e.ratePerSession ? ' x ' + money(e.ratePerSession, r.currency) : '') : null]
           .filter(Boolean).join(' \u00B7 ')
         ey = lineRow(doc, label, money(e.totalAmount, r.currency), leftX, ey, COL)
         if (detail) {
@@ -166,7 +168,7 @@ function buildPayslipPdfBuffer(r) {
       })
     } else {
       doc.font('Helvetica-Oblique').fontSize(8.5).fillColor(GREY)
-         .text('No approved tuition extras this period', leftX, ey)
+         .text('No approved tuitions this period', leftX, ey)
       ey += 15
     }
 
@@ -220,6 +222,13 @@ function buildPayslipPdfBuffer(r) {
            (r.paymentMethod ? '   \u00B7   ' + r.paymentMethod : ''),
            M + 56, y + 12, { width: W - 72 }
          )
+      y += 46
+    } else {
+      doc.roundedRect(M, y, W, 34, 4).fillAndStroke('#FEF3C7', '#FCD34D')
+      doc.font('Helvetica-Bold').fontSize(9.5).fillColor('#92400E')
+         .text(r.status === 'processing' ? 'PROCESSING' : 'DRAFT', M + 16, y + 12, { characterSpacing: 1.2, lineBreak: false })
+      doc.font('Helvetica').fontSize(8.8).fillColor('#92400E')
+         .text('Not yet paid. Figures may still change before payment.', M + 112, y + 12, { width: W - 128 })
       y += 46
     }
 

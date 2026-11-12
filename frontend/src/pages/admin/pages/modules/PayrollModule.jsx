@@ -27,7 +27,9 @@ function PayrollModule({ refreshKey, toast }) {
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
   const cur     = (r) => r?.currency||'KES'
-  const money   = (n, c='KES') => ({KES:'KES ',USD:'$',GBP:'£'})[c]||''+(n||0).toLocaleString('en-US',{minimumFractionDigits:2})
+  // Symbol + amount. (The old version returned only the symbol, so every
+  // figure on this page read "KES" with no number.)
+  const money   = (n, c='KES') => (({KES:'KES ',USD:'$',GBP:'£'})[c]||'') + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
   const fmtDate = d => d?new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'—'
 
   const STATUS_S = {
@@ -50,14 +52,14 @@ function PayrollModule({ refreshKey, toast }) {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    api.get('/payroll/teachers')
-      .then(r => setTeachers(r.data?.data?.teachers||[]))
+    api.get('/payroll/staff')
+      .then(r => setTeachers(r.data?.data?.staff||[]))
       .catch(() => {})
   }, [refreshKey])
 
   // Create
   const create = async () => {
-    if (!form.teacherId || !form.basicSalary) { toast?.error?.('Select teacher and enter basic salary.'); return }
+    if (!form.teacherId || !form.basicSalary) { toast?.error?.('Select a staff member and enter the basic salary.'); return }
     setSaving(true)
     try {
       const deds = form.deductions.filter(d=>d.label&&parseFloat(d.amount)>0)
@@ -131,8 +133,8 @@ function PayrollModule({ refreshKey, toast }) {
 
   return (
     <>
-      <PSection tag="Finance" title="Teacher" em="Payroll"
-        sub="Manage teacher salaries, deductions, and tuition extras. Mark paid to automatically email payslips."/>
+      <PSection tag="Finance" title="Staff" em="Payroll"
+        sub="Monthly salaries, deductions and approved tuitions for every staff member. Each person sees their own payslip in their portal at all times; marking paid also emails it."/>
 
       {/* Period filter */}
       <div style={{ display:'flex', gap:10, marginBottom:18, flexWrap:'wrap', alignItems:'center' }}>
@@ -169,7 +171,7 @@ function PayrollModule({ refreshKey, toast }) {
             { label:'Processing',    val:summary.processing,                color:'#1E40AF' },
             { label:'Total gross',   val:money(summary.totalGross,'KES'),   color:TOKENS.crimson },
             { label:'Total net',     val:money(summary.totalNet,'KES'),     color:TOKENS.accentEmerald },
-            { label:'Pending extras', val:summary.pendingExtras,            color:summary.pendingExtras>0?'#D97706':TOKENS.s400 },
+            { label:'Pending tuitions', val:summary.pendingExtras,            color:summary.pendingExtras>0?'#D97706':TOKENS.s400 },
           ].map(k=>(
             <div key={k.label} className="kpi">
               <div style={{ fontSize:10, fontWeight:700, color:TOKENS.s400, textTransform:'uppercase', letterSpacing:'.07em', marginBottom:5 }}>{k.label}</div>
@@ -183,7 +185,7 @@ function PayrollModule({ refreshKey, toast }) {
       {allPendingExtras.length > 0 && (
         <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:10, padding:'14px 18px', marginBottom:16 }}>
           <div style={{ fontSize:12, fontWeight:800, color:'#D97706', marginBottom:10 }}>
-            {allPendingExtras.length} tuition extra{allPendingExtras.length>1?'s':''} awaiting approval
+            {allPendingExtras.length} tuition claim{allPendingExtras.length>1?'s':''} awaiting approval
           </div>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {allPendingExtras.map((e,i) => (
@@ -214,7 +216,7 @@ function PayrollModule({ refreshKey, toast }) {
         ) : (
           <table className="tbl" style={{ width:'100%', borderCollapse:'collapse' }}>
             <thead><tr>
-              {['Teacher','Period','Basic salary','Deductions','Extras','Net pay','Status','Payment date',''].map(h=>(
+              {['Staff member','Period','Basic salary','Deductions','Approved tuitions','Net pay','Status','Payment date',''].map(h=>(
                 <th key={h} style={{ padding:'9px 14px', textAlign:'left', fontSize:10.5 }}>{h}</th>
               ))}
             </tr></thead>
@@ -226,7 +228,7 @@ function PayrollModule({ refreshKey, toast }) {
                   <tr key={r._id} style={{ borderTop:'1px solid '+TOKENS.line }}>
                     <td style={{ padding:'10px 14px' }}>
                       <div style={{ fontSize:13, fontWeight:700, color:TOKENS.s900 }}>{r.teacherName}</div>
-                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{r.teacherEmail}</div>
+                      <div style={{ fontSize:11, color:TOKENS.s500 }}>{r.staffRole ? r.staffRole+' · ' : ''}{r.teacherEmail}</div>
                     </td>
                     <td style={{ padding:'10px 14px', fontSize:13, color:TOKENS.s700 }}>{r.periodLabel}</td>
                     <td style={{ padding:'10px 14px', fontWeight:700, fontSize:13 }}>{money(r.basicSalary, cur(r))}</td>
@@ -247,7 +249,7 @@ function PayrollModule({ refreshKey, toast }) {
                       <div style={{ display:'flex', gap:5, flexWrap:'nowrap' }}>
                         {r.status!=='paid'&&<button onClick={()=>setEditModal({...r, _basic:r.basicSalary, _deds:JSON.parse(JSON.stringify(r.deductions||[]))})} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.line, background:'#fff', color:TOKENS.s700, fontSize:11.5, fontWeight:600, cursor:'pointer' }}>Edit</button>}
                         {r.status!=='paid'&&<button onClick={()=>{ setPayModal(r); setPayForm({paymentDate:new Date().toISOString().split('T')[0],paymentMethod:r.paymentMethod||'Bank transfer',paymentRef:'',paymentNote:''}) }} style={{ padding:'5px 9px', borderRadius:6, border:'none', background:TOKENS.accentEmerald, color:'#fff', fontSize:11.5, fontWeight:700, cursor:'pointer' }}>Mark paid</button>}
-                        {r.status==='paid'&&<button onClick={()=>openPayslip(r._id)} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.crimson, background:'#fff', color:TOKENS.crimson, fontSize:11.5, fontWeight:700, cursor:'pointer' }}>Payslip</button>}
+                        <button onClick={()=>openPayslip(r._id)} title={r.status==='paid'?'Payslip':'Draft payslip: not yet paid'} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid '+TOKENS.crimson, background:'#fff', color:TOKENS.crimson, fontSize:11.5, fontWeight:700, cursor:'pointer' }}>Payslip</button>
                         {r.status!=='paid'&&<button onClick={()=>del(r._id)} disabled={deleting===r._id} style={{ padding:'5px 9px', borderRadius:6, border:'1px solid #FCA5A5', background:'#fff', color:'#991B1B', fontSize:11.5, cursor:'pointer', opacity:deleting===r._id?.5:1 }}>
                           {deleting===r._id?'…':'Delete'}
                         </button>}
@@ -270,10 +272,10 @@ function PayrollModule({ refreshKey, toast }) {
             <div style={{ fontSize:16, fontWeight:800, color:TOKENS.s900, marginBottom:20 }}>New payroll record</div>
             <div style={{ display:'grid', gap:14 }}>
               <div>
-                <label className="fl">Teacher</label>
+                <label className="fl">Staff member</label>
                 <select value={form.teacherId} onChange={e=>setForm(p=>({...p,teacherId:e.target.value}))} style={{ ...{ padding:'9px 11px', borderRadius:7, border:'1.5px solid '+TOKENS.line, fontSize:13, fontFamily:'inherit', width:'100%' } }}>
-                  <option value="">Select teacher...</option>
-                  {teachers.map(t=><option key={t._id} value={t._id}>{t.firstName} {t.lastName}</option>)}
+                  <option value="">Select staff member...</option>
+                  {teachers.map(t=><option key={t._id} value={t._id}>{t.firstName} {t.lastName}{t.roleLabel?' · '+t.roleLabel:''}</option>)}
                 </select>
               </div>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>

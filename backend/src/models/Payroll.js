@@ -28,6 +28,8 @@ const payrollSchema = new mongoose.Schema({
   teacherId:   { type: mongoose.Schema.Types.ObjectId, ref:'User', required:true, index:true },
   teacherName: { type: String, required:true },
   teacherEmail:{ type: String, required:true },
+  // Job role printed on the payslip (any staff member can be on payroll).
+  staffRole:   { type: String, default: '' },
 
   // Period
   periodLabel: { type: String, required:true },  // e.g. "July 2026"
