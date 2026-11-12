@@ -171,15 +171,7 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
       ))}
     </div>
   )
-  const sideTab = (id, label, k) => {
-    const on = tab === id
-    return (
-      <button key={id} onClick={() => setTab(id)} style={{
-        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', borderRadius: 99, border: 'none', cursor: 'pointer',
-        background: on ? 'rgba(255,255,255,.14)' : 'transparent', color: '#fff', fontSize: 14, fontWeight: on ? 800 : 600, textAlign: 'left',
-      }}><Ico k={k} c={on ? GOLD : 'rgba(255,255,255,.85)'} s={18} />{label}</button>
-    )
-  }
+
 
   const nextLabel = (ns) => {
     if (!ns) return ''
@@ -320,33 +312,44 @@ export default function ClubsHub({ user, toast, readOnly = false }) {
 
   return (
     <div>
-      {/* ── Crimson header: the banner film plays inside it, the
-          section tabs ride on top - one column like every other
-          module, no second sidebar. ── */}
-      <div style={{ background: `linear-gradient(135deg, ${CR} 0%, #5A0B1B 60%, #3D0712 100%)`, borderRadius: 18, padding: '18px 20px', marginBottom: 20, position: 'relative', zIndex: 0, overflow: 'hidden' }}>
-        <HeroPanelVideo />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          {sideTab('overview', 'Overview', 'home')}
-          {sideTab('mine', 'My Clubs', 'users')}
-          {sideTab('events', 'Events', 'cal')}
-          {sideTab('recordings', 'Recordings', 'play')}
-          <div style={{ marginLeft: 'auto', color: 'rgba(255,255,255,.85)', fontSize: 12.5, fontStyle: 'italic', minWidth: 0 }}>
-            <span style={{ color: GOLD, fontSize: 18, lineHeight: 0 }}>&ldquo;</span> Discover your passion today, lead the world tomorrow.
+      {/* ── Hero: the clubs film full width, with the page title and
+          the section tabs over it. Cinematic shading (dark on the left
+          for the words, clear on the right) instead of a crimson dye. ── */}
+      <div className="clubs-hero" style={{ position: 'relative', zIndex: 0, overflow: 'hidden', borderRadius: 22, marginBottom: 20, minHeight: 250,
+        background: `linear-gradient(120deg, ${CR} 0%, #5A0B1B 55%, #2A050C 100%)`, boxShadow: '0 14px 40px -18px rgba(61,7,18,.55)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <HeroPanelVideo tone="cinematic" />
+        <div className="ch-shade" aria-hidden="true" style={{ position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none' }} />
+        <style>{`
+          .clubs-hero .ch-tab{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;cursor:pointer;font-size:14px;color:#fff;
+            border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.08);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .2s}
+          .clubs-hero .ch-tab:hover{background:rgba(255,255,255,.16)}
+          .clubs-hero .ch-tab.on{background:#fff;color:${CR};border-color:#fff;font-weight:800}
+          @media(max-width:700px){.clubs-hero .ch-shade{background:linear-gradient(180deg,rgba(40,6,14,.55),rgba(40,6,14,.35) 60%,rgba(20,3,8,.6))}.clubs-hero{min-height:220px!important}.clubs-hero .ch-quote{display:none}.clubs-hero .ch-tab{padding:8px 12px;font-size:13px}}
+        `}</style>
+        <div style={{ padding: '26px 28px 0', maxWidth: 640 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.2em', color: '#F3D58E', textTransform: 'uppercase' }}>Beyond the classroom</div>
+          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.9rem, 3.8vw, 2.7rem)', fontWeight: 600, lineHeight: 1.1, color: '#fff', margin: '6px 0 8px', textShadow: '0 2px 18px rgba(0,0,0,.35)' }}>
+            {isStaff ? <>Clubs &amp; <em style={{ color: '#F3D58E' }}>activities</em></> : <>Your <em style={{ color: '#F3D58E' }}>clubs</em></>}
+          </div>
+          <div style={{ fontSize: 14.5, color: 'rgba(255,255,255,.86)', lineHeight: 1.55, maxWidth: 520 }}>{isStaff ? 'Lead an activity, schedule sessions at any time of day, and see the week at a glance.' : 'Find your people, join a session live, and catch up on anything you missed.'}</div>
+          <div style={{ display: 'flex', gap: 18, marginTop: 14, flexWrap: 'wrap', color: 'rgba(255,255,255,.9)', fontSize: 13 }}>
+            {[[clubs.length, 'clubs'], [isStaff ? led.length : mine.length, isStaff ? 'you lead' : 'joined'], [(events || []).length, 'sessions coming up']].map(([n, l]) => (
+              <span key={l}><b style={{ fontSize: 18, color: '#fff', marginRight: 5 }}>{n}</b>{l}</span>
+            ))}
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', padding: '18px 20px 18px' }}>
+          {[['overview', 'Overview', 'home'], ['mine', 'My Clubs', 'users'], ['events', 'Events', 'cal'], ['recordings', 'Recordings', 'play']].map(([id, label, k]) => (
+            <button key={id} className={'ch-tab' + (tab === id ? ' on' : '')} onClick={() => setTab(id)}><Ico k={k} c={tab === id ? CR : '#fff'} s={16} />{label}</button>
+          ))}
+          <div className="ch-quote" style={{ marginLeft: 'auto', color: 'rgba(255,255,255,.85)', fontSize: 12.5, fontStyle: 'italic' }}>
+            <span style={{ color: '#F3D58E', fontSize: 18, lineHeight: 0 }}>&ldquo;</span> Discover your passion today, lead the world tomorrow.
           </div>
         </div>
       </div>
 
       {/* Main */}
       <div>
-        {/* Header */}
-        <div style={{ marginBottom: 18 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.18em', color: GOLD, textTransform: 'uppercase' }}>Beyond the classroom</div>
-          <div style={{ fontFamily: "'Source Serif 4',Georgia,serif", fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)', fontWeight: 600, lineHeight: 1.15, color: INK, margin: '4px 0' }}>
-            {isStaff ? <>Clubs &amp; <em style={{ color: CR }}>activities</em></> : <>Your <em style={{ color: CR }}>clubs</em></>}
-          </div>
-          <div style={{ fontSize: 14, color: MUTE }}>{isStaff ? 'Lead an activity, schedule sessions at any time of day, and see the week at a glance.' : 'Find your people, join a session live, and catch up on anything you missed.'}</div>
-        </div>
-
         {loading ? <div style={{ padding: 40, textAlign: 'center', color: MUTE }}>Loading clubs...</div> : (
           <>
             {tab === 'overview' && (
