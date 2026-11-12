@@ -510,36 +510,6 @@ const styles = `
   .lp .h-sub{font-size:17px;color:rgba(247,243,237,.85);max-width:520px;line-height:1.8;margin-bottom:44px;text-shadow:0 2px 12px rgba(8,12,20,.5)}
   .lp .h-act{display:flex;gap:12px;flex-wrap:wrap}
   .lp .h-sub-short{display:none}
-  /* HERO v2 — same words and video, calmer layout: the copy sits in a readable column on a
-     soft left-hand shade, the headline is solid gold italic (not outline), the fees become two
-     chips, and the hero now fades into the dark band below instead of washing out to cream. */
-  .lp #hero .h-bg{filter:brightness(1.12) saturate(1.1) contrast(1.04)}
-  .lp #hero .h-ov{background:linear-gradient(90deg,rgba(8,12,20,.9) 0%,rgba(8,12,20,.74) 34%,rgba(8,12,20,.28) 62%,rgba(8,12,20,.08) 100%),radial-gradient(900px 520px at 0% 100%,rgba(139,26,46,.32),transparent 70%)}
-  .lp #hero .h-vig{height:180px;background:linear-gradient(to top,${V.ink} 0%,rgba(8,12,20,0) 100%)}
-  .lp #hero .h-body{justify-content:center;padding:96px 48px 88px}
-  .lp .h-copy{max-width:1120px;position:relative;padding-left:28px}
-  .lp .h-copy::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,${V.gold3},rgba(201,151,58,.0))}
-  .lp #hero .h1{font-size:clamp(2.6rem,5vw,4.7rem);font-weight:800;line-height:1.04;letter-spacing:-.025em;margin-bottom:26px;text-shadow:0 2px 30px rgba(8,12,20,.45)}
-  .lp #hero .h1 em{-webkit-text-stroke:0;color:#E2B65A;-webkit-text-fill-color:#E2B65A;font-weight:700;padding-right:.04em}
-  .lp #hero .h-sub{font-size:17.5px;line-height:1.75;color:rgba(247,243,237,.82);max-width:640px;margin-bottom:24px;text-shadow:none}
-  .lp #hero .h-kick{display:block;font-weight:700;color:${V.white};margin-bottom:6px;letter-spacing:.01em}
-  .lp .h-price{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px}
-  .lp .h-price span{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(201,151,58,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:14px;color:rgba(247,243,237,.82)}
-  .lp .h-price strong{color:${V.gold3};font-weight:700}
-  .lp #hero .h-act .btn-p{padding:17px 32px;font-size:15.5px;font-weight:800;border-radius:12px;background:linear-gradient(180deg,#B3263F,${V.cr});box-shadow:0 14px 34px -10px rgba(139,26,46,.75),inset 0 1px 0 rgba(255,255,255,.18)}
-  .lp #hero .h-act .btn-o{padding:17px 30px;font-size:15.5px;border-radius:12px;color:${V.white};border:1px solid rgba(247,243,237,.35);background:rgba(255,255,255,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-  .lp #hero .h-act .btn-o:hover{border-color:${V.gold3};color:${V.gold3}}
-  .lp .marq.marq-home{background:${V.ink};border-top:1px solid rgba(201,151,58,.16);border-bottom:1px solid rgba(201,151,58,.16);padding:15px 0}
-  .lp .marq.marq-home .mi{color:rgba(247,243,237,.6);font-size:11.5px;letter-spacing:.14em}
-  .lp .marq.marq-home .md{width:5px;height:5px;transform:rotate(45deg);border-radius:1px}
-  @media(max-width:900px){
-    .lp #hero .h-ov{background:linear-gradient(180deg,rgba(8,12,20,.55) 0%,rgba(8,12,20,.7) 55%,rgba(8,12,20,.9) 100%)}
-    .lp #hero .h-body{padding:104px 20px 56px}
-    .lp .h-copy{padding-left:18px}
-    .lp #hero .h1{font-size:clamp(2.2rem,9.4vw,3.2rem)}
-    .lp #hero .h-sub{font-size:15.5px;line-height:1.65}
-    .lp #hero .h-act .btn-p,.lp #hero .h-act .btn-o{padding:15px 22px;font-size:15px}
-  }
   .lp .h-stats{position:absolute;right:48px;top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:12px}
   .lp .hs{background:rgba(8,12,20,.55);border:1px solid rgba(184,150,12,.22);border-radius:10px;padding:14px 16px;backdrop-filter:blur(16px);min-width:140px;max-width:210px;position:relative;overflow:hidden}
   .lp .hs::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,${V.gold3},transparent)}
@@ -5816,33 +5786,29 @@ export default function LandingPage() {
             <div className="h-ov"/>
             <div className="h-vig"/>
             <div className="h-body">
-              <div className="h-copy">
               <h1 className="h1">
                 <span>Online School &amp; Homeschool</span>
                 <span>for <em>IGCSE, A-Level,</em></span>
                 <span><em>IB, American &amp; CBC</em> Students</span>
               </h1>
               <p className="h-sub h-sub-short">Live classes with qualified teachers. 1-on-1 tuition <strong style={{color:V.gold3}}>from USD 15/hour</strong> · full programmes <strong style={{color:V.gold3}}>from USD 423/month</strong>.</p>
-              <p className="h-sub h-sub-long"><span className="h-kick">Live classes. Qualified teachers. Internationally recognised qualifications.</span> Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide.</p>
-              <div className="h-price h-sub-long" aria-label="Fees">
-                <span><strong>From USD 15/hour</strong> for 1-on-1 tuition</span>
-                <span><strong>from USD 423/month</strong> for full homeschool programmes</span>
-              </div>
+              <p className="h-sub h-sub-long">Live classes. Qualified teachers. Internationally recognised qualifications. Smartious is an accredited online school and homeschool provider delivering Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma, Kenya CBC and American Curriculum — taught online by specialists serving families across Kenya, the UAE, UK, Canada and more than 40 countries worldwide. <strong style={{color:V.gold3}}>From USD 15/hour</strong> for 1-on-1 tuition · <strong style={{color:V.gold3}}>from USD 423/month</strong> for full homeschool programmes.</p>
               <div className="h-act">
                 <a className="btn-p lp-btnlink" href={'/assessment'} onClick={linkClick(() => nav('/assessment'))}
->
+                  style={{padding:'18px 36px',fontSize:16,fontWeight:800,borderRadius:10,boxShadow:'0 8px 24px rgba(201,151,58,.35)',transition:'all .18s ease'}}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 32px rgba(201,151,58,.5)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(201,151,58,.35)' }}>
                   Book assessment
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{marginLeft:8}}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a className="btn-o lt h-act-3 lp-btnlink" href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
-              </div>
+                <a className="btn-o lt h-act-3 lp-btnlink" style={{borderColor:'rgba(247,243,237,.45)',color:'rgba(247,243,237,.9)'}} href={pageToPath('programs')} onClick={linkClick(() => P('programs'))}>View Programmes</a>
               </div>
             </div>
           </section>
 
           {/* Mobile page summary strip */}
           <div style={{display:'none'}} className="mob-page-strip">
-            <div style={{background:V.ink,borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
+            <div style={{background:'rgba(255,255,255,.04)',borderBottom:'1px solid rgba(255,255,255,.08)',padding:'10px 20px',overflowX:'auto',whiteSpace:'nowrap'}}>
               {[['Home','home'],['About','about'],['Curricula','curricula'],['Services','services'],['Pricing','pricing'],['Blog','blog'],['Book assessment','assessment']].map(([l,id]) => (
                 <a className="lp-btnlink" key={id} href={pageToPath(id)} onClick={linkClick(() => P(id))} style={{display:'inline-block',marginRight:8,padding:'6px 14px',borderRadius:99,border:'1px solid rgba(255,255,255,.15)',background:page===id?'rgba(96,165,250,.2)':'transparent',color:page===id?'#60A5FA':'rgba(255,255,255,.55)',fontSize:13,fontWeight:page===id?700:400,cursor:'pointer',whiteSpace:'nowrap'}}>
                   {l}
@@ -5851,7 +5817,7 @@ export default function LandingPage() {
             </div>
           </div>
           {/* MARQUEE */}
-          <div className="marq marq-home">
+          <div className="marq">
             <div className="marq-in">
               {[...Array(2)].map((_,ri) => ['Online School','Virtual School','Homeschool','IGCSE Excellence','Cambridge A-Level','IB Diploma','British Curriculum','American Curriculum','CBC Kenya','Pearson Edexcel','Live Online Classes','40+ Countries Served','Teaching Since 2018','78+ Qualified Tutors','Study Abroad','University Admissions Support'].map((t,i) => (
                 <div key={ri+'-'+i} className="mi"><div className="md"/>{t}</div>
