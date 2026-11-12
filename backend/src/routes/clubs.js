@@ -221,7 +221,11 @@ router.post('/:id/meetings', auth, requireRole('teacher', ...ADMIN), async (req,
     const admin = ADMIN.includes(req.user.role);
     if (!admin && !isLeaderOf(c, req.user._id)) return res.status(403).json({ success: false, message: 'Only this club\'s leaders can schedule meetings.' });
     const { title, scheduledAt, durationMins, kind, teacherId } = req.body || {};
-    const when = new Date(scheduledAt);
+    // A bare "2026-11-18T10:00" (no zone) is the school's local time,
+    // Nairobi, not UTC: read as UTC it landed three hours late, so a
+    // morning session showed up in the afternoon.
+    const raw = String(scheduledAt || '');
+    const when = new Date(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(raw) ? raw + '+03:00' : raw);
     if (!scheduledAt || isNaN(when)) return res.status(400).json({ success: false, message: 'A valid date and time is required.' });
     // The meeting's host: the leader scheduling it, or (admin) a chosen leader, else the first leader.
     let host = req.user._id;

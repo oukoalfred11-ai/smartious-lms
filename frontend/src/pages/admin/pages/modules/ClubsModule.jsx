@@ -58,7 +58,9 @@ export default function ClubsModule({ toast }) {
     if (!meeting.scheduledAt) return toast?.error?.('Pick a date and time.')
     setBusy(true)
     try {
-      await api.post(`/clubs/${meeting.clubId}/meetings`, meeting)
+      // datetime-local has no time zone: send the instant the person picked
+      // (their local time), not a bare string the server would read as UTC.
+      await api.post(`/clubs/${meeting.clubId}/meetings`, { ...meeting, scheduledAt: new Date(meeting.scheduledAt).toISOString() })
       toast?.ok?.('Session scheduled. It will open in the meeting view and record automatically.')
       setMeeting(null); if (detail) openDetail(detail.club)
     } catch (e) { toast?.error?.(e?.response?.data?.message || 'Could not schedule.') }
