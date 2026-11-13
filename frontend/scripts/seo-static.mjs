@@ -81,6 +81,7 @@ import { IGCSE_ADMISSION } from '../src/data/igcseAdmissions2027.js'
 import { LOWER_SEC_ADMISSION } from '../src/data/lowerSecondaryAdmissions2027.js'
 import { guidesFor } from '../src/data/geoGuides.js'
 import { naMeta, usLead, caLead, US_HEADLINE, CA_HEADLINE } from '../src/data/naFocus.js'
+import { programmeLinks, PROGRAMME_LINKS_HEADING } from '../src/data/articleProgrammeLinks.js'
 import { VL_PATH, VL_META, VL_HERO, VL_IMAGES, VL_BONES, VL_MODEL_IMAGES, VL_FEATURES, VL_KENYA, VL_INTERNATIONAL, VL_FAQS, VL_CREDITS, VL_PRACTICALS, VL_MODELS } from '../src/data/virtualLab.js'
 import { EXPERIMENTS } from '../../shared/lab/experiments/index.js'
 import { MODELS } from '../src/lab/models/catalogue.js'
@@ -404,8 +405,8 @@ for (const sv of SERVICES) {
 for (const c of CURRICULA) {
   const d = c.detail || {}
   const path = '/curricula/' + c.slug
-  const desc = d.overview ? d.overview.slice(0, 158) : c.desc.slice(0, 158)
-  add({ path, title: c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE, desc, h1: c.h + (d.tagline ? ': ' + d.tagline : ''), body: [
+  const desc = c.seoDesc || (d.overview ? d.overview.slice(0, 158) : c.desc.slice(0, 158))
+  add({ path, title: c.seoTitle || (c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE), desc, h1: c.h + (d.tagline ? ': ' + d.tagline : ''), body: [
     p(c.badge + (d.ageRange ? ' · ' + d.ageRange : '')), p(c.desc), p(d.overview), bullets(c.meta), c.tags?.length ? h2('Subjects') + bullets(c.tags) : '',
     ...(d.sections || []).map(s => h2(s.h) + (Array.isArray(s.p) ? s.p.map(p).join('') : p(s.p)) + bullets(s.items)),
     d.whyChoose ? h2('Why choose ' + c.h) + p(d.whyChoose) : '',
@@ -833,6 +834,7 @@ for (const [slug, a] of Object.entries(FULL_ARTICLES)) {
           `<ul class="ss-links">${rows.map(r => `<li><a href="${esc(href('/online-school/' + r.slug))}">${esc(r.name)}</a> — ` +
             r.guides.map(g => `<a href="${esc(href('/blog/' + g.slug))}">${esc(g.label)}</a>`).join(' · ') + '</li>').join('')}</ul>` : ''
       })() : '',
+      programmeLinks(slug, a).length ? h2(PROGRAMME_LINKS_HEADING) + links(programmeLinks(slug, a)) : '',
       a.articleLinks?.length ? h2(a.articleLinksHeading || 'Read next') + p(a.articleLinksIntro) +
         links(a.articleLinks.map(al => ({ href: '/blog/' + al.slug, label: al.name, note: al.note }))) : '',
       a.series === 'continental' ? h2('The Continental Guides') +
