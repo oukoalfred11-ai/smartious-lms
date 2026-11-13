@@ -19,7 +19,7 @@ export const BOARD_SCHOOLS = {
     boardFull: 'Cambridge International Education',
     other: 'edexcel',
     title: 'Accredited Cambridge Online School | Smartious',
-    desc: 'Smartious is a Cambridge registered online school: live Cambridge Primary, Lower Secondary, IGCSE and A Level classes with specialist teachers, from anywhere.',
+    desc: 'Cambridge homeschooling with a Cambridge registered online school: live Primary, Lower Secondary, IGCSE and A Level classes with specialist teachers.',
     eyebrow: 'Cambridge International registered school',
     h1: 'Accredited Cambridge online school, from Primary to A Level',
     intro: 'Smartious is a Cambridge International registered school teaching the Cambridge curriculum live online, to families in more than forty countries. Students follow one timetable with subject-specialist teachers, from Cambridge Primary through Lower Secondary and IGCSE to International AS & A Level, and we enter them for their Cambridge examinations.',
@@ -62,6 +62,7 @@ export const BOARD_SCHOOLS = {
     compare: 'Choosing between Cambridge and Pearson Edexcel? Both are British-style international qualifications accepted by universities worldwide. Cambridge has two main examination series a year and a very wide subject range; Pearson Edexcel International A Level is modular, with more series a year in which units can be sat or resat. We teach both, and help families choose at assessment.',
     faqs: [
       { q: 'Is Smartious an accredited Cambridge school?', a: 'Smartious is a Cambridge International registered school. Cambridge registers schools that teach its programmes and enter students for its examinations; that is the recognition Cambridge itself gives a school.' },
+      { q: 'Can we use Smartious for Cambridge homeschooling?', a: 'Yes. Families who homeschool on the Cambridge route enrol their child in our live online classes from home. The student follows the weekly timetable with subject-specialist teachers, and we enter them for their Cambridge examinations.' },
       { q: 'Are Cambridge qualifications from an online school the same as from a school building?', a: 'Yes. Cambridge IGCSE and A Level certificates are issued by Cambridge International Education, whether the student was taught online or in a classroom. Universities see the same qualification.' },
       { q: 'Can my child sit Cambridge exams in our country?', a: 'Cambridge examinations are sat in person at a centre. As a registered school we enter our students and agree with each family where they will sit, usually at a centre in or near their home city.' },
       { q: 'Which ages and stages do you teach?', a: 'Cambridge Primary (ages 5 to 11), Cambridge Lower Secondary (11 to 14), Cambridge IGCSE (14 to 16) and Cambridge International AS & A Level (16 to 19).' },
@@ -78,7 +79,7 @@ export const BOARD_SCHOOLS = {
     boardFull: 'Pearson Edexcel',
     other: 'cambridge',
     title: 'Accredited Pearson Edexcel Online School | Smartious',
-    desc: 'Smartious is a Pearson Edexcel approved centre teaching International GCSE and International A Level live online, with specialist teachers, from anywhere.',
+    desc: 'Edexcel homeschooling with a Pearson Edexcel approved centre: International GCSE and International A Level taught live online by specialist teachers.',
     eyebrow: 'Pearson Edexcel approved centre',
     h1: 'Accredited Pearson Edexcel online school for International GCSE and A Level',
     intro: 'Smartious is a Pearson Edexcel approved centre teaching the Edexcel route live online, to families in more than forty countries. Students in Years 7 to 13 follow one timetable with subject-specialist teachers, through Pearson Edexcel International GCSE and International AS & A Level, and we enter them for their Edexcel examinations.',
@@ -120,6 +121,7 @@ export const BOARD_SCHOOLS = {
     compare: 'Choosing between Pearson Edexcel and Cambridge? Both are British-style international qualifications accepted by universities worldwide. Edexcel International A Level is modular, with more series a year in which units can be sat or resat, and maps closely onto the English system; Cambridge has a very wide subject range and two main series a year. We teach both, and help families choose at assessment.',
     faqs: [
       { q: 'Is Smartious an accredited Pearson Edexcel school?', a: 'Smartious is a Pearson Edexcel approved centre. Pearson approves centres to deliver its qualifications and enter candidates for them; that is the recognition Pearson itself gives a school.' },
+      { q: 'Can we use Smartious for Edexcel homeschooling?', a: 'Yes. Families who homeschool on the Edexcel route enrol their child in our live online classes from home. The student follows the weekly timetable with subject-specialist teachers, and we enter them for their Edexcel examinations.' },
       { q: 'Are Edexcel qualifications from an online school the same as from a school building?', a: 'Yes. International GCSE and International A Level certificates are issued by Pearson, whether the student was taught online or in a classroom. Universities see the same qualification.' },
       { q: 'Can my child sit Edexcel exams in our country?', a: 'Edexcel examinations are sat in person at a centre. As an approved centre we enter our students and agree with each family where they will sit, usually at a centre in or near their home city.' },
       { q: 'What is modular about International A Level?', a: 'Each subject is made of units examined separately. Units can be sat in different series across the two years, and resat where the specification allows, with the best result counting towards the final grade.' },

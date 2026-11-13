@@ -69,6 +69,7 @@ import { PRIORITY_CITY_LINKS } from '../data/priorityLinks.js'
 import { SOCIAL_LINKS, SOCIAL_URLS, KAREN_MAP_URL } from '../data/social.js'
 import SocialLinks from '../components/SocialLinks.jsx'
 import { HUB_TITLES, guideTitle, nairobiAreaTitle, fitTitle, fitDesc } from '../data/seoTitles.js'
+import { programmeLinks, PROGRAMME_LINKS_HEADING } from '../data/articleProgrammeLinks.js'
 import { guidesFor } from '../data/geoGuides.js'
 import { CONTINENTAL_SERIES, guideCountryRows, aboutGuideText } from '../data/continentalGuides.js'
 import { PARTNERSHIP_PAGES, PARTNERSHIP_SLUG_TO_KEY } from '../data/partnershipPages.js'
@@ -4276,8 +4277,8 @@ export default function LandingPage() {
   if (page === 'curriculum-detail' && currentCurriculum) {
     const c = CURRICULA.find(x => x.slug === currentCurriculum)
     if (c) {
-      metaTitle = c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE
-      metaDesc  = c.detail?.overview ? c.detail.overview.slice(0, 158) : c.desc.slice(0, 158)
+      metaTitle = c.seoTitle || (c.h + (/Curriculum$/.test(c.h) ? '' : ' Curriculum') + ' | Homeschooling & Online — ' + SITE)
+      metaDesc  = c.seoDesc || (c.detail?.overview ? c.detail.overview.slice(0, 158) : c.desc.slice(0, 158))
     }
   } else if (page === 'service-detail' && currentService) {
     const s = SERVICES.find(x => x.slug === currentService)
@@ -23675,6 +23676,25 @@ export default function LandingPage() {
                     </section>
                   )
                 })()}
+
+                {/* Programme links: the guide's own IGCSE / A-Level / Cambridge / Edexcel pages (data/articleProgrammeLinks.js). */}
+                {(() => { const pl = programmeLinks(currentArticle, a); return pl.length > 0 && (
+                  <section style={{marginBottom:44}}>
+                    <h2 style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.7rem',fontWeight:700,color:V.ink,marginBottom:16,letterSpacing:'-.01em',position:'relative',paddingLeft:18}}>
+                      <span style={{position:'absolute',left:0,top:14,width:8,height:8,borderRadius:'50%',background:V.cr}}/>
+                      {PROGRAMME_LINKS_HEADING}
+                    </h2>
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:12}}>
+                      {pl.map(l => (
+                        <a key={l.href} href={l.href} onClick={linkClick(() => { nav(l.href); window.scrollTo(0, 0) })}
+                          style={{display:'block',background:V.white,border:`1px solid ${V.bone3}`,borderRadius:12,padding:'16px 18px',textDecoration:'none',color:'inherit'}}>
+                          <div style={{fontFamily:"'Source Serif 4',Georgia,serif",fontSize:'1.1rem',color:V.ink,marginBottom:5,lineHeight:1.3}}>{l.label}</div>
+                          <p style={{fontSize:13.5,color:V.sl,lineHeight:1.6,margin:0}}>{l.note}</p>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                ) })()}
 
                 {/* Article links — pillar/flagship cross-linking. Real <a href> to /blog/. */}
                 {a.articleLinks && a.articleLinks.length > 0 && (

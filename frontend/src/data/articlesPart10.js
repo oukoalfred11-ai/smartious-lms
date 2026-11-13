@@ -126,7 +126,7 @@ export const ARTICLES_PART_10 = {
     t: 'IGCSE vs WAEC: Which Should Your Child Take?',
     date: 'October 2026 · 10 min read',
     ...AUTHOR,
-    metaTitle: 'IGCSE vs WAEC: Which Should Your Child Take?',
+    metaTitle: 'IGCSE vs WAEC (WASSCE): Differences and Which to Choose',
     metaDesc: 'A fair comparison of IGCSE and WAEC WASSCE for Nigerian and West African families: content, grading, university entry and how to decide.',
     intro: "IGCSE and WAEC’s WASSCE are both respected secondary qualifications, but they are built for different purposes, and the right choice depends on where your child is likely to go next. Many Nigerian families end up taking one, the other, or both. This guide compares them fairly: who sets them, how they are structured and graded, how universities in Nigeria and abroad treat them, and how homeschooled students can sit each. We teach the IGCSE route, but we do not think it is the right answer for every child, and we say so below.",
     sections: [
@@ -265,7 +265,7 @@ export const ARTICLES_PART_10 = {
     t: 'IGCSE and A Level Exam Centres in the Gulf for Private Candidates',
     date: 'October 2026 · 9 min read',
     ...AUTHOR,
-    metaTitle: 'IGCSE Exam Centres in the Gulf: Private Candidates',
+    metaTitle: 'IGCSE & A Level Exam Centres in the Gulf (Private Candidates)',
     metaDesc: 'How homeschoolers in the UAE, Saudi Arabia, Qatar, Kuwait, Oman and Bahrain register for IGCSE and A Level as private candidates.',
     intro: "Families across the Gulf who homeschool or use an online school can still sit Cambridge and Pearson Edexcel IGCSE and A Level exams. They do it as private candidates, entering through an authorised centre such as the British Council or a school that accepts external candidates. The process is similar in the UAE, Saudi Arabia, Qatar, Kuwait, Oman and Bahrain, but centres, fees and dates differ by country. This guide explains the common steps, the differences to watch and how to plan. Always check the centre’s own pages for current details.",
     sections: [
