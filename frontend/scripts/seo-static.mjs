@@ -481,7 +481,7 @@ for (const a of NAIROBI_AREAS) {
     p(a.intro), p(a.introExtended), p(a.parentProfile), p(a.pricingNote), a.commonSubjects?.length ? h2('Subjects') + bullets(a.commonSubjects) : '',
   ], faqs: a.localFaqs, related: [
     h2('Nearby areas'), links(NAIROBI_AREAS.filter(x => x !== a).slice(0, 12).map(x => ({ href: '/tuition/' + x.slug, label: 'Tutors in ' + x.name }))),
-    h2('Online school in Kenya'), links([{ href: '/online-school/kenya', label: 'Online school and homeschool in Kenya' }, { href: '/tuition-nairobi', label: 'All Nairobi tuition' }]),
+    h2('Online school in Kenya'), links([{ href: '/online-school/kenya', label: 'Homeschooling and online school in Kenya' }, { href: '/tuition-nairobi', label: 'All Nairobi tuition' }]),
   ], crumbs: [['Tuition in Nairobi', '/tuition-nairobi'], [a.name, path]], kind: 'tuition', src: ['src/data/nairobiAreas.js'],
   ld: [serviceLd({ name: 'Tuition in ' + a.name + ', Nairobi', desc: a.seoDesc || a.intro, path, area: a.name + ', Nairobi, Kenya', kind: 'tuition' })] })
 }
@@ -503,7 +503,7 @@ for (const [id, s] of Object.entries(STATIC_META)) {
   add({ path: s.path, title: m.title, desc: m.desc, h1: x.h1 || m.title.split(/ [|—–] /)[0], body: [p(m.desc), ...x.html], faqs: x.faqs,
     related: isCa ? [h2('Homeschooling in Canada'), links([{ href: '/online-school/canada', label: 'Online school for Canadian families' },
       ...Object.entries(STATIC_META).filter(([k]) => k.endsWith('-funding') && k !== id).map(([, v]) => ({ href: v.path, label: v.title.split(' | ')[0] }))])]
-      : id === 'virtual-school-kenya' ? [h2('More for Kenyan families'), links([{ href: '/online-school/kenya', label: 'Online school and homeschool in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }])]
+      : id === 'virtual-school-kenya' ? [h2('More for Kenyan families'), links([{ href: '/online-school/kenya', label: 'Homeschooling and online school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }])]
       : [h2('More for Ukrainian families'), links([{ href: '/online-school/ukraine', label: 'Online school in Ukraine' }])],
     ld: [serviceLd({ name: x.h1 || m.title, desc: m.desc, path: s.path, area: isCa ? 'Canada' : id.includes('kenya') ? 'Kenya' : 'Ukraine' })] })
 }
@@ -696,7 +696,7 @@ for (const { file, country: c, cities } of CITY_FILES) {
       c.slug === 'kenya' ? h2('More for Kenyan families') + links([{ href: '/virtual-school-kenya', label: 'Virtual school in Kenya' }, { href: '/tuition-nairobi', label: 'Tuition in Nairobi' }]) : '',
       c.slug === 'ukraine' ? h2('Virtual school for Ukrainian families') + links([{ href: '/virtual-school-ukraine', label: 'Virtual school for Ukrainian families in Ukraine and abroad' }]) : '',
     ], faqs: c.faqs, related: guideLinks(c.hub, '', 'Guides for families in this country'), crumbs: [[name, c.hub]], src: ['src/data/' + file],
-    ld: [serviceLd({ name: 'Online school and homeschool in ' + name, desc: (m && m.desc) || c.heroSubhead, path: c.hub, area: name })] })
+    ld: [serviceLd({ name: (c.slug === 'kenya' ? 'Homeschooling and online school in ' : 'Online school and homeschool in ') + name, desc: (m && m.desc) || c.heroSubhead, path: c.hub, area: name })] })
   for (const x of cities) {
     const path = '/homeschool-' + x.slug
     const pg = add({ path,

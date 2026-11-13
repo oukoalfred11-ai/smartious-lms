@@ -18508,7 +18508,7 @@ export default function LandingPage() {
             {/* Schema */}
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
               '@context':'https://schema.org','@type':'Service',
-              'name': 'Online school and homeschool in ' + country.name,
+              'name': 'Homeschooling and online school in ' + country.name,
               'url': 'https://smartioushomeschool.com' + (country.hub || '/'),
               'provider': { '@id': ORG_ID },
               'serviceType': 'Online school and homeschooling',
@@ -18533,13 +18533,13 @@ export default function LandingPage() {
 
             {/* ─── HERO (components/CountryArtHero.jsx; art: public/images/countries/kenya-art-*.webp) ─── */}
             <CountryArtHero nav={nav} slug="kenya"
-              eyebrow={country.heroEyebrow + ' · Virtual school'} lead="Online School & Homeschool in" name={country.heroH1Suffix}
+              eyebrow={country.heroEyebrow + ' · Virtual school'} lead={country.heroLead || "Online School & Homeschool in"} name={country.heroH1Suffix}
               subhead={country.heroSubhead} valueProp={country.heroValueProp}
               cities={cities.slice(0, 6).map(c => c.name)}
               primary={{ label: 'Book assessment', href: '/assessment' }}
               secondary={{ label: `View Pricing (${country.currency})`, href: pageToPath('pricing'), onClick: () => P('pricing') }}
               note="Admissions reviews every request · assessment fee billed only on acceptance"
-              alt={`Online school in ${country.name}: live classes with expert teachers`}/>
+              alt={`Homeschooling and online school in ${country.name}: live classes with expert teachers`}/>
 
             {/* ─── TRUST BAR (immediately under hero) ─── */}
             <section style={{background:V.ink,color:'#fff',padding:'28px 0',borderTop:`1px solid rgba(255,255,255,.08)`,borderBottom:`1px solid rgba(255,255,255,.08)`}}>

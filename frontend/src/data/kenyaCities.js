@@ -477,8 +477,10 @@ export const KENYA_COUNTRY = {
   hub: '/online-school/kenya',
   hubPageId: 'homeschooling-kenya',
   cityPageId: 'kenya-city',
-  seoTitle: 'Online School & Homeschool in Kenya | Live CBC & IGCSE',
-  seoDesc: 'Online school and homeschool in Kenya: live CBC, IGCSE, A-Level and IB classes from Nairobi. From USD 423/month (≈ KSh 54,600). January 2027 intake open.',
+  seoTitle: 'Homeschooling in Kenya | Online School, CBC & IGCSE',
+  h1: 'Homeschooling & Online School in Kenya',
+  heroLead: 'Homeschooling & Online School in',
+  seoDesc: 'Homeschooling in Kenya with live online CBC, IGCSE, A-Level and IB classes taught from Nairobi. From USD 423/month (≈ KSh 54,600). January 2027 intake open.',
   currency: 'KES',
   currencyName: 'Kenyan Shilling',
   currencyPeg: { rate: 129, since: null, note: 'KES floats; figures use about KSh 129/USD (Oct 2026 rate) and are approximate' },
@@ -488,12 +490,12 @@ export const KENYA_COUNTRY = {
     'KNEC-registered centres: KJSEA and KCSE',
   ],
   heroImage: 'https://images.unsplash.com/photo-1535397459466-3a01a3ba6b21?w=1600&q=80&auto=format&fit=crop',
-  heroEyebrow: 'Online school in Kenya · Live classes',
+  heroEyebrow: 'Homeschooling in Kenya · Live classes',
   heroH1Suffix: 'Kenya',
   heroSubhead: 'Live online Cambridge IGCSE, A-Level, Pearson Edexcel, IB Diploma and American AP plus CBE (CBC), for Kenyan families in Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu, and for Kenyan families abroad. From USD 423/month for Primary (≈ KSh 54,600, Oct 2026 rate), payable termly. January 2027 intake: Term 2 starts 5 January 2027.',
   heroValueProp: 'Built for Kenyan families across all 47 counties, and for Kenyan families abroad who want curriculum continuity for the return home. Founded in Nairobi in 2018, with our head office at Diamond Plaza I Parklands Annex, and a second centre in Karen West (Mokoyeti Road).',
   whatsappTrigger: 'Hi Smartious, I would like online homeschooling for my child in Kenya.',
-  citiesSectionTitle: 'Online homeschooling across Kenya',
+  citiesSectionTitle: 'Homeschooling in Nairobi and across Kenya',
   citiesSectionBody: 'Seven Kenyan city pages: Nairobi, Mombasa, Kisumu, Nakuru, Eldoret, Thika and Kiambu. Each covers local estates, the school run, where to sit exams, CBE and Grade 10 choices, fees and the questions parents in that city ask.',
 
   trustSignals: [
@@ -643,6 +645,14 @@ export const KENYA_COUNTRY = {
       a: 'With Smartious, online school is from USD 423/month for Primary (≈ KSh 54,600/month at the Oct 2026 rate of about KSh 129/USD), payable termly. Secondary, IGCSE, A Level and IB fees vary by curriculum and level, and we confirm them after the assessment. One-to-one tuition is USD 15/hour (≈ KSh 1,940). Exam board entry fees (British Council Kenya or KNEC) are paid separately. Fees are non-refundable once the assessment is done, the timetable created and lessons started.',
     },
     {
+      q: 'Is homeschooling legal in Kenya?',
+      a: 'The Basic Education Act 2013 makes basic education compulsory, and Kenyan law does not yet set out a separate registration process for homeschooling. Homeschooling is practised in Kenya and has been discussed in the courts and in education policy. Families who are unsure should take advice. Smartious provides timetables, schemes of work, assessments and termly reports, which families find useful if they are asked about their child\'s education.',
+    },
+    {
+      q: 'Are there homeschooling centres in Kenya?',
+      a: 'Smartious has two centres in Nairobi: our head office and learning centre at Diamond Plaza I Parklands Annex, and a second centre in Karen West (Mokoyeti Road). Nairobi families can choose in-person homeschooling at a centre, which keeps a school-day routine, or learn fully online from home. Families in other counties join the same live classes online in East Africa Time.',
+    },
+    {
       q: 'How does Smartious compare to Brookhouse, Braeburn, Aga Khan Academy, GEMS Cambridge, Hillcrest, Strathmore?',
       a: 'Top Cambridge schools in Kenya — Brookhouse (KES 1.6M-2.4M/year), Braeburn (KES 1.4M-2.2M/year), Aga Khan Academy (KES 1.8M-2.6M/year — IB), GEMS Cambridge International School (KES 1.4M-2.0M/year), Hillcrest International (KES 1.5M-2.2M/year), Strathmore School (KES 800K-1.4M/year) — provide physical campus education with established sports, arts, and pastoral programmes. Smartious provides live online Cambridge, IB, American or CBE (CBC) teaching from USD 423/month for Primary (≈ KSh 54,600 at the Oct 2026 rate), payable termly; fees vary by curriculum and level. The trade-off: no full campus, but the same exam boards and qualifications, small live classes, and access from any county, with centres in Parklands and Karen West for Nairobi families.',
     },
@@ -669,10 +679,6 @@ export const KENYA_COUNTRY = {
     {
       q: 'Are Smartious teachers qualified to deliver Cambridge curriculum?',
       a: 'Yes. Smartious teachers are qualified subject specialists who teach the Cambridge, Pearson Edexcel, IB, American and CBE programmes they deliver. They teach from Nairobi, at our Parklands and Karen West centres.',
-    },
-    {
-      q: 'Is homeschooling legal in Kenya?',
-      a: 'The Basic Education Act 2013 makes basic education compulsory, and Kenyan law does not yet set out a separate registration process for homeschooling. Homeschooling is practised in Kenya and has been discussed in the courts and in education policy. Families who are unsure should take advice. Smartious provides timetables, schemes of work, assessments and termly reports, which families find useful if they are asked about their child\'s education.',
     },
     {
       q: 'How does payment work — KES or USD?',
